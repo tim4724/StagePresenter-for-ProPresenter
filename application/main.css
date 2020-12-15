@@ -1,0 +1,151 @@
+html {
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    text-align: center;
+    background: #000000;
+    color: #ffffff;
+    margin: 0;
+    user-select: none;
+    height: 100vh;
+    display: flex;
+}
+
+span, div, h1 {
+    cursor: default;
+}
+
+
+#left {
+    width: 450px;
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+#presentationContainer {
+    height: 100%;
+    flex-grow: 1;
+    padding: 0 8px;
+}
+
+#message {
+    display: none;
+    border-radius: 0.08em;
+    color: #ffffff;
+    border-width: 0.1em;
+    border-style: solid;
+    border-color: #cf008a;
+    font-size: 4em;
+    background: #000000;
+    padding: 0 0.25em;
+}
+
+.timer {
+}
+
+#previewContainer {
+    margin: 4px;
+    margin-bottom: 0;
+    font-size: 4em;
+    position: relative;
+}
+
+#videoTimer {
+    position: absolute;
+    right: 0;
+    bottom: 8px;
+    background: #00000080;
+    padding: 0 8px;
+}
+
+#preview {
+    width: 100%
+}
+
+.timer {
+    color: #ffffff;
+    font-size: 4em;
+    padding: 0 0.25em;
+    margin: 4px;
+    background: #212121;
+}
+
+#clock {
+    font-size: 4em;
+    margin-top: 0;
+}
+
+.timerMode0 {
+    border-color: #00ff00;
+}
+
+.timerMode1 {
+    border-color: #ffff00;
+}
+
+#clock {
+    border-radius: 0.08em;
+    color: #ffffff;
+    border-width: 0.1em;
+    border-style: solid;
+    border-color: #ffde3b; 
+}
+
+#timeHoursMinutes {
+    font-size: 1.5em;
+}
+
+#timeSeconds {
+}
+
+#playlist {
+    margin: 4px;
+    text-align: left;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+#playlistName {
+    display: none;
+    text-align: center;
+    margin-bottom: 4px;
+    font-size: 2em;
+}
+
+.playlistItem {
+    display: block;
+    font-size: 2em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 4px;
+    transition: color 1s, background 1s;
+    min-height: 1em;
+    background: #111111;
+}
+
+.playlistHeader {
+    text-align: center;
+    margin-top: 16px;
+    background: #212121;
+}
+
+.playlistHeader:first-of-type {
+    margin-top: 0px;
+}
+
+.playlistCurrent {
+    background: #111111;
+    color: #ff7c00;
+    transition: color 1s, background 1s;
+}

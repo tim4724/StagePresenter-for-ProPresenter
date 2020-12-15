@@ -1,0 +1,83 @@
+#presentationContainer {
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.5s;
+}
+
+@keyframes fadeInAnimation {
+    0%   {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+#title {
+    margin: 0;
+    padding-top: 0.4em;
+    padding-bottom: 0.1em;
+    color: #ff7c00;
+    font-weight: normal;
+    font-size: 3em;
+    z-index: 100;
+}
+
+#groupTemplate {
+    display: none;
+}
+
+.group {
+    margin: 0.25em auto 0.3em;
+    border-radius: 0.08em;
+    color: #909090;
+    border-width: 0.1em;
+    border-style: solid;
+    border-color: #ffde3b;
+    font-size: 4em;
+    animation: fadeInAnimation 1s normal forwards;
+}
+
+.groupName {
+    color: #ffde3b;
+    position: absolute;
+    text-align: left;
+    font-size: 0.45em;
+    margin-top: 0.075em;
+    margin-left: 0.15em;
+    transition: color 1s;
+}
+
+.emptyGroup {
+    animation: none;
+    opacity: 0;
+}
+
+.slide {
+    border-left: 0.0625em solid;
+    border-right: 0.0625em solid;
+    border-color: #000000;
+    padding: 0.125em 0.5em;
+    transition: border-color 1s, background 1s;
+    min-height: 1em;
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
+}
+
+.currentGroup {
+    color: #ffffff;
+    transition: color 0.1s ease-out;
+}
+
+.currentSlide {
+    border-color: #ffffff;
+    background: #111111;
+    transition: border-color 0.1s ease-out, background 0.1s ease-out;
+}
+
+#bottomSpacer {
+    height: 8em;
+}
+
+#message {
+    position: sticky;
+    bottom: 0;
+}
