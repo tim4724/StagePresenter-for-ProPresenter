@@ -53,7 +53,7 @@ function PlaylistDomUpdater() {
 		playlistItemElements.forEach(e => e.parentElement.removeChild(e))
 	}
 	
-	function changeCurrentItemAndScroll(index) {
+	function changeCurrentItemAndScroll(index, animate = true) {
 		const oldItem = playlistContainerElement.querySelector('.playlistCurrent')
 		if (oldItem) {
 			oldItem.classList.remove('playlistCurrent')
@@ -68,7 +68,7 @@ function PlaylistDomUpdater() {
 		if (newItem) {
 			newItem.classList.add('playlistCurrent')
 		}
-		scrollToCurrentItem()
+		scrollToCurrentItem(animate)
 	}
 	
 	function scrollToCurrentItem(animate = true) {

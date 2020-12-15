@@ -149,3 +149,27 @@ span, div, h1 {
     color: #ff7c00;
     transition: color 1s, background 1s;
 }
+
+#error {
+    position: sticky;
+    bottom: 100px;
+    width: 90%;
+    margin: 0.25em auto 0.3em;
+    border-radius: 5px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #ff0000;
+    background: #000000;
+    color: #ffffff;
+}
+
+#errorLabel {
+    margin-left: 8px;
+    text-align: left;
+    font-size: 2em;
+}
+
+#errorMessage {
+    font-size: 4em;
+    margin: 8px;
+}

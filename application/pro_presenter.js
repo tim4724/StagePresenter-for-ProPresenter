@@ -1,10 +1,23 @@
 "use strict"
 
+function WebSocketConnectionState() {
+    return {
+        isConnected: false,
+        isAuthenticated: undefined,
+        proPresenterVersion: "",
+        error: ""
+    }
+}
+
 function ProPresenter() {
+    const errorDomUpdater = ErrorDomUpdater()
     const presentationDomUpdater = PresentationDomUpdater()
     const timerDomUpdater = TimerDomUpdater()
     const playlistDomUpdater = PlaylistDomUpdater()
-
+    
+    let remoteWebsocketConnectionState = WebSocketConnectionState()
+    let stageWebsocketConnectionState = WebSocketConnectionState()
+    
     let currentPlaylistDataCache = undefined
     let currentPlaylist = undefined
 
@@ -17,110 +30,192 @@ function ProPresenter() {
     let displaySlideFromStageDisplayTimeout = undefined
     
     function connect() {
-        const remoteWebSocket = new WebSocket('ws://localhost:63147/remote')
-        remoteWebSocket.onopen = function () {
-            window.onbeforeunload = function () {
+        let remoteWebSocket = undefined
+        let stageWebSocket = undefined
+        window.onbeforeunload = function () {
+            if (remoteWebSocket) {
                 remoteWebSocket.onclose = function () {}
                 remoteWebSocket.close()
             }
-            const authenticateAction = {
-                action: 'authenticate',
-                protocol: '700',
-                password: 'observer'
-            }
-            remoteWebSocket.send(JSON.stringify(authenticateAction))
-            
-            // The following does not give reliable info,
-            // if e.g. "quick" bible text is displayed...
-            // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
-            remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
-        }
-        remoteWebSocket.onmessage = function (ev) {
-            const data = JSON.parse(ev.data)
-            console.log('RemoteWebSocket Received action: ' + data.action + ' ' + Date.now())
-            console.log(data)
-            
-            switch (data.action) {
-                case 'playlistRequestAll':
-                    if (ev.data !== currentPlaylistDataCache) {
-                        currentPlaylistDataCache = ev.data
-                        onNewPlaylistAll(data)
-                    }
-                    break
-                case 'presentationCurrent':
-                case 'presentationRequest':
-                    onNewPresentation(data)
-                    remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
-                    break
-                case 'presentationTriggerIndex':
-                    // Slide was clicked in pro presenter...
-                    onNewSlideIndex(data)
-                    
-                    // Reload presentation in case something changed
-                    // Instead of requesting current presentation,
-                    // we request a specific presentation using the presentationPath
-                    // Because we can set presentationSlideQuality to 0
-                    
-                    // TODO: reload without images, then reload with images?
-                    remoteWebSocket.send(JSON.stringify({
-                        action: 'presentationRequest',
-                        presentationPath: data['presentationPath'],
-                        presentationSlideQuality: 360
-                    }))
-                    break
-                case 'presentationSlideIndex':
-                    // This action only will be received, when queried first, which does not happen at the moment. 
-                    onNewSlideIndex(data)
-                    break
-                default:
-                    console.log('Unknown action', data.action)
-                    break
-            }
-        }
-        remoteWebSocket.onclose = function (ev) {}
-        
-        const stageWebSocket = new WebSocket('ws://localhost:63147/stagedisplay')
-        stageWebSocket.onopen = function () {
-            window.onbeforeunload = function () {
+            if (stageWebSocket) {
                 stageWebSocket.onclose = function () {}
                 stageWebSocket.close()
             }
-            
-            const authenticateAction = { acn: 'ath', pwd: 'stage', ptl: 610 }
-            stageWebSocket.send(JSON.stringify(authenticateAction))
         }
-        stageWebSocket.onmessage = function (ev) {
-            const data = JSON.parse(ev.data)
-            if(data.acn != 'sys' && data.acn != 'vid2' &&  data.acn != 'tmr2') {
-                console.log('StageWebSocket Received action: ' + data.acn + ' ' + Date.now())
-                console.log(data)
-            }
-            switch (data.acn) {
-                case 'fv': // FrameValue
-                    onNewStageDisplayFrameValue(data)
-                    break
-                case 'sys':
-                    timerDomUpdater.updateClock(parseInt(data.txt))
-                    break
-                case 'tmr':
-                    timerDomUpdater.updateTimer(data.uid, data.txt, data.timerMode)
-                    // {acn: "tmr", uid: "51D80D93-6CCC-4B45-AA82-C28BAA0F7A2A", txt: "15:08:09", timerMode: 1}
-                    break
-                case 'vid':
-                    timerDomUpdater.updateVideo(data.uid, data.txt)
-                    // {acn: "vid", uid: "00000000-0000-0000-0000-000000000000", txt: "00:00:31"}
-                    break
-                case 'msg':
-                    if (data.txt && data.txt.length > 0) {
-                        document.getElementById('message').style.display = 'inline-block'
-                        document.getElementById('message').innerText = data.txt
+        
+        
+        function connectToRemoteWebsocket() {
+            remoteWebSocket = new WebSocket('ws://localhost:63147/remote')
+            remoteWebSocket.onopen = function () {
+                remoteWebsocketConnectionState.isConnected = true
+                
+                const authenticateAction = {
+                    action: 'authenticate',
+                    protocol: '700',
+                    password: 'observer2'
+                }
+                // Authenticating is not necessary apparently, but do it anyway :) 
+                remoteWebSocket.send(JSON.stringify(authenticateAction))
+                
+                // In case authenticate is not successful
+                setTimeout(function() { 
+                    if (!remoteWebsocketConnectionState.isAuthenticated) {
+                        // Close will happen only after timeout, therefore speed things up
+                        // TODO: Submit bug report to renewed vision?
+                        remoteWebSocket.onclose({reason: remoteWebsocketConnectionState.error})
+                        remoteWebSocket.onclose = function () {}
+                        remoteWebSocket.close()
                     } else {
-                        document.getElementById('message').style.display = 'none'
+                        // remoteWebSocket.onclose will also call showupdateConnectionErrors
+                        updateConnectionErrors()
                     }
-                    break
+                }, 1000)
+                
+                // The following does not give reliable info,
+                // if e.g. "quick" bible text is displayed...
+                // TODO Fix bug, when slide is selected, the song will reload, because of different hash values
+                // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
+                // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
+            }
+            remoteWebSocket.onmessage = function (ev) {
+                const data = JSON.parse(ev.data)
+                console.log('RemoteWebSocket Received action: ' + data.action + ' ' + Date.now())
+                console.log(data)
+                
+                switch (data.action) {
+                    case 'authenticate':
+                        remoteWebsocketConnectionState.isAuthenticated = data.authenticated === 1 || data.authenticated === true
+                        remoteWebsocketConnectionState.proPresenterVersion = data.majorVersion + '.' + data.minorVersion
+                        remoteWebsocketConnectionState.error = data.error
+                        // const isController = data.controller === 1 || data.controller === true
+                        break
+                    case 'playlistRequestAll':
+                        if (ev.data !== currentPlaylistDataCache) {
+                            currentPlaylistDataCache = ev.data
+                            onNewPlaylistAll(data)
+                        }
+                        break
+                    case 'presentationCurrent':
+                    case 'presentationRequest':
+                        onNewPresentation(data)
+                        remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
+                        break
+                    case 'presentationTriggerIndex':
+                        // Slide was clicked in pro presenter...
+                        onNewSlideIndex(data)
+                        
+                        // Reload presentation in case something changed
+                        // Instead of requesting current presentation,
+                        // we request a specific presentation using the presentationPath
+                        // Because we can set presentationSlideQuality
+                        
+                        // TODO: reload without images, then reload with images?
+                        remoteWebSocket.send(JSON.stringify({
+                            action: 'presentationRequest',
+                            presentationPath: data['presentationPath'],
+                            presentationSlideQuality: 360
+                        }))
+                        break
+                    case 'presentationSlideIndex':
+                        // This action only will be received, when queried first, which does not happen at the moment. 
+                        onNewSlideIndex(data)
+                        break
+                    default:
+                        console.log('Unknown action', data.action)
+                        break
+                }
+            }
+            remoteWebSocket.onclose = function (ev) {
+                remoteWebsocketConnectionState = WebSocketConnectionState()
+                if (ev) {
+                    remoteWebsocketConnectionState.error = ev.reason
+                }
+                updateConnectionErrors()
+                
+                setTimeout(connectToRemoteWebsocket, 5000)
+                console.log('RemoteWebSocket close ' + JSON.stringify(ev))
             }
         }
-        stageWebSocket.onclose = function (ev) {}
+
+        function connectToStageWebSocket() {
+            stageWebSocket = new WebSocket('ws://localhost:63147/stagedisplay')
+            stageWebSocket.onopen = function () {
+                stageWebsocketConnectionState.isConnected = true
+                
+                const authenticateAction = { acn: 'ath', pwd: 'stage', ptl: 610 }
+                stageWebSocket.send(JSON.stringify(authenticateAction))
+                
+                setTimeout(function() {
+                    if (!stageWebsocketConnectionState.isAuthenticated) {
+                        // Close will happen only after timeout, therefore speed things up
+                        // TODO: Submit bug report to renewed vision?
+                        stageWebSocket.onclose({reason: stageWebsocketConnectionState.error})
+                        stageWebSocket.onclose = function () {}
+                        stageWebSocket.close()
+                    } else {
+                        // stageWebSocket.onclose will also call showupdateConnectionErrors
+                        updateConnectionErrors()
+                    }
+                }, 1000)
+            }
+            stageWebSocket.onmessage = function (ev) {
+                const data = JSON.parse(ev.data)
+                if (!data) {
+                    return
+                }
+                if(data.acn != 'sys' && data.acn != 'vid' &&  data.acn != 'tmr') {
+                    console.log('StageWebSocket Received action: ' + data.acn + ' ' + Date.now())
+                    console.log(data)
+                }
+                switch (data.acn) {
+                    case 'ath':
+                        stageWebsocketConnectionState.isAuthenticated = data.ath === 1 || data.ath === true
+                        stageWebsocketConnectionState.proPresenterVersion = data.majorVersion + '.' + data.minorVersion
+                        stageWebsocketConnectionState.error = data.err
+                        break
+                    case 'fv': // FrameValue
+                        onNewStageDisplayFrameValue(data)
+                        break
+                    case 'sys':
+                        timerDomUpdater.updateClock(parseInt(data.txt))
+                        break
+                    case 'tmr':
+                        // {acn: "tmr", uid: "51D80D93-6CCC-4B45-AA82-C28BAA0F7A2A", txt: "15:08:09", timerMode: 1}
+                        timerDomUpdater.updateTimer(data.uid, data.txt, data.timerMode)
+                        break
+                    case 'vid':
+                        // {acn: "vid", uid: "00000000-0000-0000-0000-000000000000", txt: "00:00:31"}
+                        timerDomUpdater.updateVideo(data.uid, data.txt)
+                        break
+                    case 'msg':
+                        if (data.txt && data.txt.length > 0) {
+                            document.getElementById('message').style.display = 'inline-block'
+                            document.getElementById('message').innerText = data.txt
+                        } else {
+                            document.getElementById('message').style.display = 'none'
+                        }
+                        break
+                    default:
+                        console.log('Unknown action', data.acn)
+                }
+            }
+            stageWebSocket.onclose = function (ev) {
+                stageWebsocketConnectionState = WebSocketConnectionState()
+                if (ev) {
+                    stageWebsocketConnectionState.error = ev.reason
+                } 
+                updateConnectionErrors()
+                setTimeout(connectToStageWebSocket, 5000)
+                console.log('StageWebsocket close ' + JSON.stringify(ev))
+            }
+        }
+        
+        connectToStageWebSocket()
+        connectToRemoteWebsocket()
+    }
+    
+    function updateConnectionErrors() {
+        errorDomUpdater.updateConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
     }
     
     function onNewPlaylistAll(data) {

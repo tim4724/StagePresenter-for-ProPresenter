@@ -6,6 +6,7 @@
     <title>Stage Monitor</title>
 
     <script src='utils.js'></script>
+    <script src='error_dom_updater.js'></script>
     <script src='playlist_dom_updater.js'></script>
     <script src='timer_dom_updater.js'></script>
     <script src='presentation_dom_updater.js'></script>
@@ -17,19 +18,19 @@
 
 <body onload='proPresenter = ProPresenter(); proPresenter.connect();'>
     
-    <section id="left">
+    <section id='left'>
         <span id='clock' class='timer'>
             <span id='timeHoursMinutes'>00:00</span>
             <span id='timeSeconds'>00</span>
         </span>
         
-        <div id="previewContainer">
+        <div id='previewContainer'>
             <span id='videoTimer'></span>
             <img id='preview' src='black16x9.png'/>
         </div>
         
-        <div id="playlist">
-            <div id="playlistName"></div>
+        <div id='playlist'>
+            <div id='playlistName'></div>
         </div>
     </section>
     
@@ -42,6 +43,11 @@
         </section>
 
         <div id='bottomSpacer'></div>
+        
+        <div id='error' style='display: none;'>
+            <div id='errorLabel'>Error</div>
+            <div id='errorMessage'></div>
+        </div>
         <span id='message'></span>
     </main>
     </body>
