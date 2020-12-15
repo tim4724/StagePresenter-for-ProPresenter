@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='UTF-8'>
+    <title>Stage Monitor</title>
+
+    <script src='utils.js'></script>
+    <script src='playlist_dom_updater.js'></script>
+    <script src='timer_dom_updater.js'></script>
+    <script src='presentation_dom_updater.js'></script>
+    <script src='pro_presenter.js'></script>
+
+    <link rel='stylesheet' href='main.css'>
+    <link rel='stylesheet' href='presentation.css'>
+</head>
+
+<body onload='proPresenter = ProPresenter(); proPresenter.connect();'>
+    
+    <section id="left">
+        <span id='clock' class='timer'>
+            <span id='timeHoursMinutes'>00:00</span>
+            <span id='timeSeconds'>00</span>
+        </span>
+        
+        <div id="previewContainer">
+            <span id='videoTimer'></span>
+            <img id='preview' src='black16x9.png'/>
+        </div>
+        
+        <div id="playlist">
+            <div id="playlistName"></div>
+        </div>
+    </section>
+    
+    <main id='presentationContainer'>
+        <h1 id='title'>No presentation selected</h1>
+
+        <section class='group'>
+            <div class='groupName'></div>
+            <div class='slide'>Setup error!</div>
+        </section>
+
+        <div id='bottomSpacer'></div>
+        <span id='message'></span>
+    </main>
+    </body>
+</html>
+            
