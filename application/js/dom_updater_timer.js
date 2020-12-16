@@ -62,7 +62,6 @@ function TimerDomUpdater() {
 	}
 	
 	function updateVideo(uid, text) {
-		console.log('original uid', uid)
 		uid = 'videoTimer'
 
 		clearTimeout(removeTimeouts[uid])
