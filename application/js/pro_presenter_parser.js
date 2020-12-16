@@ -1,9 +1,10 @@
 "use strict"
 
-function Playlist(name, items) {
+function Playlist(name, items, location) {
 	return {
 		name: name,
-		items: items
+		items: items,
+		location: location
 	}
 }
 
@@ -56,7 +57,7 @@ function ProPresenterParser() {
 			const isHeader = item.playlistItemType === 'playlistItemTypeHeader'
 			return PlaylistItem(item.playlistItemName, isHeader, item.playlistItemLocation)
 		})
-		const newPlaylist = Playlist(playlist.playlistName, newItems)
+		const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
 		const currentIndex = newItems.findIndex(item => item.location === currentPresentationPath)
 		return [newPlaylist, currentIndex]
 	}
