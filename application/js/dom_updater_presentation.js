@@ -1,5 +1,8 @@
 "use strict"
 
+const onlyFirstTextInSlide = true
+const flexibleSlides = true
+
 function PresentationDomUpdater() {
     let onResizeTimout = undefined
     window.onresize = function () { 
@@ -57,7 +60,20 @@ function PresentationDomUpdater() {
                 
                 for (const slide of group.slides) {
                     const slideElement = slideTemplate.cloneNode(true)
-                    slideElement.innerHTML = slide.text
+                    if (flexibleSlides) {
+                        slideElement.classList.add('flexibleSlide')
+                    }
+                    const lines = slide.text.split('\n')
+                    for (let line of lines) {
+                        if (onlyFirstTextInSlide) {
+                            line = line.split('\r')[0]
+                        } else {
+                            line = line.replaceAll('\r', '\n')
+                        }
+                        const span = document.createElement("span")
+                        span.innerText = line.trim()
+                        slideElement.appendChild(span)
+                    } 
                     groupElement.appendChild(slideElement)
                     slidesPreviewImageCache.push(slide.previewImage)
                 }

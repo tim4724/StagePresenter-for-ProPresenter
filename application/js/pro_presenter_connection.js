@@ -9,6 +9,9 @@ function WebSocketConnectionState() {
     }
 }
 
+let remoteWebSocket = undefined
+let stageWebSocket = undefined
+
 function ProPresenter() {
     const proPresenterParser = ProPresenterParser()
     const errorDomUpdater = ErrorDomUpdater()
@@ -32,9 +35,7 @@ function ProPresenter() {
     let displaySlideFromStageDisplayTimeout = undefined
     
     function connect() {
-        let remoteWebSocket = undefined
-        let stageWebSocket = undefined
-        window.onbeforeunload = function () {
+                window.onbeforeunload = function () {
             if (remoteWebSocket) {
                 remoteWebSocket.onclose = function () {}
                 remoteWebSocket.close()
