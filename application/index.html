@@ -6,11 +6,13 @@
     <title>Stage Monitor</title>
 
     <script src='js/utils.js'></script>
+    <script src='js/tiff.js'></script>
     <script src='js/dom_updater_error.js'></script>
     <script src='js/dom_updater_playlist.js'></script>
     <script src='js/dom_updater_timer.js'></script>
     <script src='js/dom_updater_presentation.js'></script>
     <script src='js/dom_updater_message.js'></script>
+    <script src='js/dom_updater_preview.js'></script>
     <script src='js/pro_presenter_parser.js'></script>
     <script src='js/pro_presenter_connection.js'></script>
     
@@ -28,7 +30,7 @@
         
         <div id='previewContainer'>
             <span id='videoTimer'></span>
-            <img id='preview' src='black16x9.png'/>
+            <img id='preview' src='black16x9.png' alt='Failed to load image'/>
         </div>
         
         <div id='playlist'>
@@ -45,6 +47,8 @@
         </section>
 
         <div id='bottomSpacer'></div>
+        
+        <img id='largePreview' src='' style='display: none;'/>
         
         <div id='error' style='display: none;'>
             <div id='errorLabel'>Error</div>

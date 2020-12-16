@@ -21,13 +21,10 @@ function PresentationDomUpdater() {
     
     const titleElement = document.getElementById('title')
     const presentationContainerElement = document.getElementById('presentationContainer')
-    const previewElement = document.getElementById('preview')
     const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
-    let slidesPreviewImageCache = []
     
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
-            previewElement.style.opacity = 0
             presentationContainer.style.opacity = 0
             setTimeout(function () {
                 display()
@@ -40,9 +37,7 @@ function PresentationDomUpdater() {
             changeCurrentSlideAndScroll(slideIndex, false)
         }
         
-        function display() {
-            slidesPreviewImageCache = []
-            
+        function display() {            
             // Remove old elements from DOM
             const groupElements = presentationContainerElement.querySelectorAll('.group')
             groupElements.forEach(e => e.parentElement.removeChild(e))
@@ -75,7 +70,6 @@ function PresentationDomUpdater() {
                         slideElement.appendChild(span)
                     } 
                     groupElement.appendChild(slideElement)
-                    slidesPreviewImageCache.push(slide.previewImage)
                 }
                 if (group.slides.length == 0 || group.slides.every(t => t.text.length === 0)) {
                     groupElement.classList.add('emptyGroup')
@@ -103,7 +97,6 @@ function PresentationDomUpdater() {
             const slideElement = slideTemplate.cloneNode(true)
             slideElement.innerHTML = group.slides[i].text
             groupElement.appendChild(slideElement)
-            slidesPreviewImageCache.splice(index + i, 0, group.slides[i].previewImage);
         }
         
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
@@ -127,14 +120,6 @@ function PresentationDomUpdater() {
         const slides = presentationContainerElement.getElementsByClassName('slide')
         if (!slides || slides.length === 0) {
             return
-        }
-        
-        const previewImage = slidesPreviewImageCache[slideIndex]
-        if (slideIndex >= 0 && previewImage) {
-            previewElement.style.opacity = 1
-            previewElement.src = "data:image/jpg;base64, " + previewImage
-        } else {
-            previewElement.style.opacity = 0
         }
         
         const oldSlide = presentationContainerElement.querySelector('.currentSlide')

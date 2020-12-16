@@ -16,11 +16,11 @@ function PlaylistItem(text, isHeader, location) {
 	}
 }
 
-function Presentation(name, groups) {
+function Presentation(name, groups, hasText) {
 	return { 
 		name: name, 
-		groups: groups, 
-		hash: function() { return hash(JSON.stringify(this)) } 
+		groups: groups,
+		hasText: hasText
 	}
 }
 
@@ -32,10 +32,9 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(text, previewImage) {
+function Slide(text) {
 	return { 
-		text: text, 
-		previewImage: previewImage,
+		text: text
 	}
 }
 
@@ -73,11 +72,15 @@ function ProPresenterParser() {
 			presentationName = 'Presentation'
 		}
 		
+		let hasText = false
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
 			let newSlides = []
 			for (const slide of group.groupSlides) {
-				newSlides.push(Slide(slide.slideText, slide.slideImage))
+				if (!hasText && slide.slideText) {
+					hasText = true
+				}
+				newSlides.push(Slide(slide.slideText))
 			}
 			
 			if (presentation.presentationSlideGroups.length == 1) {
@@ -93,7 +96,7 @@ function ProPresenterParser() {
 				newGroups.push(Group(group.groupName, groupColor, newSlides))
 			}
 		}
-		return Presentation(presentationName, newGroups) 
+		return Presentation(presentationName, newGroups, hasText) 
 	}
 	
 	function parseStageDisplayCurrentAndNext(data) {
