@@ -5,15 +5,17 @@
     <meta charset='UTF-8'>
     <title>Stage Monitor</title>
 
-    <script src='utils.js'></script>
-    <script src='error_dom_updater.js'></script>
-    <script src='playlist_dom_updater.js'></script>
-    <script src='timer_dom_updater.js'></script>
-    <script src='presentation_dom_updater.js'></script>
-    <script src='pro_presenter.js'></script>
-
-    <link rel='stylesheet' href='main.css'>
-    <link rel='stylesheet' href='presentation.css'>
+    <script src='js/utils.js'></script>
+    <script src='js/dom_updater_error.js'></script>
+    <script src='js/dom_updater_playlist.js'></script>
+    <script src='js/dom_updater_timer.js'></script>
+    <script src='js/dom_updater_presentation.js'></script>
+    <script src='js/dom_updater_message.js'></script>
+    <script src='js/pro_presenter_parser.js'></script>
+    <script src='js/pro_presenter_connection.js'></script>
+    
+    <link rel='stylesheet' href='css/main.css'>
+    <link rel='stylesheet' href='css/presentation.css'>
 </head>
 
 <body onload='proPresenter = ProPresenter(); proPresenter.connect();'>
