@@ -9,6 +9,7 @@ function WebSocketConnectionState() {
     }
 }
 
+const host = 'localhost:63147'
 let remoteWebSocket = undefined
 let stageWebSocket = undefined
 
@@ -19,6 +20,7 @@ function ProPresenter() {
     const presentationDomUpdater = PresentationDomUpdater()
     const timerDomUpdater = TimerDomUpdater()
     const playlistDomUpdater = PlaylistDomUpdater()
+    const previewDomUpdater = PreviewDomUpdater(host)
     
     let remoteWebsocketConnectionState = WebSocketConnectionState()
     let stageWebsocketConnectionState = WebSocketConnectionState()
@@ -26,16 +28,17 @@ function ProPresenter() {
     let currentPlaylistDataCache = undefined
     let currentPlaylist = undefined
 
+    let currentPresentationJSONString = undefined
     let currentPresentation = undefined
     let currentPresentationPath = ''
     let currentSlideIndex = -1
     let currentSlideCleared = false
-    let currentPresentationHash = 0
-        
+    
+    let currentSlideUid = undefined
     let displaySlideFromStageDisplayTimeout = undefined
     
     function connect() {
-                window.onbeforeunload = function () {
+        window.onbeforeunload = function () {
             if (remoteWebSocket) {
                 remoteWebSocket.onclose = function () {}
                 remoteWebSocket.close()
@@ -46,9 +49,8 @@ function ProPresenter() {
             }
         }
         
-        
         function connectToRemoteWebsocket() {
-            remoteWebSocket = new WebSocket('ws://localhost:63147/remote')
+            remoteWebSocket = new WebSocket('ws://' + host + '/remote')
             remoteWebSocket.onopen = function () {
                 remoteWebsocketConnectionState.isConnected = true
                 
@@ -74,11 +76,9 @@ function ProPresenter() {
                     }
                 }, 1000)
                 
-                // The following does not give reliable info,
-                // if e.g. "quick" bible text is displayed...
-                // TODO Fix bug, when slide is selected, the song will reload, because of different hash values
-                // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
-                // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
+                // The following does not give reliable info, if e.g. "quick" bible text is displayed...
+                remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
+                remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
             }
             remoteWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -118,7 +118,7 @@ function ProPresenter() {
                         remoteWebSocket.send(JSON.stringify({
                             action: 'presentationRequest',
                             presentationPath: data['presentationPath'],
-                            presentationSlideQuality: 360
+                            presentationSlideQuality: 0
                         }))
                         break
                     case 'presentationSlideIndex':
@@ -143,7 +143,7 @@ function ProPresenter() {
         }
 
         function connectToStageWebSocket() {
-            stageWebSocket = new WebSocket('ws://localhost:63147/stagedisplay')
+            stageWebSocket = new WebSocket('ws://' + host + '/stagedisplay')
             stageWebSocket.onopen = function () {
                 stageWebsocketConnectionState.isConnected = true
                 
@@ -255,6 +255,11 @@ function ProPresenter() {
         const currentAndNextStageDisplaySlide = proPresenterParser.parseStageDisplayCurrentAndNext(data)
         const [currentStageDisplaySlide, nextStageDisplaySlide] = currentAndNextStageDisplaySlide
         
+        if (currentSlideUid !== currentStageDisplaySlide.uid) {
+            currentSlideUid = currentStageDisplaySlide.uid
+            previewDomUpdater.changeSlide(currentSlideUid)
+        }
+        
         // Current slide with uid 0000...0000 means clear :)
         if (currentStageDisplaySlide.uid == '00000000-0000-0000-0000-000000000000') {
             const clearSlide = true
@@ -324,7 +329,8 @@ function ProPresenter() {
             if (nextStageDisplayText && nextStageDisplayText.length >= 0) {
                 groups.push(Group('', '', [Slide(nextStageDisplayText, undefined)]))
             }
-            const presentation = Presentation(undefined, groups)
+            // TODO: presentation has text?
+            const presentation = Presentation(undefined, groups, true)
             changePresentation(presentation, 'stageDisplayText', 0, false, true)
         }, 100)
     }
@@ -352,9 +358,14 @@ function ProPresenter() {
         currentSlideIndex = newSlideIndex
         currentSlideCleared = newSlideCleared
         
-        const newPresentationHash = newPresentation.hash()
-        if (newPresentationHash !== currentPresentationHash) {
-            currentPresentationHash = newPresentationHash
+        const newPresentationJSONString = JSON.stringify(newPresentation)
+        if (newPresentationJSONString !== currentPresentationJSONString) {
+            if (newPresentation.hasText) {
+                previewDomUpdater.hideLargePreview()
+            } else {
+                previewDomUpdater.showLargePreview()
+            }
+            currentPresentationJSONString = newPresentationJSONString
             currentPresentation = newPresentation
             presentationDomUpdater.displayPresentation(newPresentation, newSlideIndex, animate)
         } else {
@@ -365,7 +376,10 @@ function ProPresenter() {
     function insertGroupToPresentation(newGroup, groupIndex) {
         presentationDomUpdater.insertGroupToPresentation(newGroup, groupIndex)
         currentPresentation.groups.splice(groupIndex, 0, newGroup)
-        currentPresentationHash = currentPresentation.hash()
+        if (currentPresentation.hasText) {
+            // TODO: presentation has text?
+        }
+        currentPresentationJSONString = JSON.stringify(currentPresentation)
     }
     
     function getSlidesOrEmptyArray() {
