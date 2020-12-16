@@ -10,7 +10,9 @@ function WebSocketConnectionState() {
 }
 
 function ProPresenter() {
+    const proPresenterParser = ProPresenterParser()
     const errorDomUpdater = ErrorDomUpdater()
+    const messageDomUpdater = MessageDomUpdater()
     const presentationDomUpdater = PresentationDomUpdater()
     const timerDomUpdater = TimerDomUpdater()
     const playlistDomUpdater = PlaylistDomUpdater()
@@ -188,12 +190,7 @@ function ProPresenter() {
                         timerDomUpdater.updateVideo(data.uid, data.txt)
                         break
                     case 'msg':
-                        if (data.txt && data.txt.length > 0) {
-                            document.getElementById('message').style.display = 'inline-block'
-                            document.getElementById('message').innerText = data.txt
-                        } else {
-                            document.getElementById('message').style.display = 'none'
-                        }
+                        messageDomUpdater.updateMessage(data.txt)
                         break
                     default:
                         console.log('Unknown action', data.acn)
@@ -219,24 +216,13 @@ function ProPresenter() {
     }
     
     function onNewPlaylistAll(data) {
-        const currentLocation = currentPresentationPath.split(':')[0]
-        const playlist = data.playlistAll.find(p => p.playlistLocation === currentLocation)
+        const [playlist, index] = proPresenterParser.parsePlaylistAndIndex(data, currentPresentationPath)
         if (playlist) {
-            const newItems = playlist.playlist.map(function (item) {
-                return {
-                    text: item.playlistItemName,
-                    isHeader: item.playlistItemType === 'playlistItemTypeHeader',
-                    location: item.playlistItemLocation
-                }
-            })
-            const currentIndex = newItems.findIndex(item => item.location === currentPresentationPath)
-
-            currentPlaylist = {name: playlist.playlistName, items: newItems}
-            playlistDomUpdater.displayPlaylist(currentPlaylist, currentIndex)
+            playlistDomUpdater.displayPlaylist(playlist, index)
         } else {
-            currentPlaylist = undefined
             playlistDomUpdater.clear()
         }
+        currentPlaylist = playlist
     }
     
     function onNewSlideIndex(data) {
@@ -255,100 +241,44 @@ function ProPresenter() {
     
     function onNewPresentation(data) {
         const newPresentationPath = data.presentationPath
-        const newPresentation = parseProPresenterPresentation(data)
+        const newPresentation = proPresenterParser.parsePresentation(data)
         changePresentation(newPresentation, newPresentationPath, currentSlideIndex, currentSlideCleared, true)
-    }
-    
-    function buildPresentation(name, groups) {
-        return { 
-            name: name, 
-            groups: groups, 
-            hash: function() { return hash(JSON.stringify(this)) } 
-        }
-    }
-    
-    function buildGroup(name, color, slides) {
-        return { 
-            name: name, 
-            color: color, 
-            slides: slides 
-        }
-    }
-    
-    function buildSlide(text, previewImage) {
-        return { 
-            text: text, 
-            previewImage: previewImage,
-        }
-    }
-    
-    function parseProPresenterPresentation(data) {
-        function asCSSColor(color) {
-            return 'rgba(' + color.split(' ').map(c => c * 255).join(', ') + ')'
-        }
-        
-        const presentation = data.presentation
-        let presentationName = presentation.presentationName
-        if (!presentationName) {
-            presentationName = 'Presentation'
-        }
-        
-        let newGroups = []
-        for (const group of presentation.presentationSlideGroups) {
-            let newSlides = []
-            for (const slide of group.groupSlides) {
-                newSlides.push(buildSlide(slide.slideText, slide.slideImage))
-            }
-            
-            if (presentation.presentationSlideGroups.length == 1) {
-                // TODO is this correct?
-                for (let i = 0; i < group.groupSlides.length; i++) {
-                    const slide = group.groupSlides[i]
-                    const name = slide.slideLabel
-                    const groupColor = asCSSColor(slide.slideColor)
-                    newGroups.push(buildGroup(name, groupColor, [newSlides[i]]))
-                }
-            } else {
-                const groupColor = asCSSColor(group.groupColor)
-                newGroups.push(buildGroup(group.groupName, groupColor, newSlides))
-            }
-        }
-        return buildPresentation(presentationName, newGroups) 
     }
     
     function onNewStageDisplayFrameValue(data) {
         // Cancel timeout for pending stagedisplaytexts
         clearTimeout(displaySlideFromStageDisplayTimeout)
         
-        const stageDisplaySlides = parseStageDisplaySlides(data)
+        const currentAndNextStageDisplaySlide = proPresenterParser.parseStageDisplayCurrentAndNext(data)
+        const [currentStageDisplaySlide, nextStageDisplaySlide] = currentAndNextStageDisplaySlide
         
         // Current slide with uid 0000...0000 means clear :)
-        if (stageDisplaySlides.current.uid == '00000000-0000-0000-0000-000000000000') {
+        if (currentStageDisplaySlide.uid == '00000000-0000-0000-0000-000000000000') {
             const clearSlide = true
             changeCurrentSlide(currentSlideIndex, clearSlide, true)
             return
         }
         
-        const nextStageDisplayText = stageDisplaySlides.next.txt
-        const currentStageDisplayText = stageDisplaySlides.current.txt
+        const currentStageDisplayText = currentStageDisplaySlide.text
+        const nextStageDisplayText = nextStageDisplaySlide.text
         
         const allPresentationSlideTexts = getSlidesOrEmptyArray().map(s => s.text)
         
         // currentPresentationPath "stageDisplayText" would mean, the current displayed texts
         // are already from stagedisplay api
-        if (currentPresentationPath !== 'stageDisplayText') {
+        if (currentPresentationPath !== 'stageDisplayText' && currentSlideIndex < allPresentationSlideTexts.length) {
             const currentSlideText = allPresentationSlideTexts[currentSlideIndex]
-            let nextSlideText = allPresentationSlideTexts[currentSlideIndex + 1]
-            if (!nextSlideText) {
-                nextSlideText = ''
+            if (currentSlideText) {
+                const nextSlideText = undefinedToEmpty(allPresentationSlideTexts[currentSlideIndex + 1])
+                if (currentSlideText.toLowerCase() === currentStageDisplayText.toLowerCase()
+                        && nextSlideText.toLowerCase() === nextStageDisplayText.toLocaleLowerCase()) {
+                    // This text is already currently as a normal presentation displayed
+                    // Code not reached in pro presenter 7.3.1
+                    // Just to be sure, an active presentation will never be replaced by stagedisplay texts
+                    return
+                }
             }
-            if ((currentSlideText && currentSlideText.toLowerCase() === currentStageDisplayText.toLowerCase())
-                    && (nextSlideText.toLowerCase() === nextStageDisplayText.toLocaleLowerCase())) {
-                // This text is already currently as a normal presentation displayed
-                // Code not reached in pro presenter 7.3.1
-                // Just to be sure, an active presentation will never be replaced by stagedisplay texts
-                return
-            }
+            
         }
         
         // The timeout will be cancelled if these texts are part of a real presentation
@@ -362,7 +292,7 @@ function ProPresenter() {
                 if (index === index2) {
                     if (index === -1 && nextStageDisplayText === allPresentationSlideTexts[0]) {
                         // nextStageDisplayText is not already displayed, insert group at index 0
-                        const newGroup = buildGroup('', '', [currentStageDisplayText])
+                        const newGroup = Group('', '', [Slide(currentStageDisplayText, undefined)])
                         insertGroupToPresentation(newGroup, 0)
                         changeCurrentSlide(0, false, true)
                         return
@@ -371,7 +301,7 @@ function ProPresenter() {
                     // Current stage display text is already on screen
                     if (index === currentSlideIndex + 1 && index + 1 === allPresentationSlideTexts.length) {
                         // nextStageDisplayText is not already on screen, therefore append a new group to presentation
-                        const newGroup = buildGroup('', '', [nextStageDisplayText])
+                        const newGroup = Group('', '', [Slide(nextStageDisplayText, undefined)])
                         insertGroupToPresentation(newGroup, index + 1)
                         // Scroll to new slide
                         changeCurrentSlide(index, false, true)
@@ -387,45 +317,13 @@ function ProPresenter() {
             }
                     
             // Build a presentation to display
-            let groups = [buildGroup('', '', [buildSlide(currentStageDisplayText, undefined)])]
+            let groups = [Group('', '', [Slide(currentStageDisplayText, undefined)])]
             if (nextStageDisplayText && nextStageDisplayText.length >= 0) {
-                groups.push(buildGroup('', '', [buildSlide(nextStageDisplayText, undefined)]))
+                groups.push(Group('', '', [Slide(nextStageDisplayText, undefined)]))
             }
-            const presentation = buildPresentation(undefined, groups)
+            const presentation = Presentation(undefined, groups)
             changePresentation(presentation, 'stageDisplayText', 0, false, true)
         }, 100)
-    }
-    
-    function parseStageDisplaySlides(data) {
-        let currentStageDisplaySlide
-        let nextStageDisplaySlide
-        
-        for (const element of data.ary) {
-            switch (element.acn) {
-                case 'cs':
-                    currentStageDisplaySlide = element
-                    break
-                case 'ns':
-                    nextStageDisplaySlide = element
-                    break
-                default:
-                    // 'csn': current stage display slide notes
-                    // 'nsn': next stage display slide notes
-                    break
-            }
-        }
-        return { current: currentStageDisplaySlide, next: nextStageDisplaySlide }
-    }
-        
-    function getSlidesOrEmptyArray() {
-        let slides = []
-        if (!currentPresentation || !currentPresentation.groups) {
-            return slides
-        }
-        for (let group of currentPresentation.groups) {
-            slides = slides.concat(group.slides)
-        }
-        return slides
     }
 
     function changeCurrentSlide(newSlideIndex, newSlideCleared, animate) {
@@ -467,6 +365,17 @@ function ProPresenter() {
         presentationDomUpdater.insertGroupToPresentation(newGroup, groupIndex)
         currentPresentation.groups.splice(groupIndex, 0, newGroup)
         currentPresentationHash = currentPresentation.hash()
+    }
+    
+    function getSlidesOrEmptyArray() {
+        let slides = []
+        if (!currentPresentation || !currentPresentation.groups) {
+            return slides
+        }
+        for (const group of currentPresentation.groups) {
+            slides = slides.concat(group.slides)
+        }
+        return slides
     }
     
     return {

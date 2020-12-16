@@ -8,14 +8,6 @@ function hash(string) {
     return hash;
 }
 
-function getAllIndices(arr, val) {
-    var indexes = [], i;
-    for(i = 0; i < arr.length; i++)
-        if (arr[i] === val)
-        indexes.push(i);
-    return indexes;
-}
-
 function undefinedToEmpty(string) {
     if (string === undefined) {
         return "";

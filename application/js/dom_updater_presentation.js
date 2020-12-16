@@ -83,7 +83,7 @@ function PresentationDomUpdater() {
         groupElement.querySelector('.groupName').style.color = group.color
         groupElement.style.borderColor = group.color
 
-        for (let i = 0; i < group.slides.lengt; i++) {
+        for (let i = 0; i < group.slides.length; i++) {
             const slideElement = slideTemplate.cloneNode(true)
             slideElement.innerHTML = group.slides[i].text
             groupElement.appendChild(slideElement)
