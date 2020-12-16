@@ -71,6 +71,7 @@ span, div, h1 {
 
 #preview {
     width: 100%;
+    display: block;
 }
 
 .timer {
