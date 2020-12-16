@@ -95,6 +95,8 @@ function ProPresenter() {
                         if (ev.data !== currentPlaylistDataCache) {
                             currentPlaylistDataCache = ev.data
                             onNewPlaylistAll(data)
+                        } else if (!undefinedToEmpty(currentPresentationPath).startsWith(currentPlaylist.location)) {
+                            onNewPlaylistAll(data)
                         }
                         break
                     case 'presentationCurrent':
@@ -339,13 +341,11 @@ function ProPresenter() {
                                 newSlideIndex,
                                 newSlideCleared,
                                 animate) {
-        if (newPresentationPath != currentPresentationPath) {
+        if (newPresentationPath !== currentPresentationPath) {
             currentPresentationPath = newPresentationPath
-            if (currentPlaylist && currentPlaylist.items) {
+            if (currentPlaylist && currentPlaylist.items && newPresentationPath.startsWith(currentPlaylist.location)) {
                 const itemIndex = currentPlaylist.items.findIndex(item => item.location === currentPresentationPath)
                 playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
-            } else {
-                playlistDomUpdater.clear()
             }
         }
         currentSlideIndex = newSlideIndex
