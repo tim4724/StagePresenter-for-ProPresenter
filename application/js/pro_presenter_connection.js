@@ -257,7 +257,7 @@ function ProPresenter() {
         
         if (currentSlideUid !== currentStageDisplaySlide.uid) {
             currentSlideUid = currentStageDisplaySlide.uid
-            previewDomUpdater.changeSlide(currentSlideUid)
+            previewDomUpdater.changeSlide(currentSlideUid, nextStageDisplaySlide.uid)
         }
         
         // Current slide with uid 0000...0000 means clear :)

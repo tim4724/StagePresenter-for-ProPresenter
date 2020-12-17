@@ -24,7 +24,7 @@ span, div, h1 {
 
 
 #left {
-    width: 450px;
+    width: 380px;
     height: 100%;
     display: flex;
     flex-direction: column-reverse;
