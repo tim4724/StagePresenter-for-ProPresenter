@@ -1,6 +1,6 @@
 "use strict"
 
-const maxCacheItems = 8
+const maxCacheItems = 24
 
 function PreviewDomUpdater(host) {
 	const baseUrl = 'http://' + host + '/stage/image/'
