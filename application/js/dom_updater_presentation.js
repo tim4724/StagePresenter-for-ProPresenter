@@ -150,6 +150,7 @@ function PresentationDomUpdater() {
     }
     
     function scrollToCurrentSlide(animate = true) {
+        
         const slide = presentationContainerElement.querySelector('.currentSlide')
         if (!slide) {
             return
@@ -170,11 +171,41 @@ function PresentationDomUpdater() {
         
         // TODO: Scroll faster if new slide is not visible...
         
+        /*
         deltaY = (0 | deltaY) // Cast y to int
         if (deltaY !== 0) {
             const top = deltaY + presentationContainerElement.scrollTop
             presentationContainerElement.scrollTo({top: top, behavior: animate ? 'smooth' : 'auto'})
+        }*/
+        const top = deltaY + presentationContainerElement.scrollTop
+        scrollTo(presentationContainerElement, top, 1000)
+    }
+    
+    function scrollTo(container, to, duration) {
+        const start = container.scrollTop
+        const change = to - start
+        const startDate = Date.now()
+        // t = current time
+        // b = start value
+        // c = change in value
+        // d = duration
+        function easeInOutQuad(t, b, c, d) {
+            t /= d/2;
+            if (t < 1) return c/2*t*t + b
+            t--
+            return -c/2 * (t*(t-2) - 1) + b
         }
+        function animateScroll() {
+            const currentDate = Date.now()
+            const currentTime = currentDate - startDate
+            container.scrollTop = parseInt(easeInOutQuad(currentTime, start, change, duration))
+            if (currentTime < duration) {
+                requestAnimationFrame(animateScroll)
+            } else {
+                container.scrollTop = to
+            }
+        }
+        animateScroll();
     }
     
     return {
