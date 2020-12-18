@@ -40,10 +40,9 @@ function PreviewDomUpdater(host) {
 				response.text().then(show)
 			} else {
 				// Make transparent, we need to load the image from the network
-				previewElement.style.opacity = 0
+				previewElement.style.opacity = 0.5
 				if (largePreviewElement.style.display !== 'none') {
-					largePreviewElement.style.opacity = 0
-					largePreviewElement.style.opacity = 0
+					largePreviewElement.style.opacity = 0.5
 				}
 				tiffDecoderWorker.postMessage(currentUrl)
 			}
