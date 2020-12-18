@@ -9,7 +9,7 @@ function MessageDomUpdater() {
 			messageElement.innerText = text
 		} else {
 			messageElement.style.display = 'none'
-		}	
+		}
 	}
 	
 	return {
