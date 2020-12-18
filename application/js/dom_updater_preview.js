@@ -19,8 +19,8 @@ function PreviewDomUpdater(host) {
 		if (dataURL) {
 			previewImageCache.put(url, new Response(dataURL))
 		}
-		if (url === currentUrl) { 
-			show(dataURL)
+		if (url === currentUrl) {
+			show(dataURL ? dataURL : '')
 		}
 	}
 	
