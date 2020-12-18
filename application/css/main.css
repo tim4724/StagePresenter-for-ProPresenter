@@ -163,10 +163,10 @@ span, div, h1 {
 }
 
 #error {
-    position: sticky;
+    position: absolute;
     bottom: 100px;
-    width: 90%;
-    margin: 0.25em auto 0.3em;
+    left: 10%;
+    right: 10%;
     border-radius: 5px;
     border-width: 6px;
     border-style: solid;
