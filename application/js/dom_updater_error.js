@@ -3,6 +3,16 @@
 function ErrorDomUpdater() {
 	const errorElement = document.getElementById('error')
 	const errorMessageElement = document.getElementById('errorMessage')
+	window.onerror = function (e) {
+		const text = 'An error occurred\n' + e
+		errorElement.style.display = 'block'
+		errorMessageElement.innerText = text
+		setTimeout(function () {
+			if (text === errorMessageElement.innerText) {
+				errorElement.style.display = 'none'
+			}
+		}, 5000)
+	}
 
 	function updateConnectionErrors(remoteWebsocketConnectionState,  stageWebSocketConnectionState) {
 		let errorMessages = []
@@ -15,7 +25,7 @@ function ErrorDomUpdater() {
 			} else if (!connectionState.isAuthenticated) {
 				errorMessages.push(name + ': Not Authenticated')
 			}
-		}		
+		}
 		
 		checkState(remoteWebsocketConnectionState, 'Remote App Interface')
 		checkState(stageWebSocketConnectionState, 'Stage App Interface')
