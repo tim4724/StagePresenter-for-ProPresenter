@@ -6,7 +6,6 @@ function PlaylistDomUpdater() {
 	const scroller = Scroller(playlistContainerElement)
 	let containerCenterY = centerY(playlistContainerElement.getBoundingClientRect())
 
-	window.onresize = onresize
 	if (ResizeObserver) {
 		new ResizeObserver(onresize).observe(playlistContainerElement)
 	}

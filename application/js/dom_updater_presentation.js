@@ -173,7 +173,7 @@ function PresentationDomUpdater() {
         }
     
         if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {
-            const duration = (Math.abs(deltaY) / presentationContainerHeight) * 1000
+            const duration = Math.abs(deltaY) * 2
             scroller.scroll(0 | deltaY, duration)
         } else {
             scroller.scroll(0 | deltaY, 200)
