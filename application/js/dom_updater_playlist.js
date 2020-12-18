@@ -3,7 +3,9 @@
 function PlaylistDomUpdater() {
 	const playlistContainerElement = document.getElementById('playlist')
 	const playlistNameElement = document.getElementById('playlistName')
-	
+	const scroller = Scroller(playlistContainerElement)
+	let containerCenterY = centerY(playlistContainerElement.getBoundingClientRect())
+
 	window.onresize = onresize
 	if (ResizeObserver) {
 		new ResizeObserver(onresize).observe(playlistContainerElement)
@@ -11,6 +13,7 @@ function PlaylistDomUpdater() {
 
 	let onResizeTimout = undefined
 	function onresize() {
+		containerCenterY = centerY(playlistContainerElement.getBoundingClientRect())
 		clearTimeout(onResizeTimout)
 		onResizeTimout = setTimeout(scrollToCurrentItem, 500)
 	}
@@ -76,11 +79,19 @@ function PlaylistDomUpdater() {
 		if (!item) {
 			return
 		}
-		item.scrollIntoView({
-			behavior: animate ? 'smooth' : 'auto',
-			block: 'center',
-			inline: 'center'
-		});
+		
+		const itemCenterY = centerY(item.getBoundingClientRect())
+		const deltaY = itemCenterY - containerCenterY
+
+		if (animate) {
+			scroller.scroll(deltaY, 1200)
+		} else {
+			scroller.scroll(deltaY, 0)
+		}
+	}
+	
+	function centerY(boundingRect) {
+		return boundingRect.top + (boundingRect.height / 2.0)
 	}
 	
 	return {

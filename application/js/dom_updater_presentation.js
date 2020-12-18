@@ -23,6 +23,8 @@ function PresentationDomUpdater() {
     const presentationContainerElement = document.getElementById('presentationContainer')
     const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
     
+    const scroller = Scroller(presentationContainerElement)
+    
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
             presentationContainer.style.opacity = 0
@@ -150,7 +152,6 @@ function PresentationDomUpdater() {
     }
     
     function scrollToCurrentSlide(animate = true) {
-        
         const slide = presentationContainerElement.querySelector('.currentSlide')
         if (!slide) {
             return
@@ -159,53 +160,24 @@ function PresentationDomUpdater() {
         const presentationContainerHeight = presentationContainerElement.clientHeight
         const isFirstSlideInGroup = slide.parentElement.querySelector('.slide') === slide
         
-        let deltaY
+        let slideBoundingRect = slide.getBoundingClientRect()
+        
+        let deltaY = undefined
         if (isFirstSlideInGroup || slide.parentElement.scrollHeight < (presentationContainerHeight * 0.9)) {
             // Just a small offfset to make it look good
             const smallOffset = parseFloat(getComputedStyle(document.body).fontSize) * 0.5
             // Whole group is fits in screen or this is the first slide
             deltaY = slide.parentElement.getBoundingClientRect().top - smallOffset
         } else {
-            deltaY = slide.getBoundingClientRect().top - presentationContainerHeight * 0.2
+            deltaY = slideBoundingRect.top - presentationContainerHeight * 0.2
         }
-        
-        // TODO: Scroll faster if new slide is not visible...
-        
-        /*
-        deltaY = (0 | deltaY) // Cast y to int
-        if (deltaY !== 0) {
-            const top = deltaY + presentationContainerElement.scrollTop
-            presentationContainerElement.scrollTo({top: top, behavior: animate ? 'smooth' : 'auto'})
-        }*/
-        const top = deltaY + presentationContainerElement.scrollTop
-        scrollTo(presentationContainerElement, top, 1000)
-    }
     
-    function scrollTo(container, to, duration) {
-        const start = container.scrollTop
-        const change = to - start
-        const startDate = Date.now()
-        // t = current time
-        // b = start value
-        // c = change in value
-        // d = duration
-        function easeInOutQuad(t, b, c, d) {
-            t /= d/2;
-            if (t < 1) return c/2*t*t + b
-            t--
-            return -c/2 * (t*(t-2) - 1) + b
+        if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {
+            const duration = (Math.abs(deltaY) / presentationContainerHeight) * 1000
+            scroller.scroll(0 | deltaY, duration)
+        } else {
+            scroller.scroll(0 | deltaY, 200)
         }
-        function animateScroll() {
-            const currentDate = Date.now()
-            const currentTime = currentDate - startDate
-            container.scrollTop = parseInt(easeInOutQuad(currentTime, start, change, duration))
-            if (currentTime < duration) {
-                requestAnimationFrame(animateScroll)
-            } else {
-                container.scrollTop = to
-            }
-        }
-        animateScroll();
     }
     
     return {
