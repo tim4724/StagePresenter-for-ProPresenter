@@ -2,11 +2,13 @@
 
 const maxCacheItems = 24
 
-function PreviewDomUpdater(host) {
-	const baseUrl = 'http://' + host + '/stage/image/'
+function PreviewDomUpdater() {
 	const previewElement = document.getElementById('preview')
 	const largePreviewElement = document.getElementById('largePreview')
 	const tiffDecoderWorker = new Worker('js/tiff_decoder_worker.js');
+	function getPreviewUrl(slideUid) {
+		return 'http://' + getHost() + '/stage/image/' + slideUid
+	}
 
 	let previewImageCache = undefined
 	caches.open('previewImageCache').then(cache => {
@@ -23,7 +25,7 @@ function PreviewDomUpdater(host) {
 			show(dataURL ? dataURL : '')
 		}
 	}
-	
+
 	function show(dataUrl) {
 		previewElement.src = dataUrl
 		previewElement.style.opacity = 1
@@ -32,9 +34,10 @@ function PreviewDomUpdater(host) {
 			largePreviewElement.style.opacity = 1
 		}
 	}
-	
+
 	function changeSlide(uid, nextSlideUid) {
-		currentUrl = baseUrl + uid
+		currentUrl = getPreviewUrl(uid)
+
 		previewImageCache.match(currentUrl).then(response => {
 			if (response !== undefined) {
 				response.text().then(show)
@@ -47,16 +50,16 @@ function PreviewDomUpdater(host) {
 				tiffDecoderWorker.postMessage(currentUrl)
 			}
 		})
-			
+
 		previewImageCache.keys().then(function(requests) {
 			if (nextSlideUid && nextSlideUid !== '00000000-0000-0000-0000-000000000000') {
-				const nextUrl = baseUrl + nextSlideUid
+				const nextUrl = getPreviewUrl(nextSlideUid)
 				if (!requests.some(request => request.url === nextUrl)) {
 					// Load the next slides image
 					tiffDecoderWorker.postMessage(nextUrl)
 				}
 			}
-			
+
 			// Delete old cache entries
 			for (let i = 0; i < requests.length - maxCacheItems; i++) {
 				previewImageCache.delete(requests[i])
@@ -70,12 +73,12 @@ function PreviewDomUpdater(host) {
 			largePreviewElement.style.display = 'block'
 		}
 	}
-	
+
 	function hideLargePreview() {
 		largePreviewElement.src = ''
 		largePreviewElement.style.display = 'none'
 	}
-	
+
 	return {
 		changeSlide: changeSlide,
 		showLargePreview: showLargePreview,

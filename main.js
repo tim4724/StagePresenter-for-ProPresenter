@@ -13,7 +13,7 @@ function createWindow () {
     const internalDisplay = displays.find((display) => {
         return display.internal
     })
-    
+
     const bounds = internalDisplay.bounds
 
     // Create the browser window.
@@ -39,10 +39,36 @@ function createWindow () {
             nodeIntegration: true
         }
     })
-    
+
     // and load the index.html of the app.
-    mainWindow.loadFile('application/index.html')
-    
+    mainWindow.loadFile('application/stagemonitor.html')
+
+
+
+        // Create the browser window.
+        const settingsWindow = new BrowserWindow({
+            // resizable: false,
+            // movable: false,
+            // minimizable: false,
+            // maximizable: false,
+            // focusable: false,
+            // alwaysOnTop: true,
+            // fullscreen: true,
+            // frame: false,
+            backgroundColor: '#000000',
+            darkTheme: true,
+            // kiosk: true,
+            title: 'Stagemonitor',
+            width: 400,
+            height: 400,
+            webPreferences: {
+                preload: path.join(__dirname, 'preload.js'),
+                nodeIntegration: true
+            }
+        })
+
+        // and load the index.html of the app.
+        settingsWindow.loadFile('application/settings.html')
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
 }
@@ -52,7 +78,7 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
     createWindow()
-    
+
     app.on('activate', function () {
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
