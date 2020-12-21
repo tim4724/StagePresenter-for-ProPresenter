@@ -9,7 +9,6 @@ function WebSocketConnectionState() {
     }
 }
 
-const host = 'localhost:63147'
 let remoteWebSocket = undefined
 let stageWebSocket = undefined
 
@@ -20,11 +19,11 @@ function ProPresenter() {
     const presentationDomUpdater = PresentationDomUpdater()
     const timerDomUpdater = TimerDomUpdater()
     const playlistDomUpdater = PlaylistDomUpdater()
-    const previewDomUpdater = PreviewDomUpdater(host)
-    
+    const previewDomUpdater = PreviewDomUpdater()
+
     let remoteWebsocketConnectionState = WebSocketConnectionState()
     let stageWebsocketConnectionState = WebSocketConnectionState()
-    
+
     let currentPlaylistDataCache = undefined
     let currentPlaylist = undefined
 
@@ -33,10 +32,10 @@ function ProPresenter() {
     let currentPresentationPath = ''
     let currentSlideIndex = -1
     let currentSlideCleared = false
-    
+
     let currentSlideUid = undefined
     let displaySlideFromStageDisplayTimeout = undefined
-    
+
     function connect() {
         window.onbeforeunload = function () {
             if (remoteWebSocket) {
@@ -48,22 +47,22 @@ function ProPresenter() {
                 stageWebSocket.close()
             }
         }
-        
+
         function connectToRemoteWebsocket() {
-            remoteWebSocket = new WebSocket('ws://' + host + '/remote')
+            remoteWebSocket = new WebSocket('ws://' + getHost() + '/remote')
             remoteWebSocket.onopen = function () {
                 remoteWebsocketConnectionState.isConnected = true
-                
+
                 const authenticateAction = {
                     action: 'authenticate',
                     protocol: '700',
-                    password: 'observer2'
+                    password: localStorage.remoteAppPass || 'observer'
                 }
-                // Authenticating is not necessary apparently, but do it anyway :) 
+                // Authenticating is not necessary apparently, but do it anyway :)
                 remoteWebSocket.send(JSON.stringify(authenticateAction))
-                
+
                 // In case authenticate is not successful
-                setTimeout(function() { 
+                setTimeout(function() {
                     if (!remoteWebsocketConnectionState.isAuthenticated) {
                         // Close will happen only after timeout, therefore speed things up
                         // TODO: Submit bug report to renewed vision?
@@ -75,7 +74,7 @@ function ProPresenter() {
                         updateConnectionErrors()
                     }
                 }, 1000)
-                
+
                 // The following does not give reliable info, if e.g. "quick" bible text is displayed...
                 remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
                 remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
@@ -84,7 +83,7 @@ function ProPresenter() {
                 const data = JSON.parse(ev.data)
                 console.log('RemoteWebSocket Received action: ' + data.action + ' ' + Date.now())
                 console.log(data)
-                
+
                 switch (data.action) {
                     case 'authenticate':
                         remoteWebsocketConnectionState.isAuthenticated = data.authenticated === 1 || data.authenticated === true
@@ -108,12 +107,12 @@ function ProPresenter() {
                     case 'presentationTriggerIndex':
                         // Slide was clicked in pro presenter...
                         onNewSlideIndex(data)
-                        
+
                         // Reload presentation in case something changed
                         // Instead of requesting current presentation,
                         // we request a specific presentation using the presentationPath
                         // Because we can set presentationSlideQuality
-                        
+
                         // TODO: reload without images, then reload with images?
                         remoteWebSocket.send(JSON.stringify({
                             action: 'presentationRequest',
@@ -122,7 +121,7 @@ function ProPresenter() {
                         }))
                         break
                     case 'presentationSlideIndex':
-                        // This action only will be received, when queried first, which does not happen at the moment. 
+                        // This action only will be received, when queried first, which does not happen at the moment.
                         onNewSlideIndex(data)
                         break
                     default:
@@ -136,20 +135,21 @@ function ProPresenter() {
                     remoteWebsocketConnectionState.error = ev.reason
                 }
                 updateConnectionErrors()
-                
+
                 setTimeout(connectToRemoteWebsocket, 5000)
                 console.log('RemoteWebSocket close ' + JSON.stringify(ev))
             }
         }
 
         function connectToStageWebSocket() {
-            stageWebSocket = new WebSocket('ws://' + host + '/stagedisplay')
+            stageWebSocket = new WebSocket('ws://' + getHost() + '/stagedisplay')
             stageWebSocket.onopen = function () {
                 stageWebsocketConnectionState.isConnected = true
-                
-                const authenticateAction = { acn: 'ath', pwd: 'stage', ptl: 610 }
+
+                const pwd = localStorage.stageAppPass || 'stage'
+                const authenticateAction = { acn: 'ath', pwd: pwd, ptl: 610 }
                 stageWebSocket.send(JSON.stringify(authenticateAction))
-                
+
                 setTimeout(function() {
                     if (!stageWebsocketConnectionState.isAuthenticated) {
                         // Close will happen only after timeout, therefore speed things up
@@ -203,21 +203,21 @@ function ProPresenter() {
                 stageWebsocketConnectionState = WebSocketConnectionState()
                 if (ev) {
                     stageWebsocketConnectionState.error = ev.reason
-                } 
+                }
                 updateConnectionErrors()
                 setTimeout(connectToStageWebSocket, 5000)
                 console.log('StageWebsocket close ' + JSON.stringify(ev))
             }
         }
-        
+
         connectToStageWebSocket()
         connectToRemoteWebsocket()
     }
-    
+
     function updateConnectionErrors() {
         errorDomUpdater.updateConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
     }
-    
+
     function onNewPlaylistAll(data) {
         const [playlist, index] = proPresenterParser.parsePlaylistAndIndex(data, currentPresentationPath)
         if (playlist) {
@@ -227,10 +227,10 @@ function ProPresenter() {
         }
         currentPlaylist = playlist
     }
-    
+
     function onNewSlideIndex(data) {
         clearTimeout(displaySlideFromStageDisplayTimeout)
-        
+
         const newSlideIndex = parseInt(data.slideIndex)
         if (!data.presentationPath || data.presentationPath === currentPresentationPath) {
             // Apparently still same presentation, therefore scroll right away
@@ -241,37 +241,37 @@ function ProPresenter() {
             currentSlideCleared = false
         }
     }
-    
+
     function onNewPresentation(data) {
         const newPresentationPath = data.presentationPath
         const newPresentation = proPresenterParser.parsePresentation(data)
         changePresentation(newPresentation, newPresentationPath, currentSlideIndex, currentSlideCleared, true)
     }
-    
+
     function onNewStageDisplayFrameValue(data) {
         // Cancel timeout for pending stagedisplaytexts
         clearTimeout(displaySlideFromStageDisplayTimeout)
-        
+
         const currentAndNextStageDisplaySlide = proPresenterParser.parseStageDisplayCurrentAndNext(data)
         const [currentStageDisplaySlide, nextStageDisplaySlide] = currentAndNextStageDisplaySlide
-        
+
         if (currentSlideUid !== currentStageDisplaySlide.uid) {
             currentSlideUid = currentStageDisplaySlide.uid
             previewDomUpdater.changeSlide(currentSlideUid, nextStageDisplaySlide.uid)
         }
-        
+
         // Current slide with uid 0000...0000 means clear :)
         if (currentStageDisplaySlide.uid == '00000000-0000-0000-0000-000000000000') {
             const clearSlide = true
             changeCurrentSlide(currentSlideIndex, clearSlide, true)
             return
         }
-        
+
         const currentStageDisplayText = currentStageDisplaySlide.text
         const nextStageDisplayText = nextStageDisplaySlide.text
-        
+
         const allPresentationSlideTexts = getSlidesOrEmptyArray().map(s => s.text)
-        
+
         // currentPresentationPath "stageDisplayText" would mean, the current displayed texts
         // are already from stagedisplay api
         if (currentPresentationPath !== 'stageDisplayText' && currentSlideIndex < allPresentationSlideTexts.length) {
@@ -286,17 +286,17 @@ function ProPresenter() {
                     return
                 }
             }
-            
+
         }
-        
+
         // The timeout will be cancelled if these texts are part of a real presentation
         displaySlideFromStageDisplayTimeout = setTimeout(function () {
             // Timeout was not cancelled, therefore display these stagedisplaytexts
-            
+
             if (currentPresentationPath === 'stageDisplayText') {
                 const index = allPresentationSlideTexts.indexOf(currentStageDisplayText)
                 const index2 = allPresentationSlideTexts.indexOf(currentStageDisplayText)
-                
+
                 if (index === index2) {
                     if (index === -1 && nextStageDisplayText === allPresentationSlideTexts[0]) {
                         // nextStageDisplayText is not already displayed, insert group at index 0
@@ -305,7 +305,7 @@ function ProPresenter() {
                         changeCurrentSlide(0, false, true)
                         return
                     }
-                    
+
                     // Current stage display text is already on screen
                     if (index === currentSlideIndex + 1 && index + 1 === allPresentationSlideTexts.length) {
                         // nextStageDisplayText is not already on screen, therefore append a new group to presentation
@@ -315,7 +315,7 @@ function ProPresenter() {
                         changeCurrentSlide(index, false, true)
                         return
                     }
-                    
+
                     if (index >= 0 && nextStageDisplayText === undefinedToEmpty(allPresentationSlideTexts[index + 1])) {
                         // Everything is already on screen, just scroll
                         changeCurrentSlide(index, false, true)
@@ -323,7 +323,7 @@ function ProPresenter() {
                     }
                 }
             }
-                    
+
             // Build a presentation to display
             let groups = [Group('', '', [Slide(currentStageDisplayText, undefined)])]
             if (nextStageDisplayText && nextStageDisplayText.length >= 0) {
@@ -342,9 +342,9 @@ function ProPresenter() {
         currentSlideIndex = newSlideIndex
         presentationDomUpdater.changeCurrentSlideAndScroll(newSlideCleared ? -1 : newSlideIndex, animate)
     }
-    
+
     function changePresentation(newPresentation,
-                                newPresentationPath, 
+                                newPresentationPath,
                                 newSlideIndex,
                                 newSlideCleared,
                                 animate) {
@@ -357,7 +357,7 @@ function ProPresenter() {
         }
         currentSlideIndex = newSlideIndex
         currentSlideCleared = newSlideCleared
-        
+
         const newPresentationJSONString = JSON.stringify(newPresentation)
         if (newPresentationJSONString !== currentPresentationJSONString) {
             if (newPresentation.hasText) {
@@ -372,7 +372,7 @@ function ProPresenter() {
             presentationDomUpdater.changeCurrentSlideAndScroll(newSlideCleared ? -1 : newSlideIndex, animate)
         }
     }
-    
+
     function insertGroupToPresentation(newGroup, groupIndex) {
         presentationDomUpdater.insertGroupToPresentation(newGroup, groupIndex)
         currentPresentation.groups.splice(groupIndex, 0, newGroup)
@@ -381,7 +381,7 @@ function ProPresenter() {
         }
         currentPresentationJSONString = JSON.stringify(currentPresentation)
     }
-    
+
     function getSlidesOrEmptyArray() {
         let slides = []
         if (!currentPresentation || !currentPresentation.groups) {
@@ -392,7 +392,7 @@ function ProPresenter() {
         }
         return slides
     }
-    
+
     return {
         connect: connect
     }

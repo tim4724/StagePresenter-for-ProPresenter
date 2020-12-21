@@ -21,17 +21,10 @@ function ConnectionSettings() {
 	}
 
 	function initInputsFromStorage() {
-		if (localStorage.ipAddress === undefined) {
-			ipAddressElement.value = 'localhost'
-		} else {
-			ipAddressElement.value = localStorage.ipAddress
-		}
+		ipAddressElement.value = localStorage.ipAddress || 'localhost'
 		updateHostIsLocal()
-		if (localStorage.port === undefined) {
-			portElement.value = '63147'
-		} else {
-			portElement.value = localStorage.port
-		}
+
+		portElement.value = localStorage.port ||  '63147'
 		remoteAppPassElement.value = undefinedToEmpty(localStorage.remoteAppPass)
 		stageAppPassElement.value = undefinedToEmpty(localStorage.stageAppPass)
 		resetResults()
