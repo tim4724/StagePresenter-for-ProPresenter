@@ -4,16 +4,18 @@
 <head>
     <meta charset='UTF-8'>
     <link rel='stylesheet' href='css/settings.css'>
+    <link rel='stylesheet' href='css/switch.css'>
+    <link rel='stylesheet' href='css/radio.css'>
 
     <script src='js/utils.js'></script>
     <script src='js/settings_connection.js'></script>
-    <script src='js/settings_stagemonitor.js'></script>
+    <script src='js/settings_application.js'></script>
 
     <title>Settings</title>
 </head>
 
 <body onload='connectionSettings = ConnectionSettings()
-              stagemonitorSettings = StagemonitorSettings()'>
+              applicationSettings = ApplicationSettings()'>
     <main>
         <h1 id='title'>Settings</h1>
 
@@ -66,22 +68,51 @@
         </section>
 
         <section class='settingGroup' id='electronAppSettings' style='display: none'>
-            <div class='settingGroupTitle'>Stagemonitor Settings</div>
+            <div class='settingGroupTitle'>Application</div>
             <div class='setting'>
                 Show Stagemonitor on display
-                <select id='showOnDisplay' onchange='stagemonitorSettings.onDisplaySelected(this)'>
+                <select id='showOnDisplay' onchange='applicationSettings.onDisplaySelected(this)'>
                     <option id='showOnDisplayNone' value='-1'> None </option>
                </select>
             </div>
 
             <div class='setting'>
-                <span unselectable='on' class='settingText'>Open automatically after Login</span>
+                <span class='settingText'>
+                    Open automatically after Login
+                </span>
                 <label class='switch right'>
                     <input id='autoStart' type='checkbox'
-                           onchange='stagemonitorSettings.startAtLogin(this)'>
+                           onchange='applicationSettings.startAtLogin(this)'>
                     <span class='slider'></span>
                 </label>
             </div>
+        </section>
+
+        <section class='settingGroup'>
+            <div class='settingGroupTitle'>Stagemonitor</div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Remove Linebreaks in slides
+                </span>
+                <label class='switch right'>
+                    <input id='autoStart' type='checkbox'
+                           onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Only show first text-object of slide
+                </span>
+                <label class='switch right'>
+                    <input id='autoStart' type='checkbox'
+                           onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
         </section>
 
         <button id='doneButton' onclick='window.close()'>
