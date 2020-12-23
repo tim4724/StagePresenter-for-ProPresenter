@@ -22,6 +22,26 @@ span, div, h1 {
     cursor: default;
 }
 
+body:hover #settingsButton, body:hover #closeButton {
+    display: inline;
+}
+
+#settingsButton, #closeButton {
+    display: none;
+    position: absolute;
+    font-size: 2em;
+    z-index: 100;
+}
+
+#settingsButton {
+    top: 16px;
+    left: 16px;
+}
+
+#closeButton {
+    top: 16px;
+    right: 16px;
+}
 
 #left {
     width: 380px;

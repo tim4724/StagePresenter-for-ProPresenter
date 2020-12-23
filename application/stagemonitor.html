@@ -14,29 +14,36 @@
     <script src='js/dom_updater_preview.js'></script>
     <script src='js/pro_presenter_parser.js'></script>
     <script src='js/pro_presenter_connection.js'></script>
-    
-    <link rel='stylesheet' href='css/main.css'>
+
+    <link rel='stylesheet' href='css/stagemonitor.css'>
     <link rel='stylesheet' href='css/presentation.css'>
 </head>
 
 <body onload='proPresenter = ProPresenter(); proPresenter.connect();'>
-    
+    <button id='settingsButton' onclick='window.open("settings.html", "popup")'>
+        Settings
+    </button>
+
+    <button id='closeButton' onclick='window.close()'>
+        Close
+    </button>
+
     <section id='left'>
         <span id='clock' class='timer'>
             <span id='timeHoursMinutes'>00:00</span>
             <span id='timeSeconds'>00</span>
         </span>
-        
+
         <div id='previewContainer'>
             <span id='videoTimer'></span>
             <img id='preview' src='black16x9.png' alt='Failed to load image'/>
         </div>
-        
+
         <div id='playlist'>
             <div id='playlistName'></div>
         </div>
     </section>
-    
+
     <main id='presentationContainer'>
         <h1 id='title'>No presentation selected</h1>
 
@@ -46,12 +53,12 @@
         </section>
 
         <div id='bottomSpacer'></div>
-        
+
         <img id='largePreview' src='' style='display: none;'/>
-        
+
         <span id='message'></span>
     </main>
-    
+
     <div id='error' style='display: none;'>
         <div id='errorLabel'>Error</div>
         <div id='errorMessage'></div>
@@ -59,4 +66,3 @@
 
     </body>
 </html>
-            
