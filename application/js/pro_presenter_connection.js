@@ -21,6 +21,9 @@ function ProPresenter() {
     const playlistDomUpdater = PlaylistDomUpdater()
     const previewDomUpdater = PreviewDomUpdater()
 
+    let remoteWebSocketCloseCounter = 0
+    let stageWebSocketCloseCounter = 0
+
     let remoteWebsocketConnectionState = WebSocketConnectionState()
     let stageWebsocketConnectionState = WebSocketConnectionState()
 
@@ -83,6 +86,8 @@ function ProPresenter() {
                 const data = JSON.parse(ev.data)
                 console.log('RemoteWebSocket Received action: ' + data.action + ' ' + Date.now())
                 console.log(data)
+                
+                remoteWebSocketCloseCounter = 0
 
                 switch (data.action) {
                     case 'authenticate':
@@ -130,13 +135,19 @@ function ProPresenter() {
                 }
             }
             remoteWebSocket.onclose = function (ev) {
+                remoteWebSocketCloseCounter++
                 remoteWebsocketConnectionState = WebSocketConnectionState()
                 if (ev) {
                     remoteWebsocketConnectionState.error = ev.reason
                 }
                 updateConnectionErrors()
 
-                setTimeout(connectToRemoteWebsocket, 5000)
+                remoteWebSocketCloseCounter++
+                if (remoteWebSocketCloseCounter === 1) {
+                    setTimeout(connectToRemoteWebsocket, 10)
+                } else {
+                    setTimeout(connectToRemoteWebsocket, 5000)
+                }
                 console.log('RemoteWebSocket close ' + JSON.stringify(ev))
             }
         }
@@ -168,6 +179,7 @@ function ProPresenter() {
                 if (!data) {
                     return
                 }
+                stageWebSocketCloseCounter = 0
                 if(data.acn != 'sys' && data.acn != 'vid' &&  data.acn != 'tmr') {
                     console.log('StageWebSocket Received action: ' + data.acn + ' ' + Date.now())
                     console.log(data)
@@ -205,7 +217,12 @@ function ProPresenter() {
                     stageWebsocketConnectionState.error = ev.reason
                 }
                 updateConnectionErrors()
-                setTimeout(connectToStageWebSocket, 5000)
+                stageWebSocketCloseCounter++
+                if (stageWebSocketCloseCounter === 1) {
+                    setTimeout(connectToStageWebSocket, 10)
+                } else {
+                    setTimeout(connectToStageWebSocket, 5000)
+                }
                 console.log('StageWebsocket close ' + JSON.stringify(ev))
             }
         }
