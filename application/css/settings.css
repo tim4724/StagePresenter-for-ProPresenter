@@ -76,110 +76,12 @@ main {
     float: right;
 }
 
-.switch {
-    position: relative;
-    display: inline-block;
-    height: 1.4em;
-    width: 2.45em;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.3s;
-    border-radius: 1.5em;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 1.05em;
-    width: 1.05em;
-    left: 0.175em;
-    bottom: 0.175em;
-    background-color: white;
-    transition: 0.3s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: #008cff;
-}
-
-input:checked + .slider:before {
-    transform: translateX(1.05em);
-}
-
-.radioLabel {
-    display: block;
-    position: relative;
-    padding-left: 35px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    font-size: 22px;
-    user-select: none;
-}
-
-.radioLabel input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.radio {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 25px;
-    width: 25px;
-    background-color: #eee;
-    border-radius: 50%;
-}
-
-.radioLabel:hover input ~ .radio {
-    background-color: #ccc;
-}
-
-.radioLabel input:checked ~ .radio {
-    background-color: #2196F3;
-}
-
-.radio:after {
-    content: "";
-    position: absolute;
-    display: none;
-}
-
-.radioLabel input:checked ~ .radio:after {
-    display: block;
-}
-
-.radioLabel .radio:after {
-    top: 9px;
-    left: 9px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: white;
+#showOnDisplay {
+    float: right;
 }
 
 .disabled {
     opacity: 0.5;
-}
-
-.disabled .slider {
-    cursor: default;
 }
 
 input[type="text"], input[type="number"] {

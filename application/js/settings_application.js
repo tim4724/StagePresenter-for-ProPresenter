@@ -1,4 +1,4 @@
-function StagemonitorSettings() {
+function ApplicationSettings() {
     let screen, app, ipcRenderer
     try {
         let remote
@@ -19,6 +19,7 @@ function StagemonitorSettings() {
     autoStartElement.checked = app.getLoginItemSettings().openAtLogin
 
     ipcRenderer.on('updateDisplays', updateDisplaySelect)
+    updateDisplaySelect()
 
     function updateDisplaySelect() {
         displaySelectElement.innerText = ''
