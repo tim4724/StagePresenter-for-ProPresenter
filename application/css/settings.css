@@ -35,7 +35,6 @@ main {
     border-radius: 0.25em;
     text-align: left;
     border: 0.375em solid #181818;
-    min-width: 90%;
 }
 
 .settingGroup {
@@ -70,6 +69,11 @@ main {
 
 #proPresenterVersion, #remoteAppConnectionResult, #stageAppConnectionResult {
     display: inline-block;
+    min-width: 240px
+}
+
+#doneButton {
+    float: right;
 }
 
 .switch {

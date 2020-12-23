@@ -14,6 +14,8 @@ function ConnectionSettings() {
 	let connectTimeout = undefined
 	let changed = false
 
+	initInputsFromStorage()
+
 	function showResult(element, success, message) {
 		element.innerText = message
 		element.classList.remove('successResult', 'errorResult')
@@ -159,6 +161,7 @@ function ConnectionSettings() {
 		if (!ipAddress || ipAddress.length === 0 || !port || port.length === 0) {
 			showResult(proPresenterVersionElement, false, 'Invalid')
 		} else {
+			// TODO: improve
 			testWebSocketConnection(ipAddress, port, 'remote', remoteAppPassElement.value)
 			testWebSocketConnection(ipAddress, port, 'stagedisplay', stageAppPassElement.value)
 		}

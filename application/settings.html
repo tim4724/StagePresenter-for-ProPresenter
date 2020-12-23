@@ -3,75 +3,90 @@
 
 <head>
     <meta charset='UTF-8'>
-    <link rel="stylesheet" href="css/settings.css">
+    <link rel='stylesheet' href='css/settings.css'>
 
     <script src='js/utils.js'></script>
-    <script src='js/settings.js'></script>
+    <script src='js/settings_connection.js'></script>
+    <script src='js/settings_stagemonitor.js'></script>
 
     <title>Settings</title>
 </head>
 
-<body onload='connectionSettings = ConnectionSettings();
-              connectionSettings.initInputsFromStorage();'>
+<body onload='connectionSettings = ConnectionSettings()
+              stagemonitorSettings = StagemonitorSettings()'>
     <main>
-    <h1 id="title">Settings</h1>
+        <h1 id='title'>Settings</h1>
 
-    <section class="settingGroup">
-        <div unselectable="on" class="settingGroupTitle">Pro Presenter Connection</div>
+        <section class='settingGroup'>
+            <div class='settingGroupTitle'>Pro Presenter Connection</div>
 
-        <div class="setting">
-            <label class="radioLabel">
-                <input id="hostIsLocal" type="radio" name="remoteLocal"
-                    checked=true
-                    onchange="connectionSettings.hostIsLocalComputer()">
-                <span class="radio"></span>
-                Connect to ProPresenter instance on this computer
-            </label>
-            <label class="radioLabel">
-                <input id="hostIsRemote" type="radio" name="remoteLocal" onchange="connectionSettings.hostIsRemoteComputer()">
-                <span class="radio"></span>
-                Connect to ProPresenter instance on another computer
-            </label>
-        </div>
+            <div class='setting'>
+                <label class='radioLabel'>
+                    <input id='hostIsLocal' type='radio' name='remoteLocal'
+                        checked=true
+                        onchange='connectionSettings.hostIsLocalComputer()'>
+                    <span class='radio'></span>
+                    Connect to ProPresenter instance on this computer
+                </label>
+                <label class='radioLabel'>
+                    <input id='hostIsRemote' type='radio' name='remoteLocal' onchange='connectionSettings.hostIsRemoteComputer()'>
+                    <span class='radio'></span>
+                    Connect to ProPresenter instance on another computer
+                </label>
+            </div>
 
-        <div class="setting">
-            <label>
+            <div class='setting'>
                 IP-Address or Network Name
-                <input id="ipAddress" type="text" value="localhost" disabled
-                        oninput="connectionSettings.onInputChanged()">
-            </label>
-            <label>
+                <input id='ipAddress' type='text' value='localhost' disabled
+                        oninput='connectionSettings.onInputChanged()'>
                 Port
-                <input id="port" type="number" min="0" max="999999"
-                        oninput="connectionSettings.onInputChanged()">
-            </label>
-            <span id="proPresenterVersion"></span>
-        </div>
+                <input id='port' type='number' min='0' max='999999'
+                        oninput='connectionSettings.onInputChanged()'>
+                <span id='proPresenterVersion'></span>
+            </div>
 
-        <div class="setting">
-            <label class="">
+            <div class='setting'>
                 Remote Observer Password
-                <input id="remoteAppPass" type="text"
-                        oninput="connectionSettings.onInputChanged()">
-            </label>
-            <span id="remoteAppConnectionResult"></span>
-        </div>
+                <input id='remoteAppPass' type='text'
+                        oninput='connectionSettings.onInputChanged()'>
+                <span id='remoteAppConnectionResult'></span>
+            </div>
 
-        <div class="setting">
-            <label class="">
+            <div class='setting'>
                 Stage App Password
-                <input id="stageAppPass" type="text" name="remoteAppPass"
-                        oninput="connectionSettings.onInputChanged()">
-            </label>
-            <span id="stageAppConnectionResult"></span>
-        </div>
+                <input id='stageAppPass' type='text' name='remoteAppPass'
+                        oninput='connectionSettings.onInputChanged()'>
+                <span id='stageAppConnectionResult'></span>
+            </div>
 
-        <button id="resetButton" disabled
-                onclick="connectionSettings.initInputsFromStorage()">
-            Reset
+            <button id='resetButton' disabled
+                    onclick='connectionSettings.initInputsFromStorage()'>
+                Reset
+            </button>
+        </section>
+
+        <section class='settingGroup' id='electronAppSettings' style='display: none'>
+            <div class='settingGroupTitle'>Stagemonitor Settings</div>
+            <div class='setting'>
+                Show Stagemonitor on display
+                <select id='showOnDisplay' onchange='stagemonitorSettings.onDisplaySelected(this)'>
+                    <option id='showOnDisplayNone' value='-1'> None </option>
+               </select>
+            </div>
+
+            <div class='setting'>
+                <span unselectable='on' class='settingText'>Open automatically after Login</span>
+                <label class='switch right'>
+                    <input id='autoStart' type='checkbox'
+                           onchange='stagemonitorSettings.startAtLogin(this)'>
+                    <span class='slider'></span>
+                </label>
+            </div>
+        </section>
+
+        <button id='doneButton' onclick='window.close()'>
+            Done
         </button>
-    </section>
-
     </main>
 </body>
 </html>

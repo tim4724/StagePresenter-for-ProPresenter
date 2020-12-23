@@ -1,6 +1,10 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, screen } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, BrowserView, screen, ipcMain } = require('electron')
+const { localStorage } = require('electron-browser-storage');
+
+let stageMonitorWindow = undefined
+let settingsWindow = undefined
+let settingsWindow2 = undefined
 
 // Enable live reload for Electron too
 require('electron-reload')(__dirname, {
@@ -8,90 +12,96 @@ require('electron-reload')(__dirname, {
     electron: require(`${__dirname}/node_modules/electron`)
 });
 
-function createWindow () {
-    const displays = screen.getAllDisplays()
-    const internalDisplay = displays.find((display) => {
-        return display.internal
+ipcMain.on('displaySelected', (event, arg) => {
+    if (stageMonitorWindow) {
+        stageMonitorWindow.close()
+    }
+
+    localStorage.getItem('showOnDisplay').then(displayId => {
+        const display = getDisplayById(displayId)
+        if (display) {
+            createStageMonitorWindow(display.bounds)
+        }
     })
+})
 
-    const bounds = internalDisplay.bounds
+function createStageMonitorWindow(bounds) {
+    if (stageMonitorWindow) {
+        stageMonitorWindow.close()
+    }
 
-    // Create the browser window.
-    const mainWindow = new BrowserWindow({
-        // resizable: false,
-        // movable: false,
-        // minimizable: false,
-        // maximizable: false,
-        // focusable: false,
-        // alwaysOnTop: true,
-        // fullscreen: true,
-        // frame: false,
-        backgroundColor: '#000000',
-        darkTheme: true,
-        // kiosk: true,
-        title: 'Stagemonitor',
+    stageMonitorWindow = new BrowserWindow({
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
+        fullscreen: true,
+        backgroundColor: '#000000',
+        darkTheme: true,
+        title: 'Stagemonitor',
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: true
+            nodeIntegration: false,
+            enableRemoteModule: false,
+            nativeWindowOpen: true
         }
     })
+    stageMonitorWindow.loadFile('application/stagemonitor.html')
+    stageMonitorWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
+        event.preventDefault()
+        createSettingsWindow()
+    })
+    stageMonitorWindow.on('closed', function () {
+        stageMonitorWindow = undefined
+    })
+}
 
-    // and load the index.html of the app.
-    mainWindow.loadFile('application/stagemonitor.html')
+function createSettingsWindow () {
+    if (settingsWindow) {
+        settingsWindow.close()
+    }
 
-
-
-        // Create the browser window.
-        const settingsWindow = new BrowserWindow({
-            // resizable: false,
-            // movable: false,
-            // minimizable: false,
-            // maximizable: false,
-            // focusable: false,
-            // alwaysOnTop: true,
-            // fullscreen: true,
-            // frame: false,
-            backgroundColor: '#000000',
-            darkTheme: true,
-            // kiosk: true,
-            title: 'Stagemonitor',
-            width: 400,
-            height: 400,
-            webPreferences: {
-                preload: path.join(__dirname, 'preload.js'),
-                nodeIntegration: true
-            }
-        })
-
-        // and load the index.html of the app.
-        settingsWindow.loadFile('application/settings.html')
-    // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    settingsWindow = new BrowserWindow({
+        backgroundColor: '#000000',
+        darkTheme: true,
+        title: 'Stagemonitor',
+        width: 1000,
+        height: 800,
+        fullscreen: false,
+        center: true,
+        webPreferences: {
+            nodeIntegration: true,
+            enableRemoteModule: true
+        }
+    })
+    settingsWindow.loadFile('application/settings.html')
+    settingsWindow.on('closed', function () {
+        settingsWindow = undefined
+    })
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-    createWindow()
+app.whenReady().then(async () => {
+    function updateSettingsWindowDisplays() {
+        if (settingsWindow) {
+            settingsWindow.webContents.send('updateDisplays')
+        }
+    }
+    screen.on('display-removed', updateSettingsWindowDisplays);
+    screen.on('display-added', updateSettingsWindowDisplays);
+    screen.on('display-metrics-changed', updateSettingsWindowDisplays);
 
-    app.on('activate', function () {
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
-        if (BrowserWindow.getAllWindows().length === 0) createWindow()
-    })
+    const displayId = await localStorage.getItem('showOnDisplay')
+    const display = getDisplayById(displayId)
+    if (display) {
+        createStageMonitorWindow(display.bounds)
+    } else {
+        createSettingsWindow()
+    }
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') app.quit()
-})
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+function getDisplayById(id) {
+    // Do not use '===' !
+    return screen.getAllDisplays().find(d => d.id == id)
+}
