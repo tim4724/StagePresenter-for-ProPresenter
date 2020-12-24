@@ -90,14 +90,29 @@
 
         <section class='settingGroup'>
             <div class='settingGroupTitle'>Stagemonitor</div>
+            <div style="color: #ff7f00">
+                Coming soon...
+            </div>
+            <div class='spacer' style="height: 32px">
+            </div>
 
             <div class='setting disabled'>
                 <span class='settingText'>
-                    Remove Linebreaks in slides
+                    Songtext Zoom Factor
+                </span>
+
+                <label class='right'>
+                    100%
+                </label>
+            </div>
+
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Intelligent Removal of Linebreaks in slides
                 </span>
                 <label class='switch right'>
-                    <input id='' type='checkbox'
-                           onchange=''>
+                    <input id='' type='checkbox' checked onchange=''>
                     <span class='slider'></span>
                 </label>
             </div>
@@ -107,10 +122,23 @@
                     Only show first text-object of slide
                 </span>
                 <label class='switch right'>
-                    <input id='' type='checkbox'
-                           onchange=''>
+                    <input id='' type='checkbox' checked onchange=''>
                     <span class='slider'></span>
                 </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    New Line for each bible verse
+                </span>
+                <label class='switch right'>
+                    <input id='' type='checkbox' onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+
+            <div class='spacer' style="height: 32px">
             </div>
 
             <div class='setting disabled'>
@@ -118,12 +146,69 @@
                     Show sidebar on the left
                 </span>
                 <label class='switch right'>
-                    <input id='' type='checkbox'
-                           onchange=''>
+                    <input id='' type='checkbox' checked onchange=''>
                     <span class='slider'></span>
                 </label>
             </div>
 
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Sidebar Zoom Factor
+                </span>
+
+                <label class='right'>
+                    100%
+                </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Sidebar width
+                </span>
+                <label class='switch right'>
+                    XX%
+                </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Show timers only when active
+                </span>
+                <label class='switch right'>
+                    <input id='' type='checkbox' checked onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Show Clock
+                </span>
+                <label class='switch right'>
+                    <input id='' type='checkbox' checked onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Show Preview
+                </span>
+                <label class='switch right'>
+                    <input id='' type='checkbox' checked onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting disabled'>
+                <span class='settingText'>
+                    Show Playlist
+                </span>
+                <label class='switch right'>
+                    <input id='' type='checkbox' checked onchange=''>
+                    <span class='slider'></span>
+                </label>
+            </div>
         </section>
 
         <button id='doneButton' onclick='window.close()'>
