@@ -4,13 +4,12 @@ importScripts('tiff.js')
 Tiff.prototype.toOffscreenCanvas = function () {
 	const width = this.width();
 	const height = this.height();
-	const image = this.readRGBAImage()
+	const data = this.readRGBAImage()
 
 	const canvas = new OffscreenCanvas(width, height);
 	const context = canvas.getContext('2d');
-
 	const imageData = context.createImageData(width, height);
-	imageData.data.set(image);
+	imageData.data.set(new Uint8Array(data));
 	context.putImageData(imageData, 0, 0);
 	return canvas;
 };
