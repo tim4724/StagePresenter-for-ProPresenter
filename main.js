@@ -13,7 +13,7 @@ require('electron-reload')(__dirname, {
 });
 
 ipcMain.on('displaySelected', (event, arg) => {
-    if (stageMonitorWindow) {
+    if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
         stageMonitorWindow.close()
     }
 
@@ -26,7 +26,7 @@ ipcMain.on('displaySelected', (event, arg) => {
 })
 
 function createStageMonitorWindow(bounds) {
-    if (stageMonitorWindow) {
+    if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
         stageMonitorWindow.close()
     }
 
@@ -38,25 +38,30 @@ function createStageMonitorWindow(bounds) {
         fullscreen: true,
         backgroundColor: '#000000',
         darkTheme: true,
+        frame: false,
         title: 'Stagemonitor',
         webPreferences: {
             nodeIntegration: false,
+            contextIsolation: true,
             enableRemoteModule: false,
             nativeWindowOpen: true
         }
     })
     stageMonitorWindow.loadFile('application/stagemonitor.html')
+    console.log('stageMonitorWindow created')
     stageMonitorWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
         event.preventDefault()
         createSettingsWindow()
     })
-    stageMonitorWindow.on('closed', function () {
-        stageMonitorWindow = undefined
+    stageMonitorWindow.on('close', function (ev) {
+        if (ev.sender === stageMonitorWindow) {
+            stageMonitorWindow = undefined
+        }
     })
 }
 
 function createSettingsWindow () {
-    if (settingsWindow) {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
         settingsWindow.close()
     }
 
@@ -70,12 +75,23 @@ function createSettingsWindow () {
         center: true,
         webPreferences: {
             nodeIntegration: true,
+            contextIsolation: false,
             enableRemoteModule: true
-        }
+        },
+    })
+    settingsWindow.once('ready-to-show', (ev) => {
+        console.log(settingsWindow.webContents.zoom)
+        settingsWindow.webContents.on('zoom-changed', (ev, s) => {
+            console.log(ev)
+            console.log(s)
+        })
+        // settingsWindow.webContents.setZoomFactor(1.5)
     })
     settingsWindow.loadFile('application/settings.html')
-    settingsWindow.on('closed', function () {
-        settingsWindow = undefined
+    settingsWindow.on('close', function (ev) {
+        if (ev === settingsWindow) {
+            settingsWindow = undefined
+        }
     })
 }
 
