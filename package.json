@@ -1,12 +1,12 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
+  "name": "stagemonitor",
+  "version": "0.0.1",
   "description": "A better stage monitor",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/tim4724/Stage-Monitor-2",
   "keywords": [
     "ProPresenter",
     "stage",
@@ -16,7 +16,7 @@
   "author": "Tim Vogel",
   "license": "",
   "devDependencies": {
-    "electron": "^11.0.4"
+    "electron": "^11.1.1"
   },
   "dependencies": {
     "electron-browser-storage": "^1.0.7",
