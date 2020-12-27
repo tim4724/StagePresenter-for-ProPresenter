@@ -69,7 +69,7 @@ function createSettingsWindow () {
         backgroundColor: '#000000',
         darkTheme: true,
         title: 'Stagemonitor',
-        width: 1000,
+        width: 1200,
         height: 800,
         fullscreen: false,
         center: true,
@@ -100,7 +100,7 @@ function createSettingsWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
     function updateSettingsWindowDisplays() {
-        if (settingsWindow) {
+        if (settingsWindow && !settingsWindow.isDestroyed()) {
             settingsWindow.webContents.send('updateDisplays')
         }
     }
@@ -109,11 +109,31 @@ app.whenReady().then(async () => {
     screen.on('display-metrics-changed', updateSettingsWindowDisplays);
 
     const displayId = await localStorage.getItem('showOnDisplay')
+
+    // TODO: Wait for display, if not connected
+
     const display = getDisplayById(displayId)
     if (display) {
         createStageMonitorWindow(display.bounds)
     } else {
         createSettingsWindow()
+
+        if (process.defaultApp === false) {
+            // TODO: Only first launch ?
+            // TODO: Only on mac
+            app.moveToApplicationsFolder({
+              conflictHandler: (conflictType) => {
+                if (conflictType === 'exists') {
+                  return dialog.showMessageBoxSync({
+                    type: 'question',
+                    buttons: ['Halt Move', 'Continue Move'],
+                    defaultId: 0,
+                    message: 'An app of this name already exists'
+                  }) === 1
+                }
+              }
+            })
+        }
     }
 })
 
