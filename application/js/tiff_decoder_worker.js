@@ -1,15 +1,35 @@
 importScripts('tiff.js')
 
 
+Tiff.prototype.bitDepth = function () {
+	return this.getField(Tiff.Tag.BITSPERSAMPLE);
+};
+
 Tiff.prototype.toOffscreenCanvas = function () {
-	const width = this.width();
-	const height = this.height();
-	const data = this.readRGBAImage()
+	const width = this.width()
+	const height = this.height()
+	const data = new Uint8Array(this.readRGBAImage())
+
+	/*
+	TODO: This is so stupid :(
+	if (normalize) {
+		let maxValue = 1
+		data.forEach(element => {
+			if (element > maxValue) {
+				maxValue = element
+			}
+		});
+
+		const factor = 255.0 / maxValue
+		data.forEach(function(element, index) {
+  			data[index] = element * factor
+		});
+	}*/
 
 	const canvas = new OffscreenCanvas(width, height);
 	const context = canvas.getContext('2d');
 	const imageData = context.createImageData(width, height);
-	imageData.data.set(new Uint8Array(data));
+	imageData.data.set(data);
 	context.putImageData(imageData, 0, 0);
 	return canvas;
 };
