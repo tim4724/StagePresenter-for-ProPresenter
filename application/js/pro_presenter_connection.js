@@ -86,7 +86,7 @@ function ProPresenter() {
                 const data = JSON.parse(ev.data)
                 console.log('RemoteWebSocket Received action: ' + data.action + ' ' + Date.now())
                 console.log(data)
-                
+
                 remoteWebSocketCloseCounter = 0
 
                 switch (data.action) {
@@ -274,7 +274,8 @@ function ProPresenter() {
 
         if (currentSlideUid !== currentStageDisplaySlide.uid) {
             currentSlideUid = currentStageDisplaySlide.uid
-            previewDomUpdater.changeSlide(currentSlideUid, nextStageDisplaySlide.uid)
+            const nextSlideUid = nextStageDisplaySlide ? nextStageDisplaySlide.uid : undefined
+            previewDomUpdater.changeSlide(currentSlideUid, nextSlideUid)
         }
 
         // Current slide with uid 0000...0000 means clear :)
