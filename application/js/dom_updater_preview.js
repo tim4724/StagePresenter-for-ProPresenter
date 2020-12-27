@@ -38,18 +38,27 @@ function PreviewDomUpdater() {
 	function changeSlide(uid, nextSlideUid) {
 		currentUrl = getPreviewUrl(uid)
 
-		previewImageCache.match(currentUrl).then(response => {
-			if (response !== undefined) {
-				response.text().then(show)
-			} else {
-				// Make transparent, we need to load the image from the network
-				previewElement.style.opacity = 0.5
-				if (largePreviewElement.style.display !== 'none') {
-					largePreviewElement.style.opacity = 0.5
+		if (uid && uid !== '00000000-0000-0000-0000-000000000000') {
+			previewImageCache.match(currentUrl).then(response => {
+				if (response !== undefined) {
+					response.text().then(show)
+				} else {
+					// Make transparent, we need to load the image from the network
+					previewElement.style.opacity = 0.5
+					if (largePreviewElement.style.display !== 'none') {
+						largePreviewElement.style.opacity = 0.5
+					}
+					tiffDecoderWorker.postMessage(currentUrl)
 				}
-				tiffDecoderWorker.postMessage(currentUrl)
+			})
+		} else {
+			// "Slide cleared"
+			// TODO: What best to do?
+			previewElement.style.opacity = 0.5
+			if (largePreviewElement.style.display !== 'none') {
+				largePreviewElement.style.opacity = 0.5
 			}
-		})
+		}
 
 		previewImageCache.keys().then(function(requests) {
 			if (nextSlideUid && nextSlideUid !== '00000000-0000-0000-0000-000000000000') {
