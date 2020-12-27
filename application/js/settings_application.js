@@ -9,6 +9,7 @@ function ApplicationSettings() {
     }
     if (!screen || !app || !ipcRenderer) {
         console.log('electron remote and ipcRenderer are not available')
+        return
     }
 
     document.getElementById('electronAppSettings').style.display = ''
