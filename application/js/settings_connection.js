@@ -1,5 +1,6 @@
 function ConnectionSettings() {
 	const hostIsLocalElement = document.getElementById('hostIsLocal')
+	const hostIsRemoteElement = document.getElementById('hostIsRemote')
 	const ipAddressElement = document.getElementById('ipAddress')
 	const portElement = document.getElementById('port')
 	const remoteAppPassElement = document.getElementById('remoteAppPass')
@@ -30,6 +31,7 @@ function ConnectionSettings() {
 		remoteAppPassElement.value = undefinedToEmpty(localStorage.remoteAppPass)
 		stageAppPassElement.value = undefinedToEmpty(localStorage.stageAppPass)
 		resetResults()
+		updateHostIsLocal()
 		connect()
 	}
 
@@ -75,12 +77,14 @@ function ConnectionSettings() {
 				showResult(resultElement, hasAuthenticated, 'Connected')
 			} else {
 				const msg = error && error.length > 0 ? error : 'Error'
+				// TODO: Reconnect after timeout?
 				showResult(resultElement, hasAuthenticated, msg)
 			}
 			onDone()
 		}
 
 		const webSocketTimeout = setTimeout(function() {
+			// TODO: Reconnect after timeout?
 			showResult(proPresenterVersionElement, false, 'Failed to connect')
 			onDone()
 		}, 3000)
@@ -127,8 +131,11 @@ function ConnectionSettings() {
 		const ipAddress = ipAddressElement.value
 		if (ipAddress === 'localhost') {
 			hostIsLocalElement.checked = true
+			hostIsRemoteElement.checked = false
 			ipAddressElement.disabled = true
 		} else {
+			hostIsLocalElement.checked = false
+			hostIsRemoteElement.checked = true
 			ipAddressElement.disabled = false
 		}
 	}
