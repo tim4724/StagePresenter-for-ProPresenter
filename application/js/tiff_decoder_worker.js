@@ -1,6 +1,5 @@
 importScripts('tiff.js')
 
-
 Tiff.prototype.bitDepth = function () {
 	return this.getField(Tiff.Tag.BITSPERSAMPLE);
 };
@@ -11,7 +10,8 @@ Tiff.prototype.toOffscreenCanvas = function () {
 	const data = new Uint8Array(this.readRGBAImage())
 
 	/*
-	TODO: This is so stupid :(
+	// TODO: This is so stupid :(
+	const normalize = true
 	if (normalize) {
 		let maxValue = 1
 		data.forEach(element => {
@@ -19,7 +19,6 @@ Tiff.prototype.toOffscreenCanvas = function () {
 				maxValue = element
 			}
 		});
-
 		const factor = 255.0 / maxValue
 		data.forEach(function(element, index) {
   			data[index] = element * factor
@@ -47,10 +46,10 @@ onmessage = function(e) {
 		const canvas = new Tiff({buffer: arrayBuffer}).toOffscreenCanvas()
 		return canvas.convertToBlob()
 	}).then(blob => {
-		const dataURL = new FileReaderSync().readAsDataURL(blob);
-		postMessage({url: url, dataURL: dataURL});
+		const objectURL = URL.createObjectURL(blob)
+		postMessage({url: url, objectURL: objectURL});
 	}).catch(e => {
 		console.log(e)
-		postMessage({url: url, dataURL: undefined});
+		postMessage({url: url, objectURL: undefined});
 	})
 }
