@@ -92,7 +92,6 @@ body:hover #settingsButton, body:hover #closeButton {
 #preview {
     width: 100%;
     display: block;
-    transition: opacity 0.2s;
 }
 
 #largePreview {
@@ -102,7 +101,6 @@ body:hover #settingsButton, body:hover #closeButton {
     width: 100%;
     max-height: calc(100% - 6em);
     object-fit: contain;
-    transition: opacity 0.2s;
 }
 
 .timer {
@@ -161,7 +159,6 @@ body:hover #settingsButton, body:hover #closeButton {
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 4px;
-    transition: color 1s, background 1s;
     min-height: 1em;
     background: #111111;
 }
@@ -179,7 +176,6 @@ body:hover #settingsButton, body:hover #closeButton {
 .playlistCurrent {
     background: #111111;
     color: #ff7c00;
-    transition: color 1s, background 1s;
 }
 
 #error {
