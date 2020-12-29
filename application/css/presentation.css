@@ -11,12 +11,10 @@
 
 #title {
     margin: 0;
-    padding-top: 0.4em;
-    padding-bottom: 0.1em;
+    padding-top: 8px;
     color: #ff7c00;
     font-weight: normal;
     font-size: 3em;
-    z-index: 100;
 }
 
 #groupTemplate {
@@ -24,10 +22,9 @@
 }
 
 .group {
-    margin: 0.25em auto 0.3em;
-    border-radius: 0.08em;
+    margin: 8px auto 12px;
     color: #909090;
-    border-width: 0.1em;
+    border-width: 6px;
     border-style: solid;
     border-color: #ffde3b;
     font-size: 4em;
@@ -37,9 +34,12 @@
 .groupName {
     color: #ffde3b;
     text-align: left;
-    font-size: 0.45em;
+    font-size: 0.5em;
     margin-top: 4px;
-    margin-left: 8px;
+    margin-left: 14px;
+    display: inline-block;
+    left: 12px;
+    float: left;
 }
 
 .emptyGroup {
@@ -57,17 +57,14 @@
 }
 
 .slide {
-    border-left: 0.0625em solid;
-    border-right: 0.0625em solid;
+    border-left: 8px solid;
+    border-right: 8px solid;
     border-color: #000000;
-    padding: 0 0.125em;
+    padding: 2px 4px;
     min-height: 1em;
-    max-height: 90%;
-    width: 100%
 }
 
 .groupWithLongText .slide .line {
-    /* Provided in em, because */
     margin-top: 0.25em;
     margin-bottom: 0.25em;
 }
@@ -87,6 +84,7 @@
 
 .bibleVerseNumber {
     color: #ffde3b;
+    /* Average space width is 0.25em http://jkorpela.fi/styles/spaces.html */
     margin-right: 0.25em;
     font-size: 0.8em
 }
@@ -105,7 +103,7 @@
 }
 
 #bottomSpacer {
-    height: 8em;
+    height: 20%;
 }
 
 #message {

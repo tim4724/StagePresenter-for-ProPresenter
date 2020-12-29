@@ -16,11 +16,11 @@ function PlaylistItem(text, isHeader, location) {
 	}
 }
 
-function Presentation(name, groups, hasText) {
+function Presentation(name, groups) {
 	return {
 		name: name,
 		groups: groups,
-		hasText: hasText
+		hasText: () => groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
 	}
 }
 
@@ -166,7 +166,6 @@ function ProPresenterParser() {
 			presentationName = 'Presentation'
 		}
 
-		let hasText = false
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
 			const groupName = group.groupName
@@ -178,10 +177,6 @@ function ProPresenterParser() {
 					slide.slideLabel,
 					asCSSColor(slide.slideColor)
 				)
-
-				if (!hasText && newSlide.lines.some(l => l.length > 0)) {
-					hasText = true
-				}
 
 				if (presentation.presentationSlideGroups.length === 1) {
 					const name = newSlide.label
@@ -199,7 +194,7 @@ function ProPresenterParser() {
 					groupName, groupColor, newSlides))
 			}
 		}
-		return Presentation(presentationName, newGroups, hasText)
+		return Presentation(presentationName, newGroups)
 	}
 
 	function parseStageDisplayCurrentAndNext(data) {

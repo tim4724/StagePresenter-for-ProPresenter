@@ -90,10 +90,12 @@ function PresentationDomUpdater() {
         for (const groupElement of groupElements) {
             const groupNameElement = groupElement.querySelector('.groupName')
             const firstLine = groupElement.querySelector('.line')
-            groupNameElement.style.position = 'absolute'
+            const groupNameOffsetRight = groupNameElement.offsetLeft + groupNameElement.offsetWidth
             if (firstLine &&
-                firstLine.getBoundingClientRect().left < groupNameElement.getBoundingClientRect().right) {
+                firstLine.offsetLeft < groupNameOffsetRight) {
                 groupNameElement.style.position = ''
+            } else {
+                groupNameElement.style.position = 'absolute'
             }
         }
     }

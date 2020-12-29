@@ -79,8 +79,9 @@ function ProPresenter() {
                 }, 1000)
 
                 // The following does not give reliable info, if e.g. "quick" bible text is displayed...
-                remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
-                remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
+                // Also there are bugs in pro presenter 7.4 and this is wrong sometimes
+                // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
+                // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
             }
             remoteWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -280,11 +281,9 @@ function ProPresenter() {
             return
         }
 
-        if (currentSlideUid !== cs.uid) {
-            currentSlideUid = cs.uid
-            const nextSlideUid = ns ? ns.uid : undefined
-            previewDomUpdater.changeSlide(currentSlideUid, nextSlideUid)
-        }
+        currentSlideUid = cs.uid
+        const nextSlideUid = ns ? ns.uid : undefined
+        previewDomUpdater.changeSlide(currentSlideUid, nextSlideUid)
 
         // Current slide with uid 0000...0000 means clear :)
         if (cs.uid === '00000000-0000-0000-0000-000000000000') {
@@ -292,8 +291,6 @@ function ProPresenter() {
             changeCurrentSlide(currentSlideIndex, clearSlide, true)
             return
         }
-        console.log('ns')
-        console.log(ns)
 
         const allPresentationSlides = getSlidesOrEmptyArray()
 
@@ -315,7 +312,7 @@ function ProPresenter() {
         if (currentPresentationPath !== 'stagedisplay' && currentSlide) {
             if (currentSlide.rawText === currentStageDisplaySlide.rawText
                     && (nextSlide === nextStageDisplaySlide === undefined
-                        || nextSlide.rawText === nextStageDisplaySlide.rawText)) {
+                        || (nextSlide && nextStageDisplaySlide && nextSlide.rawText === nextStageDisplaySlide.rawText))) {
                 // This text is already currently as a normal presentation displayed
                 // Code not reached in pro presenter 7.3.1
                 // Just to be sure, an active presentation will never be replaced by stagedisplay texts
@@ -368,7 +365,7 @@ function ProPresenter() {
                 groups.push(Group('', '', [nextStageDisplaySlide]))
             }
             // TODO: presentation has text?
-            const presentation = Presentation(undefined, groups, true)
+            const presentation = Presentation(undefined, groups)
             changePresentation(presentation, 'stagedisplay', 0, false, true)
         }, 100)
     }
@@ -398,7 +395,7 @@ function ProPresenter() {
 
         const newPresentationJSONString = JSON.stringify(newPresentation)
         if (newPresentationJSONString !== currentPresentationJSONString) {
-            if (newPresentation.hasText) {
+            if (newPresentation.hasText()) {
                 previewDomUpdater.hideLargePreview()
             } else {
                 previewDomUpdater.showLargePreview()
@@ -414,9 +411,6 @@ function ProPresenter() {
     function insertGroupToPresentation(newGroup, groupIndex) {
         presentationDomUpdater.insertGroupToPresentation(newGroup, groupIndex)
         currentPresentation.groups.splice(groupIndex, 0, newGroup)
-        if (currentPresentation.hasText) {
-            // TODO: presentation has text?
-        }
         currentPresentationJSONString = JSON.stringify(currentPresentation)
     }
 
