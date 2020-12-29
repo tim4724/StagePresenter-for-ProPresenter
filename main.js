@@ -80,12 +80,8 @@ function createSettingsWindow () {
         },
     })
     settingsWindow.once('ready-to-show', (ev) => {
-        console.log(settingsWindow.webContents.zoom)
         settingsWindow.webContents.on('zoom-changed', (ev, s) => {
-            console.log(ev)
-            console.log(s)
         })
-        // settingsWindow.webContents.setZoomFactor(1.5)
     })
     settingsWindow.loadFile('application/settings.html')
     settingsWindow.on('close', function (ev) {
