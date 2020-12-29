@@ -1,30 +1,29 @@
 "use strict"
 
-const onlyFirstTextInSlide = true
 const flexibleSlides = true
+const alignLeftCharactersThreshold = 80
 
 function PresentationDomUpdater() {
     let onResizeTimout = undefined
-    window.onresize = function () { 
+    window.onresize = function () {
         clearTimeout(onResizeTimout)
         onResizeTimout = setTimeout(function() {
             scrollToCurrentSlide(true)
         }, 500)
     }
-    
     const groupTemplate = document.querySelector('.group')
     groupTemplate.parentElement.removeChild(groupTemplate)
     groupTemplate.removeAttribute('id');
-    
+
     const slideTemplate = groupTemplate.querySelector('.slide')
     groupTemplate.removeChild(slideTemplate)
-    
+
     const titleElement = document.getElementById('title')
     const presentationContainerElement = document.getElementById('presentationContainer')
     const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
-    
+
     const scroller = Scroller(presentationContainerElement)
-    
+
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
             presentationContainer.style.opacity = 0
@@ -38,57 +37,60 @@ function PresentationDomUpdater() {
             display()
             changeCurrentSlideAndScroll(slideIndex, false)
         }
-        
-        function display() {            
+
+        function display() {
             // Remove old elements from DOM
             const groupElements = presentationContainerElement.querySelectorAll('.group')
             groupElements.forEach(e => e.parentElement.removeChild(e))
-            
+
             // Update elements
             titleElement.innerHTML = presentation.name
             titleElement.style.display = presentation.name ? 'block' : 'none'
-            
+
             // Insert new elements
             for (const group of presentation.groups) {
                 const groupElement = groupTemplate.cloneNode(true)
                 groupElement.querySelector('.groupName').innerHTML = group.name
                 groupElement.querySelector('.groupName').style.color = group.color
                 groupElement.style.borderColor = group.color
-                
+
                 for (const slide of group.slides) {
                     const slideElement = slideTemplate.cloneNode(true)
                     if (flexibleSlides) {
                         slideElement.classList.add('flexibleSlide')
                     }
-                    const lines = slide.text.split('\n')
-                    for (let line of lines) {
-                        if (onlyFirstTextInSlide) {
-                            line = line.split('\r')[0]
-                        } else {
-                            line = line.replaceAll('\r', '\n')
-                        }
-                        const span = document.createElement("span")
+
+                    if (slide.lines && slide.lines.some(l => l.length > alignLeftCharactersThreshold)) {
+                        groupElement.classList.add('groupWithLongText')
+                    }
+
+                    for (let line of slide.lines) {
+                        const span = document.createElement('span')
                         span.innerText = line.trim()
                         slideElement.appendChild(span)
-                    } 
+                    }
+
                     groupElement.appendChild(slideElement)
                 }
-                if (group.slides.length == 0 || group.slides.every(t => t.text.length === 0)) {
+
+                if (group.containsBiblePassage) {
+                    groupElement.classList.add('groupWithBiblePassage')
+                }
+                if (group.slides.length == 0 || !group.slides.every(s => s.lines.some(l => l.length > 0))) {
                     groupElement.classList.add('emptyGroup')
                 }
                 presentationContainerElement.insertBefore(groupElement, bottomSpacer)
             }
-            
+
             // Hide the first group if it only contains empty slides
-            /// TODO Improve presentation of "Flyer" presentation
-            const firstGroupTexts = presentation.groups[0].slides
-            if (!firstGroupTexts || firstGroupTexts.every(t => t.text.length === 0)) {
+            const firstGroupSlides = presentation.groups[0].slides
+            if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
                 const firstGroup = presentationContainerElement.querySelector('.group')
                 firstGroup.style.display = 'none'
             }
         }
     }
-    
+
     function insertGroupToPresentation(group, index = 0) {
         const groupElement = groupTemplate.cloneNode(true)
         groupElement.querySelector('.groupName').innerHTML = group.name
@@ -100,34 +102,34 @@ function PresentationDomUpdater() {
             slideElement.innerHTML = group.slides[i].text
             groupElement.appendChild(slideElement)
         }
-        
+
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
-        
+
         const groups = presentationContainerElement.getElementsByClassName('group')
         const elementBefore = index < groups.length ? groups[index] : bottomSpacer
         presentationContainerElement.insertBefore(groupElement, elementBefore)
-        
+
         if (insertedBeforeCurrent) {
             scrollToCurrentSlide(false)
         }
     }
-    
+
     function getCurrentSlideIndex() {
         const slides = presentationContainerElement.getElementsByClassName('slide')
         const currentSlide = presentationContainerElement.querySelector('.currentSlide')
         return Array.prototype.indexOf.call(slides, currentSlide)
     }
-    
+
     function changeCurrentSlideAndScroll(slideIndex, animate = true) {
         const slides = presentationContainerElement.getElementsByClassName('slide')
         if (!slides || slides.length === 0) {
             return
         }
-        
+
         const oldSlide = presentationContainerElement.querySelector('.currentSlide')
         const newSlide = slides[Math.min(slideIndex, slides.length -1)]
         const newSlideIsHidden = newSlide && newSlide.parentElement.style.display === 'none'
-        
+
         if (oldSlide) {
             oldSlide.parentNode.classList.remove('currentGroup')
             if (newSlide && !newSlideIsHidden) {
@@ -136,13 +138,13 @@ function PresentationDomUpdater() {
                 // Keep class as a hint, what was the last slide
             }
         }
-        
+
         // Do not scroll to a slide whos group is not visible
         if (newSlide && !newSlideIsHidden) {
             newSlide.classList.add('currentSlide')
             newSlide.parentElement.classList.add('currentGroup')
             scrollToCurrentSlide(animate)
-            
+
             // Yes sometimes it just does not scroll...
             // Try again
             setTimeout(function () {
@@ -150,18 +152,18 @@ function PresentationDomUpdater() {
             }, 32)
         }
     }
-    
+
     function scrollToCurrentSlide(animate = true) {
         const slide = presentationContainerElement.querySelector('.currentSlide')
         if (!slide) {
             return
         }
-        
+
         const presentationContainerHeight = presentationContainerElement.clientHeight
         const isFirstSlideInGroup = slide.parentElement.querySelector('.slide') === slide
-        
+
         let slideBoundingRect = slide.getBoundingClientRect()
-        
+
         let deltaY = undefined
         if (isFirstSlideInGroup || slide.parentElement.scrollHeight < (presentationContainerHeight * 0.9)) {
             // Just a small offfset to make it look good
@@ -171,7 +173,7 @@ function PresentationDomUpdater() {
         } else {
             deltaY = slideBoundingRect.top - presentationContainerHeight * 0.2
         }
-    
+
         if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {
             const duration = Math.abs(deltaY) * 2
             scroller.scroll(0 | deltaY, duration)
@@ -179,7 +181,7 @@ function PresentationDomUpdater() {
             scroller.scroll(0 | deltaY, 200)
         }
     }
-    
+
     return {
         displayPresentation: displayPresentation,
         insertGroupToPresentation: insertGroupToPresentation,
