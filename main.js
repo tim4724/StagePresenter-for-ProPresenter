@@ -1,5 +1,12 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, BrowserView, screen, ipcMain } = require('electron')
+const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu } = require('electron')
+
+const dockMenu = Menu.buildFromTemplate([
+    {
+        label: 'Settings',
+        click () { createSettingsWindow() }
+    }
+])
 
 let dummyWindow = undefined
 let waitingForDisplay = undefined
@@ -134,6 +141,10 @@ app.whenReady().then(async () => {
         }
     })
     dummyWindow.loadFile(__filename)
+
+    app.dock.setMenu(dockMenu)
+
+
 
     /*
     // TODO: Only first launch ?
