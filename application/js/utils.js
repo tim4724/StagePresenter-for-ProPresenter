@@ -20,6 +20,23 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
+function fontSizeReducer(element, maxHeight) {
+    let fontSize = 1
+    if (element.offsetHeight > maxHeight) {
+        const steps = [0.2, 0.05, 0.0125]
+        for (let i = 0; i < steps.length; i++) {
+            while (element.offsetHeight > maxHeight) {
+                fontSize -= steps[i]
+                element.style.fontSize = fontSize + 'em'
+            }
+            if (i + 1 < steps.length) {
+                fontSize += steps[i] - steps[i + 1]
+                element.style.fontSize = fontSize + 'em'
+            }
+        }
+    }
+}
+
 function Scroller(container) {
     let scrollCounter = 0
 
