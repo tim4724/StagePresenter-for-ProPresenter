@@ -285,6 +285,9 @@ function ProPresenter() {
             return
         }
 
+        // TODO: fix presentation
+        return
+
         const currentStageDisplayText = currentStageDisplaySlide.text
         const nextStageDisplayText = nextStageDisplaySlide.text
 
