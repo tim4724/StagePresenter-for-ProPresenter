@@ -1,7 +1,7 @@
 #presentationContainer {
     position: relative;
     overflow: hidden;
-    transition: opacity 0.5s;
+    transition: opacity 0.3s ease-in-out;
 }
 
 @keyframes fadeInAnimation {
@@ -51,7 +51,8 @@
     font-size: 3.5em;
 }
 
-.groupWithLongText .slide .text {
+
+.groupWithLongText .slide .text, .slide.biblePassage .text {
     padding: 8px 0;
 }
 
@@ -63,9 +64,9 @@
     min-height: 1em;
 }
 
-.groupWithLongText .slide .line {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
+.groupWithLongText .slide .line, .slide.biblePassage .line {
+    margin-top: 0.125em;
+    margin-bottom: 0.125em;
 }
 
 .flexibleSlide {
@@ -78,7 +79,7 @@
 }
 
 .slide.biblePassage {
-    text-align: start
+    text-align: start;
 }
 
 .bibleVerseNumber {
