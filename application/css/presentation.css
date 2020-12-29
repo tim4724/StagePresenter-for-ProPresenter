@@ -37,9 +37,8 @@
     font-size: 0.5em;
     margin-top: 4px;
     margin-left: 14px;
-    display: inline-block;
+    display: block;
     left: 12px;
-    float: left;
 }
 
 .emptyGroup {

@@ -89,13 +89,12 @@ function PresentationDomUpdater() {
         const groupElements = presentationContainerElement.querySelectorAll('.group')
         for (const groupElement of groupElements) {
             const groupNameElement = groupElement.querySelector('.groupName')
+            groupNameElement.style.position = 'absolute'
+
             const firstLine = groupElement.querySelector('.line')
             const groupNameOffsetRight = groupNameElement.offsetLeft + groupNameElement.offsetWidth
-            if (firstLine &&
-                firstLine.offsetLeft < groupNameOffsetRight) {
+            if (firstLine && firstLine.offsetLeft <= groupNameOffsetRight) {
                 groupNameElement.style.position = ''
-            } else {
-                groupNameElement.style.position = 'absolute'
             }
         }
     }
