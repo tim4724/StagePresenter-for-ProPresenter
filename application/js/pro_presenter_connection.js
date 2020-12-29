@@ -297,6 +297,8 @@ function ProPresenter() {
         const currentSlide = allPresentationSlides[currentSlideIndex]
         const nextSlide = allPresentationSlides[currentSlideIndex + 1]
 
+        // Assume text is bible passage...
+        // Because most of the time it will be a bible passage...
         const currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text, '', undefined, true)
 
         let nextStageDisplaySlide
