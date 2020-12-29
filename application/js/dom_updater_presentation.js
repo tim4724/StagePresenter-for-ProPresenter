@@ -49,36 +49,7 @@ function PresentationDomUpdater() {
 
             // Insert new elements
             for (const group of presentation.groups) {
-                const groupElement = groupTemplate.cloneNode(true)
-                groupElement.querySelector('.groupName').innerHTML = group.name
-                groupElement.querySelector('.groupName').style.color = group.color
-                groupElement.style.borderColor = group.color
-
-                for (const slide of group.slides) {
-                    const slideElement = slideTemplate.cloneNode(true)
-                    if (flexibleSlides) {
-                        slideElement.classList.add('flexibleSlide')
-                    }
-
-                    if (slide.lines && slide.lines.some(l => l.length > alignLeftCharactersThreshold)) {
-                        groupElement.classList.add('groupWithLongText')
-                    }
-
-                    for (let line of slide.lines) {
-                        const span = document.createElement('span')
-                        span.innerText = line.trim()
-                        slideElement.appendChild(span)
-                    }
-
-                    groupElement.appendChild(slideElement)
-                }
-
-                if (group.containsBiblePassage) {
-                    groupElement.classList.add('groupWithBiblePassage')
-                }
-                if (group.slides.length == 0 || !group.slides.every(s => s.lines.some(l => l.length > 0))) {
-                    groupElement.classList.add('emptyGroup')
-                }
+                const groupElement = buildGroupElement(group)
                 presentationContainerElement.insertBefore(groupElement, bottomSpacer)
             }
 
@@ -92,17 +63,7 @@ function PresentationDomUpdater() {
     }
 
     function insertGroupToPresentation(group, index = 0) {
-        const groupElement = groupTemplate.cloneNode(true)
-        groupElement.querySelector('.groupName').innerHTML = group.name
-        groupElement.querySelector('.groupName').style.color = group.color
-        groupElement.style.borderColor = group.color
-
-        for (let i = 0; i < group.slides.length; i++) {
-            const slideElement = slideTemplate.cloneNode(true)
-            slideElement.innerHTML = group.slides[i].text
-            groupElement.appendChild(slideElement)
-        }
-
+        const groupElement = buildGroupElement(group)
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
 
         const groups = presentationContainerElement.getElementsByClassName('group')
@@ -112,6 +73,40 @@ function PresentationDomUpdater() {
         if (insertedBeforeCurrent) {
             scrollToCurrentSlide(false)
         }
+    }
+
+    function buildGroupElement(group) {
+        const groupElement = groupTemplate.cloneNode(true)
+        groupElement.querySelector('.groupName').innerHTML = group.name
+        groupElement.querySelector('.groupName').style.color = group.color
+        groupElement.style.borderColor = group.color
+
+        for (const slide of group.slides) {
+            const slideElement = slideTemplate.cloneNode(true)
+            if (flexibleSlides) {
+                slideElement.classList.add('flexibleSlide')
+            }
+
+            if (slide.lines && slide.lines.some(l => l.length > alignLeftCharactersThreshold)) {
+                groupElement.classList.add('groupWithLongText')
+            }
+
+            for (let line of slide.lines) {
+                const span = document.createElement('span')
+                span.innerText = line.trim()
+                slideElement.appendChild(span)
+            }
+
+            groupElement.appendChild(slideElement)
+        }
+
+        if (group.containsBiblePassage) {
+            groupElement.classList.add('groupWithBiblePassage')
+        }
+        if (group.slides.length == 0 || !group.slides.every(s => s.lines.some(l => l.length > 0))) {
+            groupElement.classList.add('emptyGroup')
+        }
+        return groupElement
     }
 
     function getCurrentSlideIndex() {
