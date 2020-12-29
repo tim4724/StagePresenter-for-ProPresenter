@@ -37,7 +37,6 @@
 
 .groupName {
     color: #ffde3b;
-    position: absolute;
     text-align: left;
     font-size: 0.45em;
     margin-top: 0.075em;
@@ -49,11 +48,11 @@
     opacity: 0;
 }
 
-.groupWithLongText, .groupWithBiblePassage {
+.groupWithLongText {
     text-align: start;
 }
 
-.groupWithLongText .slide span {
+.groupWithLongText .slide .text {
     padding: 8px 0;
 }
 
@@ -61,20 +60,36 @@
     border-left: 0.0625em solid;
     border-right: 0.0625em solid;
     border-color: #000000;
-    padding: 0.125em 0.5em;
+    padding: 0 0.125em;
     min-height: 1em;
+}
+
+.groupWithLongText .slide .line {
+    /* Provided in em, because */
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
 }
 
 .flexibleSlide {
 }
 
-.slide span {
+.slide .line {
     /* Average space width is 0.25em http://jkorpela.fi/styles/spaces.html */
     margin-left: 0.125em;
     margin-right: 0.125em;
 }
 
-.flexibleSlide span {
+.slide.biblePassage {
+    text-align: start
+}
+
+.bibleVerseNumber {
+    color: #ffde3b;
+    margin-right: 0.25em;
+    font-size: 0.8em
+}
+
+.flexibleSlide .line {
     display: inline-block;
 }
 

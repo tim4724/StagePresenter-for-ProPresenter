@@ -15,9 +15,6 @@ function PresentationDomUpdater() {
     groupTemplate.parentElement.removeChild(groupTemplate)
     groupTemplate.removeAttribute('id');
 
-    const slideTemplate = groupTemplate.querySelector('.slide')
-    groupTemplate.removeChild(slideTemplate)
-
     const titleElement = document.getElementById('title')
     const presentationContainerElement = document.getElementById('presentationContainer')
     const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
@@ -82,7 +79,8 @@ function PresentationDomUpdater() {
         groupElement.style.borderColor = group.color
 
         for (const slide of group.slides) {
-            const slideElement = slideTemplate.cloneNode(true)
+            const slideElement = document.createElement('div')
+            slideElement.classList.add('slide')
             if (flexibleSlides) {
                 slideElement.classList.add('flexibleSlide')
             }
@@ -91,10 +89,30 @@ function PresentationDomUpdater() {
                 groupElement.classList.add('groupWithLongText')
             }
 
-            for (let line of slide.lines) {
-                const span = document.createElement('span')
-                span.innerText = line.trim()
-                slideElement.appendChild(span)
+            if (slide.isBiblePassage) {
+                slideElement.classList.add('biblePassage')
+            }
+
+            for (let i = 0; i < slide.lines.length; i++) {
+                const line = slide.lines[i]
+
+                const lineSpan = document.createElement('span')
+                lineSpan.classList.add('line')
+
+                if (slide.bibleVerseNumbers && i < slide.bibleVerseNumbers.length) {
+                    const bibleVerseSpan = document.createElement('span')
+                    bibleVerseSpan.innerText = slide.bibleVerseNumbers[i]
+                    bibleVerseSpan.classList.add('bibleVerseNumber')
+
+                    lineSpan.appendChild(bibleVerseSpan)
+                }
+
+                const textSpan = document.createElement('span')
+                textSpan.classList.add('text')
+                textSpan.innerText = line.trim()
+
+                lineSpan.appendChild(textSpan)
+                slideElement.appendChild(lineSpan)
             }
 
             groupElement.appendChild(slideElement)
