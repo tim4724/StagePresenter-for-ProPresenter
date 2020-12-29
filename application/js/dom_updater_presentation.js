@@ -4,22 +4,23 @@ const flexibleSlides = true
 const alignLeftCharactersThreshold = 80
 
 function PresentationDomUpdater() {
-    let onResizeTimout = undefined
-    window.onresize = function () {
-        clearTimeout(onResizeTimout)
-        onResizeTimout = setTimeout(function() {
-            scrollToCurrentSlide(true)
-        }, 500)
-    }
-    const groupTemplate = document.querySelector('.group')
-    groupTemplate.parentElement.removeChild(groupTemplate)
-    groupTemplate.removeAttribute('id');
-
-    const titleElement = document.getElementById('title')
     const presentationContainerElement = document.getElementById('presentationContainer')
+    const titleElement = document.getElementById('title')
     const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
-
     const scroller = Scroller(presentationContainerElement)
+
+    let onResizeTimout = undefined
+    if (ResizeObserver) {
+        new ResizeObserver(onresize).observe(presentationContainerElement)
+    } else {
+        window.onresize = onresize
+    }
+    function onresize() {
+        clearTimeout(onResizeTimout)
+        fixGroupNameElementPosition()
+        fixSlidesTextSize()
+        onResizeTimout = setTimeout(scrollToCurrentSlide, 500)
+    }
 
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
@@ -56,6 +57,8 @@ function PresentationDomUpdater() {
                 const firstGroup = presentationContainerElement.querySelector('.group')
                 firstGroup.style.display = 'none'
             }
+            fixGroupNameElementPosition()
+            fixSlidesTextSize()
         }
     }
 
@@ -72,11 +75,39 @@ function PresentationDomUpdater() {
         }
     }
 
+    function fixSlidesTextSize() {
+        let maxHeight = presentationContainerElement.clientHeight - 64
+
+        const slideElements = presentationContainerElement.querySelectorAll('.slide')
+        for (const slideElement of slideElements) {
+            slideElement.style.fontSize = '1em'
+            fontSizeReducer(slideElement, maxHeight)
+        }
+    }
+
+    function fixGroupNameElementPosition() {
+        const groupElements = presentationContainerElement.querySelectorAll('.group')
+        for (const groupElement of groupElements) {
+            const groupNameElement = groupElement.querySelector('.groupName')
+            const firstLine = groupElement.querySelector('.line')
+            groupNameElement.style.position = 'absolute'
+            if (firstLine &&
+                firstLine.getBoundingClientRect().left < groupNameElement.getBoundingClientRect().right) {
+                groupNameElement.style.position = ''
+            }
+        }
+    }
+
     function buildGroupElement(group) {
-        const groupElement = groupTemplate.cloneNode(true)
-        groupElement.querySelector('.groupName').innerHTML = group.name
-        groupElement.querySelector('.groupName').style.color = group.color
+        const groupElement = document.createElement('section')
+        groupElement.classList.add('group')
         groupElement.style.borderColor = group.color
+
+        const groupNameElement = document.createElement('div')
+        groupNameElement.classList.add('groupName')
+        groupNameElement.innerHTML = group.name
+        groupNameElement.style.color = group.color
+        groupElement.appendChild(groupNameElement)
 
         for (const slide of group.slides) {
             const slideElement = document.createElement('div')
@@ -178,13 +209,17 @@ function PresentationDomUpdater() {
         let slideBoundingRect = slide.getBoundingClientRect()
 
         let deltaY = undefined
-        if (isFirstSlideInGroup || slide.parentElement.scrollHeight < (presentationContainerHeight * 0.9)) {
+        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerHeight * 0.9)) {
             // Just a small offfset to make it look good
-            const smallOffset = parseFloat(getComputedStyle(document.body).fontSize) * 0.5
+            const smallOffset = 8
             // Whole group is fits in screen or this is the first slide
             deltaY = slide.parentElement.getBoundingClientRect().top - smallOffset
         } else {
-            deltaY = slideBoundingRect.top - presentationContainerHeight * 0.2
+            if (slide.offsetHeight < presentationContainerHeight * 0.8) {
+                deltaY = slideBoundingRect.top - presentationContainerHeight * 0.2
+            } else {
+                deltaY = slideBoundingRect.top
+            }
         }
 
         if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {

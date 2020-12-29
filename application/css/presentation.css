@@ -23,7 +23,6 @@
     display: none;
 }
 
-
 .group {
     margin: 0.25em auto 0.3em;
     border-radius: 0.08em;
@@ -39,8 +38,8 @@
     color: #ffde3b;
     text-align: left;
     font-size: 0.45em;
-    margin-top: 0.075em;
-    margin-left: 0.15em;
+    margin-top: 4px;
+    margin-left: 8px;
 }
 
 .emptyGroup {
@@ -50,6 +49,7 @@
 
 .groupWithLongText {
     text-align: start;
+    font-size: 3.5em;
 }
 
 .groupWithLongText .slide .text {
@@ -62,6 +62,8 @@
     border-color: #000000;
     padding: 0 0.125em;
     min-height: 1em;
+    max-height: 90%;
+    width: 100%
 }
 
 .groupWithLongText .slide .line {
