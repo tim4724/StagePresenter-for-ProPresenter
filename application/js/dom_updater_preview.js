@@ -5,7 +5,11 @@ function Cache(maxItems = 24) {
 	const map = new Map()
 
 	function add(id, objectUrl) {
-		keys.push(id)
+		if (map.has(id)) {
+			URL.revokeObjectURL(map.get(id))
+		} else {
+			keys.push(id)
+		}
 		map.set(id, objectUrl)
 
 		if (keys.length > maxItems) {
@@ -56,6 +60,13 @@ function PreviewDomUpdater() {
 		currentUrl = getPreviewUrl(uid)
 
 		const currentObjectUrl = cache.get(currentUrl)
+
+		// Do not load if uid is 000...000
+		if (uid && uid !== '00000000-0000-0000-0000-000000000000') {
+			// Always load preview image, because the slide could have been edited
+			tiffDecoderWorker.postMessage(currentUrl)
+		}
+
 		if (currentObjectUrl) {
 			// TODO: bug if text of cached slide is edited...
 			show(currentObjectUrl)
@@ -63,17 +74,11 @@ function PreviewDomUpdater() {
 			// Set img opacity while loading new image
 			previewElement.style.opacity = 0.5
 			largePreviewElement.style.opacity = 0.5
-			// Do not load if uid is 000...000
-			if (uid && uid !== '00000000-0000-0000-0000-000000000000') {
-				tiffDecoderWorker.postMessage(currentUrl)
-			}
 		}
 
 		if (nextSlideUid && nextSlideUid !== '00000000-0000-0000-0000-000000000000') {
-			const nextUrl = getPreviewUrl(nextSlideUid)
-			if (!cache.has(nextUrl)) {
-				tiffDecoderWorker.postMessage(nextUrl)
-			}
+			// Always load preview image, because the slide could have been edited
+			tiffDecoderWorker.postMessage(getPreviewUrl(nextSlideUid))
 		}
 	}
 
