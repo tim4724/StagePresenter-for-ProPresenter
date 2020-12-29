@@ -97,10 +97,11 @@ function ProPresenter() {
                         // const isController = data.controller === 1 || data.controller === true
                         break
                     case 'playlistRequestAll':
-                        if (ev.data !== currentPlaylistDataCache) {
+                        if (!currentPlaylist || ev.data !== currentPlaylistDataCache) {
                             currentPlaylistDataCache = ev.data
                             onNewPlaylistAll(data)
                         } else if (!undefinedToEmpty(currentPresentationPath).startsWith(currentPlaylist.location)) {
+                            // TODO: only scroll to current
                             onNewPlaylistAll(data)
                         }
                         break
