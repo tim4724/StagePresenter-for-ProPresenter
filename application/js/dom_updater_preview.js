@@ -57,6 +57,7 @@ function PreviewDomUpdater() {
 
 		const currentObjectUrl = cache.get(currentUrl)
 		if (currentObjectUrl) {
+			// TODO: bug if text of cached slide is edited...
 			show(currentObjectUrl)
 		} else {
 			// Set img opacity while loading new image
