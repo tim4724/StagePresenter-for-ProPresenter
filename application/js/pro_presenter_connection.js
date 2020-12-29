@@ -136,16 +136,16 @@ function ProPresenter() {
                 }
             }
             remoteWebSocket.onclose = function (ev) {
-                remoteWebSocketCloseCounter++
                 remoteWebsocketConnectionState = WebSocketConnectionState()
                 if (ev) {
                     remoteWebsocketConnectionState.error = ev.reason
+                    console.log('RemoteWebSocket close reason' + ev.reason)
                 }
                 updateConnectionErrors()
 
                 remoteWebSocketCloseCounter++
                 if (remoteWebSocketCloseCounter === 1) {
-                    setTimeout(connectToRemoteWebsocket, 10)
+                    setTimeout(connectToRemoteWebsocket, 50)
                 } else {
                     setTimeout(connectToRemoteWebsocket, 5000)
                 }
@@ -216,11 +216,12 @@ function ProPresenter() {
                 stageWebsocketConnectionState = WebSocketConnectionState()
                 if (ev) {
                     stageWebsocketConnectionState.error = ev.reason
+                    console.log('StageWebsocket close reason' + ev.reason)
                 }
                 updateConnectionErrors()
                 stageWebSocketCloseCounter++
                 if (stageWebSocketCloseCounter === 1) {
-                    setTimeout(connectToStageWebSocket, 10)
+                    setTimeout(connectToStageWebSocket, 50)
                 } else {
                     setTimeout(connectToStageWebSocket, 5000)
                 }
