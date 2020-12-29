@@ -33,9 +33,12 @@ function Group(name, color, slides, containsBiblePassage) {
 	}
 }
 
-function Slide(lines) {
+function Slide(lines, rawText, slideLabel, bibleVerseNumbers) {
 	return {
-		lines: lines
+		lines: lines,
+		rawText: rawText,
+		slideLabel: slideLabel,
+		bibleVerseNumbers: bibleVerseNumbers
 	}
 }
 
@@ -65,6 +68,74 @@ function ProPresenterParser() {
 		return [newPlaylist, currentIndex]
 	}
 
+	function parseSlide(slideText, slideLabel) {
+		const bibleRegex = /.+\s(\d)+:(\d)+(-(\d)+)?$/
+		const slideLabelIsBiblePassage = slideLabel && bibleRegex.test(slideLabel)
+
+		let bibleReferenceRegex
+		if (slideLabelIsBiblePassage) {
+			 bibleReferenceRegex = new RegExp(slideLabel + '(\\s\\(.+\\))?$')
+		} else {
+			// Always false...
+			bibleReferenceRegex = /$.^/
+		}
+
+		function removeBibleReference(strings) {
+			const notBibleReference = s => !bibleReferenceRegex.test(s)
+			if (strings.length > 1 && strings.some(notBibleReference)) {
+				return strings.filter(notBibleReference)
+			}
+			return strings
+		}
+
+		let textBoxes = slideText.split('\r')
+
+		if (optimizeBiblePresentations) {
+			let lines
+			if (onlyFirstTextInSlide) {
+				if (slideLabelIsBiblePassage) {
+					textBoxes = removeBibleReference(textBoxes)
+					lines = removeBibleReference(textBoxes[0].split('\n'))
+				} else {
+					lines = textBoxes[0].split('\n')
+				}
+			} else {
+				lines = textBoxes.join('\n').split('\n')
+				if (slideLabelIsBiblePassage) {
+					lines = removeBibleReference(lines)
+				}
+			}
+
+			const bibleVerseNumbers = []
+			let lastVerseNumber = undefined
+			for (let i = 0; i < lines.length; i++) {
+				if (/^\d+[^\s\d]/.test(lines[i])) {
+					const verseNumber = lines[i].match(/^\d+/)[0]
+					lines[i] = lines[i].replace(/^\d+/, '')
+					lastVerseNumber = verseNumber
+					bibleVerseNumbers.push(verseNumber)
+				} else {
+					bibleVerseNumbers.push('')
+				}
+			}
+			const firstVerseNumber = bibleVerseNumbers.find(v => v.length > 0)
+
+			// Fix slidelabel to show wich verses are actually in slide
+			if (slideLabelIsBiblePassage && firstVerseNumber) {
+				const bookAndChapter = slideLabel.match(/.+\s(\d)+:/)[0]
+				slideLabel = bookAndChapter + firstVerseNumber
+				if (lastVerseNumber && lastVerseNumber > firstVerseNumber) {
+					slideLabel += '-' + lastVerseNumber
+				}
+			}
+			return Slide(lines, slideText, slideLabel, bibleVerseNumbers)
+		} else {
+			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
+			let lines = text.split('\n')
+			return Slide(lines, slideText, slideLabel)
+		}
+	}
+
 	function parsePresentation(data) {
 		function asCSSColor(color) {
 			return 'rgba(' + color.split(' ').map(c => c * 255).join(', ') + ')'
@@ -80,64 +151,29 @@ function ProPresenterParser() {
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
 			const groupName = group.groupName
-			const bibleRegex = /.+\s(\d)+:(\d)+(-(\d)+)?$/
-			const containsBiblePassage = optimizeBiblePresentations && bibleRegex.test(groupName)
-
-			let groupNameRegex = undefined
-			if (containsBiblePassage) {
-				// Matches "<groupName<" and "<groupName> (Translation)"
-				groupNameRegex = new RegExp(groupName + '(\\s\\(.+\\))?$')
-			}
 
 			let newSlides = []
 			for (const slide of group.groupSlides) {
-				if (!hasText && slide.slideText) {
+				const newSlide = parseSlide(slide.slideText, slide.slideLabel)
+
+				if (!hasText && newSlide.lines.some(l => l.length > 0)) {
 					hasText = true
 				}
 
-				let textBoxes = slide.slideText.split('\r')
-				let text = ""
-				if (onlyFirstTextInSlide) {
-					if (containsBiblePassage && textBoxes.some(t => !groupNameRegex.test(t))) {
-						text = textBoxes.filter(t => !groupNameRegex.test(t))[0]
-					} else {
-						text = textBoxes[0]
-					}
-				} else {
-					text = textBoxes.join('\n')
-				}
-
-				let lines = text.split('\n')
-				if (containsBiblePassage) {
-					if (lines.length > 1 && lines.some(l => !groupNameRegex.test(l))) {
-						lines = lines.filter(l => !groupNameRegex.test(l))
-					}
-					for (let i = 0; i < lines.length; i++) {
-						// Replace verseNumbers with Superscript verse numbers
-						if (/^\d+[^\s\d]/.test(lines[i])) {
-							const verseNumber = lines[i].match(/^\d+/)[0]
-							// TODO: in color?
-							let verseNumberSup = [...verseNumber].map(c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[parseInt(c)]).join('')
-							lines[i] = lines[i].replace(/\d+/, verseNumberSup)
-						}
-					}
-				}
-				newSlides.push(Slide(lines))
-			}
-
-			if (presentation.presentationSlideGroups.length == 1) {
-				// TODO is this correct?
-				for (let i = 0; i < group.groupSlides.length; i++) {
-					const slide = group.groupSlides[i]
-					const name = slide.slideLabel
+				if (presentation.presentationSlideGroups.length === 1) {
+					const name = newSlide.slideLabel
 					const groupColor = asCSSColor(slide.slideColor)
 					newGroups.push(Group(
-						name, groupColor, [newSlides[i]], containsBiblePassage))
+						name, groupColor, [newSlide], true))
+				} else {
+					newSlides.push(newSlide)
 				}
-			} else {
+			}
+
+			if (presentation.presentationSlideGroups.length !== 1) {
 				const groupColor = asCSSColor(group.groupColor)
 				newGroups.push(Group(
-					groupName, groupColor, newSlides, containsBiblePassage))
+					groupName, groupColor, newSlides, true))
 			}
 		}
 		return Presentation(presentationName, newGroups, hasText)
@@ -166,6 +202,7 @@ function ProPresenterParser() {
 	return {
 		parsePlaylistAndIndex: parsePlaylistAndIndex,
 		parsePresentation: parsePresentation,
+		parseSlide: parseSlide,
 		parseStageDisplayCurrentAndNext: parseStageDisplayCurrentAndNext
 	}
 }

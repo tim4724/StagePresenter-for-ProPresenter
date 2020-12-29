@@ -269,75 +269,90 @@ function ProPresenter() {
         // Cancel timeout for pending stagedisplaytexts
         clearTimeout(displaySlideFromStageDisplayTimeout)
 
+        // TODO: Parse directly as slide?
         const currentAndNextStageDisplaySlide = proPresenterParser.parseStageDisplayCurrentAndNext(data)
-        const [currentStageDisplaySlide, nextStageDisplaySlide] = currentAndNextStageDisplaySlide
+        const [cs, ns] = currentAndNextStageDisplaySlide
 
-        if (currentSlideUid !== currentStageDisplaySlide.uid) {
-            currentSlideUid = currentStageDisplaySlide.uid
-            const nextSlideUid = nextStageDisplaySlide ? nextStageDisplaySlide.uid : undefined
+        if (!cs) {
+            console.log('onNewStageDisplayFrameValue: Current stagedisplay slide is undefined')
+            return
+        }
+
+        if (currentSlideUid !== cs.uid) {
+            currentSlideUid = cs.uid
+            const nextSlideUid = ns ? ns.uid : undefined
             previewDomUpdater.changeSlide(currentSlideUid, nextSlideUid)
         }
 
         // Current slide with uid 0000...0000 means clear :)
-        if (currentStageDisplaySlide.uid == '00000000-0000-0000-0000-000000000000') {
+        if (cs.uid === '00000000-0000-0000-0000-000000000000') {
             const clearSlide = true
             changeCurrentSlide(currentSlideIndex, clearSlide, true)
             return
         }
+        console.log('ns')
+        console.log(ns)
 
-        // TODO: fix presentation
-        return
+        const allPresentationSlides = getSlidesOrEmptyArray()
 
-        const currentStageDisplayText = currentStageDisplaySlide.text
-        const nextStageDisplayText = nextStageDisplaySlide.text
+        const currentSlide = allPresentationSlides[currentSlideIndex]
+        const nextSlide = allPresentationSlides[currentSlideIndex + 1]
 
-        const allPresentationSlideTexts = getSlidesOrEmptyArray().map(s => s.text)
+        const currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text)
 
-        // currentPresentationPath "stageDisplayText" would mean, the current displayed texts
+        let nextStageDisplaySlide
+        if (ns && ns.uid === '00000000-0000-0000-0000-000000000000'
+                && undefinedToEmpty(ns.text).length === 0) {
+            nextStageDisplaySlide = undefined
+        } else {
+            nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text)
+        }
+
+        // currentPresentationPath "stagedisplay" would mean, the current displayed texts
         // are already from stagedisplay api
-        if (currentPresentationPath !== 'stageDisplayText' && currentSlideIndex < allPresentationSlideTexts.length) {
-            const currentSlideText = allPresentationSlideTexts[currentSlideIndex]
-            if (currentSlideText) {
-                const nextSlideText = undefinedToEmpty(allPresentationSlideTexts[currentSlideIndex + 1])
-                if (currentSlideText.toLowerCase() === currentStageDisplayText.toLowerCase()
-                        && nextSlideText.toLowerCase() === nextStageDisplayText.toLocaleLowerCase()) {
-                    // This text is already currently as a normal presentation displayed
-                    // Code not reached in pro presenter 7.3.1
-                    // Just to be sure, an active presentation will never be replaced by stagedisplay texts
-                    return
-                }
+        if (currentPresentationPath !== 'stagedisplay' && currentSlide) {
+            if (currentSlide.rawText === currentStageDisplaySlide.rawText
+                    && (nextSlide === nextStageDisplaySlide === undefined
+                        || nextSlide.rawText === nextStageDisplaySlide.rawText)) {
+                // This text is already currently as a normal presentation displayed
+                // Code not reached in pro presenter 7.3.1
+                // Just to be sure, an active presentation will never be replaced by stagedisplay texts
+                return
             }
-
         }
 
         // The timeout will be cancelled if these texts are part of a real presentation
         displaySlideFromStageDisplayTimeout = setTimeout(function () {
             // Timeout was not cancelled, therefore display these stagedisplaytexts
 
-            if (currentPresentationPath === 'stageDisplayText') {
-                const index = allPresentationSlideTexts.indexOf(currentStageDisplayText)
-                const index2 = allPresentationSlideTexts.indexOf(currentStageDisplayText)
+            if (currentPresentationPath === 'stagedisplay') {
+                const index = allPresentationSlides.map(s => s.rawText).indexOf(currentStageDisplaySlide.rawText)
+                const index2 = allPresentationSlides.map(s => s.rawText).lastIndexOf(currentStageDisplaySlide.rawText)
 
                 if (index === index2) {
-                    if (index === -1 && nextStageDisplayText === allPresentationSlideTexts[0]) {
-                        // nextStageDisplayText is not already displayed, insert group at index 0
-                        const newGroup = Group('', '', [Slide(currentStageDisplayText, undefined)])
+                    if (index === -1 && allPresentationSlides.length > 0 &&
+                            nextStageDisplaySlide.rawText === allPresentationSlides[0].rawText) {
+                        // currentStageDisplaySlide is not already displayed, insert group at index 0
+                        const newGroup = Group('', '', [currentStageDisplaySlide])
                         insertGroupToPresentation(newGroup, 0)
                         changeCurrentSlide(0, false, true)
                         return
                     }
 
                     // Current stage display text is already on screen
-                    if (index === currentSlideIndex + 1 && index + 1 === allPresentationSlideTexts.length) {
-                        // nextStageDisplayText is not already on screen, therefore append a new group to presentation
-                        const newGroup = Group('', '', [Slide(nextStageDisplayText, undefined)])
-                        insertGroupToPresentation(newGroup, index + 1)
+                    if (index >= 0 && index === currentSlideIndex + 1 && index + 1 === allPresentationSlides.length) {
+                        if (nextStageDisplaySlide) {
+                            // nextStageDisplaySlide is not already on screen, therefore append a new group to presentation
+                            const newGroup = Group('', '', [nextStageDisplaySlide])
+                            insertGroupToPresentation(newGroup, index + 1)
+                        }
                         // Scroll to new slide
                         changeCurrentSlide(index, false, true)
                         return
                     }
 
-                    if (index >= 0 && nextStageDisplayText === undefinedToEmpty(allPresentationSlideTexts[index + 1])) {
+                    if (index >= 0 &&
+                            nextStageDisplaySlide.rawText === allPresentationSlides[index + 1].rawText) {
                         // Everything is already on screen, just scroll
                         changeCurrentSlide(index, false, true)
                         return
@@ -346,13 +361,13 @@ function ProPresenter() {
             }
 
             // Build a presentation to display
-            let groups = [Group('', '', [Slide(currentStageDisplayText, undefined)])]
-            if (nextStageDisplayText && nextStageDisplayText.length >= 0) {
-                groups.push(Group('', '', [Slide(nextStageDisplayText, undefined)]))
+            let groups = [Group('', '', [currentStageDisplaySlide])]
+            if (nextStageDisplaySlide) {
+                groups.push(Group('', '', [nextStageDisplaySlide]))
             }
             // TODO: presentation has text?
             const presentation = Presentation(undefined, groups, true)
-            changePresentation(presentation, 'stageDisplayText', 0, false, true)
+            changePresentation(presentation, 'stagedisplay', 0, false, true)
         }, 100)
     }
 

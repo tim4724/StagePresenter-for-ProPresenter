@@ -5,6 +5,11 @@ function undefinedToEmpty(string) {
     return string
 }
 
+function arrayEquals(a, b) {
+    return a.length === b.length
+        && a.every((val, index) => val === b[index]);
+}
+
 function getHost() {
     const ipAddress = localStorage.ipAddress || 'localhost'
     const port = localStorage.port || '63147'
