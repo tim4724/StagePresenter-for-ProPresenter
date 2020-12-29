@@ -320,10 +320,7 @@ function ProPresenter() {
             }
         }
 
-        // The timeout will be cancelled if these texts are part of a real presentation
-        displaySlideFromStageDisplayTimeout = setTimeout(function () {
-            // Timeout was not cancelled, therefore display these stagedisplaytexts
-
+        function displaySlideFromStageDisplay() {
             if (currentPresentationPath === 'stagedisplay') {
                 const index = allPresentationSlides.map(s => s.rawText).indexOf(currentStageDisplaySlide.rawText)
                 const index2 = allPresentationSlides.map(s => s.rawText).lastIndexOf(currentStageDisplaySlide.rawText)
@@ -367,7 +364,18 @@ function ProPresenter() {
             // TODO: presentation has text?
             const presentation = Presentation(undefined, groups)
             changePresentation(presentation, 'stagedisplay', 0, false, true)
-        }, 100)
+        }
+
+        if (currentPresentationPath === 'stagedisplay' || currentPresentationPath === undefined) {
+            displaySlideFromStageDisplay()
+        } else {
+            clearTimeout(displaySlideFromStageDisplayTimeout)
+            // The timeout will be cancelled if these texts are part of a real presentation
+            displaySlideFromStageDisplayTimeout = setTimeout(
+                displaySlideFromStageDisplay,
+                500
+            )
+        }
     }
 
     function changeCurrentSlide(newSlideIndex, newSlideCleared, animate) {
