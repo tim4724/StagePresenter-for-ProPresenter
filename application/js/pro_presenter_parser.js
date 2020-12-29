@@ -69,16 +69,14 @@ function ProPresenterParser() {
 		return [newPlaylist, currentIndex]
 	}
 
-	function parseSlide(text, label, color) {
+	function parseSlide(text, label, color, assumeIsBiblePassage = false) {
 		const bibleRegex = /.+\s(\d)+:(\d)+(-(\d)+)?(\s\(.+\))?$/
-		const labelIsBiblePassage = label && bibleRegex.test(label)
-
-		console.log('label', label)
+		const isBiblePassage = label !== undefined
+			&& (assumeIsBiblePassage || bibleRegex.test(label))
 
 		let bibleReferenceRegex
-		if (labelIsBiblePassage) {
+		if (isBiblePassage) {
 			 bibleReferenceRegex = new RegExp(escapeRegExp(label) + '(\\s\\(.+\\))?$')
-			 console.log(bibleReferenceRegex)
 		} else {
 			// Always false...
 			bibleReferenceRegex = /$.^/
@@ -97,7 +95,7 @@ function ProPresenterParser() {
 		if (optimizeBiblePresentations) {
 			let lines
 			if (onlyFirstTextInSlide) {
-				if (labelIsBiblePassage) {
+				if (isBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
 					lines = removeBibleReference(textBoxes[0].split('\n'))
 				} else {
@@ -105,7 +103,7 @@ function ProPresenterParser() {
 				}
 			} else {
 				lines = textBoxes.join('\n').split('\n')
-				if (labelIsBiblePassage) {
+				if (isBiblePassage) {
 					lines = removeBibleReference(lines)
 				}
 			}
@@ -146,12 +144,11 @@ function ProPresenterParser() {
 					label += ' ' + translation.trim()
 				}
 			}
-			const isBible = labelIsBiblePassage
-			return Slide(lines, text, label, color, isBible, bibleVerseNumbers)
+			return Slide(lines, text, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
 			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
 			let lines = text.split('\n')
-			return Slide(lines, text, label, color, false, undefined)
+			return Slide(lines, text, label, color, isBiblePassage, undefined)
 		}
 	}
 

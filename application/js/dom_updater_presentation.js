@@ -30,7 +30,7 @@ function PresentationDomUpdater() {
                 presentationContainerElement.scrollTo(0, 0)
                 presentationContainer.style.opacity = 1
                 changeCurrentSlideAndScroll(slideIndex, true)
-            }, 500)
+            }, 300)
         } else {
             display()
             changeCurrentSlideAndScroll(slideIndex, false)
@@ -69,19 +69,10 @@ function PresentationDomUpdater() {
         const groups = presentationContainerElement.getElementsByClassName('group')
         const elementBefore = index < groups.length ? groups[index] : bottomSpacer
         presentationContainerElement.insertBefore(groupElement, elementBefore)
-
+        fixGroupNameElementPosition()
+        fixSlidesTextSize()
         if (insertedBeforeCurrent) {
             scrollToCurrentSlide(false)
-        }
-    }
-
-    function fixSlidesTextSize() {
-        let maxHeight = presentationContainerElement.clientHeight - 64
-
-        const slideElements = presentationContainerElement.querySelectorAll('.slide')
-        for (const slideElement of slideElements) {
-            slideElement.style.fontSize = '1em'
-            fontSizeReducer(slideElement, maxHeight)
         }
     }
 
@@ -99,6 +90,16 @@ function PresentationDomUpdater() {
         }
     }
 
+    function fixSlidesTextSize() {
+        let maxHeight = presentationContainerElement.clientHeight - 64
+
+        const slideElements = presentationContainerElement.querySelectorAll('.slide')
+        for (const slideElement of slideElements) {
+            slideElement.style.fontSize = '1em'
+            fontSizeReducer(slideElement, maxHeight)
+        }
+    }
+
     function buildGroupElement(group) {
         const groupElement = document.createElement('section')
         groupElement.classList.add('group')
@@ -111,16 +112,15 @@ function PresentationDomUpdater() {
         groupElement.appendChild(groupNameElement)
 
         for (const slide of group.slides) {
+            if (slide.lines && slide.lines.some(l => l.length > alignLeftCharactersThreshold)) {
+                groupElement.classList.add('groupWithLongText')
+            }
+
             const slideElement = document.createElement('div')
             slideElement.classList.add('slide')
             if (flexibleSlides) {
                 slideElement.classList.add('flexibleSlide')
             }
-
-            if (slide.lines && slide.lines.some(l => l.length > alignLeftCharactersThreshold)) {
-                groupElement.classList.add('groupWithLongText')
-            }
-
             if (slide.isBiblePassage) {
                 slideElement.classList.add('biblePassage')
             }
@@ -131,11 +131,11 @@ function PresentationDomUpdater() {
                 const lineSpan = document.createElement('span')
                 lineSpan.classList.add('line')
 
-                if (slide.bibleVerseNumbers && i < slide.bibleVerseNumbers.length) {
+                const bibleVerseNumber = (slide.bibleVerseNumbers || [])[i]
+                if (bibleVerseNumber && bibleVerseNumber.length > 0){
                     const bibleVerseSpan = document.createElement('span')
-                    bibleVerseSpan.innerText = slide.bibleVerseNumbers[i]
+                    bibleVerseSpan.innerText = bibleVerseNumber
                     bibleVerseSpan.classList.add('bibleVerseNumber')
-
                     lineSpan.appendChild(bibleVerseSpan)
                 }
 
@@ -223,11 +223,15 @@ function PresentationDomUpdater() {
             }
         }
 
-        if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {
-            const duration = Math.abs(deltaY) * 2
-            scroller.scroll(0 | deltaY, duration)
+        if (animate) {
+            if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {
+                const duration = Math.abs(deltaY) * 2
+                scroller.scroll(0 | deltaY, duration)
+            } else {
+                scroller.scroll(0 | deltaY, 200)
+            }
         } else {
-            scroller.scroll(0 | deltaY, 200)
+            presentationContainerElement.scrollTop += deltaY
         }
     }
 

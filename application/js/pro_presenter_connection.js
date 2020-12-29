@@ -297,14 +297,14 @@ function ProPresenter() {
         const currentSlide = allPresentationSlides[currentSlideIndex]
         const nextSlide = allPresentationSlides[currentSlideIndex + 1]
 
-        const currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text)
+        const currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text, '', undefined, true)
 
         let nextStageDisplaySlide
         if (ns && ns.uid === '00000000-0000-0000-0000-000000000000'
                 && undefinedToEmpty(ns.text).length === 0) {
             nextStageDisplaySlide = undefined
         } else {
-            nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text)
+            nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text, '', undefined, true)
         }
 
         // currentPresentationPath "stagedisplay" would mean, the current displayed texts
@@ -326,7 +326,7 @@ function ProPresenter() {
                 const index2 = allPresentationSlides.map(s => s.rawText).lastIndexOf(currentStageDisplaySlide.rawText)
 
                 if (index === index2) {
-                    if (index === -1 && allPresentationSlides.length > 0 &&
+                    if (index === -1 && allPresentationSlides.length > 0 && nextStageDisplaySlide &&
                             nextStageDisplaySlide.rawText === allPresentationSlides[0].rawText) {
                         // currentStageDisplaySlide is not already displayed, insert group at index 0
                         const newGroup = Group('', '', [currentStageDisplaySlide])
@@ -347,8 +347,8 @@ function ProPresenter() {
                         return
                     }
 
-                    if (index >= 0 &&
-                            nextStageDisplaySlide.rawText === allPresentationSlides[index + 1].rawText) {
+                    if (index >= 0 && nextStageDisplaySlide && index + 1 < allPresentationSlides.length
+                            && nextStageDisplaySlide.rawText === allPresentationSlides[index + 1].rawText) {
                         // Everything is already on screen, just scroll
                         changeCurrentSlide(index, false, true)
                         return
@@ -403,6 +403,10 @@ function ProPresenter() {
 
         const newPresentationJSONString = JSON.stringify(newPresentation)
         if (newPresentationJSONString !== currentPresentationJSONString) {
+            console.log('changePresentation')
+            console.log(currentPresentationJSONString)
+            console.log(newPresentationJSONString)
+
             if (newPresentation.hasText()) {
                 previewDomUpdater.hideLargePreview()
             } else {
