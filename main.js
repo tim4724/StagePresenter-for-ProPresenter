@@ -13,11 +13,13 @@ let waitingForDisplay = undefined
 let stageMonitorWindow = undefined
 let settingsWindow = undefined
 
-// Enable live reload for Electron too
-require('electron-reload')(__dirname, {
-    // Note that the path to electron may vary according to the main file
-    electron: require(`${__dirname}/node_modules/electron`)
-})
+if (!app.isPackaged) {
+    // Enable live reload for Electron too
+    require('electron-reload')(__dirname, {
+        // Note that the path to electron may vary according to the main file
+        electron: require(`${__dirname}/node_modules/electron`)
+    })
+}
 
 ipcMain.on('displaySelected', (event, arg) => {
     if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
@@ -45,7 +47,7 @@ function createStageMonitorWindow(bounds) {
         fullscreen: true,
         backgroundColor: '#000000',
         darkTheme: true,
-        frame: false,
+        frame: !app.isPackaged,
         title: 'Stagemonitor',
         webPreferences: {
             nodeIntegration: false,
@@ -134,33 +136,35 @@ function screenConfigChanged() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-    dummyWindow = new BrowserWindow({
-        show: false,
-        webPreferences: {
-            nodeIntegration: false
-        }
-    })
-    dummyWindow.loadFile(__filename)
+    // TODO: Only first launch ?
+    // TODO: Only on mac?
+    if (app.isPackaged) {
+        app.moveToApplicationsFolder({
+          conflictHandler: (conflictType) => {
+            if (conflictType === 'exists') {
+              return dialog.showMessageBoxSync({
+                type: 'question',
+                buttons: ['Halt Move', 'Continue Move'],
+                defaultId: 0,
+                message: 'An app of this name already exists'
+              }) === 1
+            }
+          }
+        })
+    }
 
     app.dock.setMenu(dockMenu)
 
-
-
-    /*
-    // TODO: Only first launch ?
-    // TODO: Only on mac?
-    app.moveToApplicationsFolder({
-      conflictHandler: (conflictType) => {
-        if (conflictType === 'exists') {
-          return dialog.showMessageBoxSync({
-            type: 'question',
-            buttons: ['Halt Move', 'Continue Move'],
-            defaultId: 0,
-            message: 'An app of this name already exists'
-          }) === 1
+    dummyWindow = new BrowserWindow({
+        show: false,
+        paintWhenInitiallyHidden: false,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            enableRemoteModule: false
         }
-      }
-    })*/
+    })
+    dummyWindow.loadFile(__filename)
 
     screen.on('display-removed', screenConfigChanged)
     screen.on('display-added', screenConfigChanged)

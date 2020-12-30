@@ -1,5 +1,5 @@
 {
-  "name": "stagemonitor",
+  "name": "Stagemonitor",
   "version": "0.0.1",
   "description": "A better stage monitor",
   "main": "main.js",
@@ -16,10 +16,9 @@
   "author": "Tim Vogel",
   "license": "",
   "devDependencies": {
-    "electron": "^11.1.1"
+    "electron": "^11.1.1",
+    "electron-reload": "^1.5.0",
+    "electron-packager": "^15.2.0"
   },
-  "dependencies": {
-    "electron-browser-storage": "^1.0.7",
-    "electron-reload": "^1.5.0"
-  }
+  "dependencies": {}
 }
