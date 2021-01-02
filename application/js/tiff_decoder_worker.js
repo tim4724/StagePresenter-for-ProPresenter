@@ -27,7 +27,7 @@ Tiff.prototype.toOffscreenCanvas = function () {
 
 	const canvas = new OffscreenCanvas(width, height);
 	const context = canvas.getContext('2d');
-	const imageData = context.createImageData(width, height);
+	const imageData = context.getImageData(0, 0, width, height);
 	imageData.data.set(data);
 	context.putImageData(imageData, 0, 0);
 	return canvas;

@@ -10,12 +10,14 @@
     <script src='js/utils.js'></script>
     <script src='js/settings_connection.js'></script>
     <script src='js/settings_application.js'></script>
+    <script src='js/settings_stagemonitor.js'></script>
 
     <title>Settings</title>
 </head>
 
 <body onload='connectionSettings = ConnectionSettings()
-              applicationSettings = ApplicationSettings()'>
+              applicationSettings = ApplicationSettings()
+              stagemonitorSettings = StageMonitorSettings()'>
     <main>
         <h1 id='title'>Settings</h1>
 
@@ -90,126 +92,62 @@
 
         <section class='settingGroup'>
             <div class='settingGroupTitle'>Stagemonitor</div>
-            <div style="color: #ff7f00">
-                Coming soon...
+
+            <div id="stagemonitorSettingsContainer">
+                <div id="stagemonitorSettings">
+
+                    <div class='setting' id="zoomSetting">
+                        <span class='settingText'>
+                            Zoom
+                        </span>
+                        <label class='right'>
+                            <input id='zoom' type='number' min='10' max='500'
+                                    value="100"
+                                    oninput='stagemonitorSettings.zoomChanged()'>
+                            %
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Auto-Remove Linebreaks
+                        </span>
+                        <label class='switch right'>
+                            <input id='flexibleSlides' type='checkbox'
+                                onchange='stagemonitorSettings.flexibleSlidesChanged()'>
+                            <span class='slider'></span>
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Show Sidebar
+                        </span>
+                        <label class='switch right'>
+                            <input id='showSidebar' type='checkbox'
+                                onchange='stagemonitorSettings.showSidebarChanged()'>
+                            <span class='slider'></span>
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Improve layout of Bible presentations
+                        </span>
+                        <label class='switch right'>
+                            <input id='improveBiblePassages' type='checkbox'
+                                onchange='stagemonitorSettings.improveBiblePassagesChanged()'>
+                            <span class='slider'></span>
+                        </label>
+                    </div>
+                </div>
+
+                <iframe src="stagemonitor.html" id="previewIframe">
+                </iframe>
+                <!--
+                <img id="stagemonitorImg" src='black16x9.png'>
+            </img>-->
             </div>
-            <div class='spacer' style="height: 32px">
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Songtext Zoom Factor
-                </span>
-
-                <label class='right'>
-                    100%
-                </label>
-            </div>
-
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Intelligent Removal of Linebreaks in slides
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Only show first text-object of slide
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    New Line for each bible verse
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-
-            <div class='spacer' style="height: 32px">
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Show sidebar on the left
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Sidebar Zoom Factor
-                </span>
-
-                <label class='right'>
-                    100%
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Sidebar width
-                </span>
-                <label class='switch right'>
-                    XX%
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Show timers only when active
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Show Clock
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Show Preview
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-
-            <div class='setting disabled'>
-                <span class='settingText'>
-                    Show Playlist
-                </span>
-                <label class='switch right'>
-                    <input id='' type='checkbox' checked onchange=''>
-                    <span class='slider'></span>
-                </label>
-            </div>
-        </section>
 
         <button id='doneButton' onclick='window.close()'>
             Done

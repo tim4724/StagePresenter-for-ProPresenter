@@ -57,22 +57,28 @@ function createStageMonitorWindow(bounds) {
         }
     })
     stageMonitorWindow.loadFile('application/stagemonitor.html')
-    stageMonitorWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
+    function newWindow(event, url, frameName, disposition, options, additionalFeatures) {
         event.preventDefault()
         createSettingsWindow()
-    })
-    stageMonitorWindow.on('move', function (ev) {
+    }
+    stageMonitorWindow.webContents.on('new-window', newWindow)
+    function move(ev) {
         waitingForDisplay = true
+        stageMonitorWindow.webContents.removeListener('new-window', newWindow)
+        stageMonitorWindow.removeListener('move', move)
         stageMonitorWindow.close()
         stageMonitorWindow = undefined
         screenConfigChanged()
-    })
-    stageMonitorWindow.on('close', function (ev) {
+    }
+    stageMonitorWindow.on('move', move)
+    stageMonitorWindow.once('close', function (ev) {
         if (ev.sender === stageMonitorWindow) {
+            stageMonitorWindow.webContents.removeListener('new-window', newWindow)
+            stageMonitorWindow.removeListener('move', move)
             stageMonitorWindow = undefined
         }
     })
-    stageMonitorWindow.on('closed', function (ev) {
+    stageMonitorWindow.once('closed', function (ev) {
         checkIfShouldQuit()
     })
 }
@@ -96,17 +102,16 @@ function createSettingsWindow () {
             enableRemoteModule: true
         },
     })
-    settingsWindow.once('ready-to-show', (ev) => {
-        settingsWindow.webContents.on('zoom-changed', (ev, s) => {
-        })
-    })
     settingsWindow.loadFile('application/settings.html')
-    settingsWindow.on('close', function (ev) {
+    settingsWindow.once('close', function (ev) {
         if (ev === settingsWindow) {
             settingsWindow = undefined
+            if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
+                stageMonitorWindow.webContents.endFrameSubscription()
+            }
         }
     })
-    settingsWindow.on('closed', function (ev) {
+    settingsWindow.once('closed', function (ev) {
         checkIfShouldQuit()
     })
 }
@@ -157,6 +162,7 @@ app.whenReady().then(async () => {
 
     dummyWindow = new BrowserWindow({
         show: false,
+        title: 'dummyWindow',
         paintWhenInitiallyHidden: false,
         webPreferences: {
             nodeIntegration: false,
@@ -171,7 +177,7 @@ app.whenReady().then(async () => {
     screen.on('display-metrics-changed', screenConfigChanged)
 
     const displayId = await localStorageGet('showOnDisplay')
-    if (displayId) {
+    if (displayId !== undefined && displayId !== '-1') {
         const display = getDisplayById(displayId)
         if (display) {
             waitingForDisplay = false

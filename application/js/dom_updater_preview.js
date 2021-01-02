@@ -1,17 +1,21 @@
 "use strict"
 
-function Cache(maxItems = 24) {
-	const keys = []
+function Cache(maxItems = 16) {
+	let keys = []
 	const map = new Map()
 
 	function add(id, objectUrl) {
+		// Remove if old entry with that id exists
+		keys = keys.filter(k => k !== id)
 		if (map.has(id)) {
 			URL.revokeObjectURL(map.get(id))
-		} else {
-			keys.push(id)
 		}
+
+		// Add new id, object Url
+		keys.push(id)
 		map.set(id, objectUrl)
 
+		// Remove old items
 		if (keys.length > maxItems) {
 			const victimId = keys.shift()
 			URL.revokeObjectURL(map.get(victimId))
@@ -36,62 +40,73 @@ function PreviewDomUpdater() {
 		return 'http://' + getHost() + '/stage/image/' + slideUid
 	}
 	let currentUrl = undefined
+	let nextUrl = undefined
 
 	tiffDecoderWorker.onmessage = function(e) {
 		const { url, objectURL } = e.data
-		if (objectURL) {
-			cache.add(url, objectURL)
-		}
-		if (url === currentUrl) {
-			show(objectURL ? objectURL : '')
+		cache.add(url, objectURL || '')
+		if (url === currentUrl || url === nextUrl) {
+			showCurrentAndNext()
 		}
 	}
 
-	function show(objectUrl) {
-		previewElement.src = objectUrl
-		previewElement.style.opacity = 1
-		if (largePreviewElement.style.display !== 'none') {
-			largePreviewElement.src = objectUrl
-			largePreviewElement.style.opacity = 1
+	function showCurrentAndNext() {
+		const currentObjectUrl = cache.get(currentUrl)
+		const nextObjectUrl = cache.get(nextUrl)
+
+		if (currentObjectUrl) {
+			if (largePreviewElement.style.display !== 'none') {
+				largePreviewElement.src = currentObjectUrl
+				largePreviewElement.style.opacity = 1
+
+				if (nextObjectUrl) {
+					previewElement.src = nextObjectUrl || ''
+					previewElement.style.opacity = 1
+				} else {
+					previewElement.style.opacity = 0
+				}
+			} else {
+				previewElement.src = currentObjectUrl
+				previewElement.style.opacity = 1
+			}
+		} else {
+			// Still loading...
+			previewElement.style.opacity = 0.5
+			largePreviewElement.style.opacity = 0.5
 		}
 	}
 
 	function changeSlide(uid, nextSlideUid) {
 		currentUrl = getPreviewUrl(uid)
+		nextUrl = getPreviewUrl(nextSlideUid)
 
-		const currentObjectUrl = cache.get(currentUrl)
+		showCurrentAndNext()
 
 		// Do not load if uid is 000...000
 		if (uid && uid !== '00000000-0000-0000-0000-000000000000') {
 			// Always load preview image, because the slide could have been edited
 			tiffDecoderWorker.postMessage(currentUrl)
 		}
-
-		if (currentObjectUrl) {
-			// TODO: bug if text of cached slide is edited...
-			show(currentObjectUrl)
-		} else {
-			// Set img opacity while loading new image
-			previewElement.style.opacity = 0.5
-			largePreviewElement.style.opacity = 0.5
-		}
-
+		// Do not load if uid is 000...000
 		if (nextSlideUid && nextSlideUid !== '00000000-0000-0000-0000-000000000000') {
 			// Always load preview image, because the slide could have been edited
-			tiffDecoderWorker.postMessage(getPreviewUrl(nextSlideUid))
+			tiffDecoderWorker.postMessage(nextUrl)
 		}
 	}
 
 	function showLargePreview() {
 		if (largePreviewElement.style.display !== 'block') {
-			largePreviewElement.src = previewElement.src
 			largePreviewElement.style.display = 'block'
+			showCurrentAndNext()
 		}
 	}
 
 	function hideLargePreview() {
-		largePreviewElement.src = ''
-		largePreviewElement.style.display = 'none'
+		if (largePreviewElement.style.display !== 'none') {
+			largePreviewElement.src = ''
+			largePreviewElement.style.display = 'none'
+			showCurrentAndNext()
+		}
 	}
 
 	return {

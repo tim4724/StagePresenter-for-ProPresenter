@@ -1,3 +1,5 @@
+"use strict"
+
 function ConnectionSettings() {
 	const hostIsLocalElement = document.getElementById('hostIsLocal')
 	const hostIsRemoteElement = document.getElementById('hostIsRemote')
@@ -27,7 +29,7 @@ function ConnectionSettings() {
 		ipAddressElement.value = localStorage.ipAddress || 'localhost'
 		updateHostIsLocal()
 
-		portElement.value = localStorage.port ||  '63147'
+		portElement.value = localStorage.port ||  '49303'
 		remoteAppPassElement.value = undefinedToEmpty(localStorage.remoteAppPass)
 		stageAppPassElement.value = undefinedToEmpty(localStorage.stageAppPass)
 		resetResults()
