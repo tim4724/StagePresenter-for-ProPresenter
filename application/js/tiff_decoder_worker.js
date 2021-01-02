@@ -44,12 +44,11 @@ onmessage = function(e) {
 	}).then(arrayBuffer => {
 		Tiff.initialize({TOTAL_MEMORY: arrayBuffer.byteLength})
 		const canvas = new Tiff({buffer: arrayBuffer}).toOffscreenCanvas()
-		return canvas.convertToBlob()
+		return canvas.convertToBlob({ type: "image/jpeg", quality: 0.5 })
 	}).then(blob => {
-		const objectURL = URL.createObjectURL(blob)
-		postMessage({url: url, objectURL: objectURL});
+		postMessage({url: url, blob: blob});
 	}).catch(e => {
 		console.log(e)
-		postMessage({url: url, objectURL: undefined});
+		postMessage({url: url, blob: undefined});
 	})
 }
