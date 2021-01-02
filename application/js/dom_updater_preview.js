@@ -57,20 +57,20 @@ function PreviewDomUpdater() {
 		const nextObjectUrl = cache.get(nextUrl)
 
 		if (currentObjectUrl) {
+			previewElement.style.opacity = 1
+			largePreviewElement.style.opacity = 1
+
 			if (largePreviewElement.style.display !== 'none') {
 				largePreviewElement.src = currentObjectUrl
-				largePreviewElement.style.opacity = 1
 
 				if (nextObjectUrl) {
-					previewElement.src = nextObjectUrl || ''
-					previewElement.style.opacity = 1
+					previewElement.src = nextObjectUrl
 				} else {
 					// next is still loading
-					previewElement.style.opacity = 0
+					previewElement.src = 'black16x9.png'
 				}
 			} else {
 				previewElement.src = currentObjectUrl
-				previewElement.style.opacity = 1
 			}
 		} else {
 			// Still loading...

@@ -2,7 +2,7 @@
 
 function MessageDomUpdater() {
 	const messageElement = document.getElementById('message')
-	
+
 	function updateMessage(text) {
 		if (text && text.length > 0) {
 			messageElement.style.display = 'inline-block'
@@ -11,7 +11,7 @@ function MessageDomUpdater() {
 			messageElement.style.display = 'none'
 		}
 	}
-	
+
 	return {
 		updateMessage: updateMessage,
 	}

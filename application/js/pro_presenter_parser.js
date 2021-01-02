@@ -158,6 +158,7 @@ function ProPresenterParser() {
 
 		const presentation = data.presentation
 		let presentationName = presentation.presentationName
+		// TODO: Shorten presentation name of bible presentations
 		if (!presentationName) {
 			presentationName = 'Presentation'
 		}

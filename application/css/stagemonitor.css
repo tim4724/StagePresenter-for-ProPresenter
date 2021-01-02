@@ -43,7 +43,7 @@ body:hover #settingsButton, body:hover #closeButton {
     right: 16px;
 }
 
-#left {
+#sidebar {
     width: 300px;
     height: 100%;
     flex-direction: column-reverse;
@@ -52,7 +52,7 @@ body:hover #settingsButton, body:hover #closeButton {
     display: none;
 }
 
-.showSidebar #left {
+.showSidebar #sidebar {
     display: flex;
 }
 
@@ -64,25 +64,21 @@ body:hover #settingsButton, body:hover #closeButton {
 
 #message {
     display: none;
-    color: #ffffff;
+    color: #000000;
     border: 6px solid #cf008a;
-    font-size: 4em;
-    background: #000000;
+    font-size: 5em;
+    background: #ffffff;
     padding: 0 8px;
-}
-
-.timer {
 }
 
 #previewContainer {
     margin: 4px;
-    font-size: 4em;
     position: relative;
     border: 4px solid #515151;
 }
 
 #videoTimer {
-    font-size: 0.9em;
+    font-size: 2em;
     position: absolute;
     right: 0;
     bottom: 0;
@@ -106,18 +102,22 @@ body:hover #settingsButton, body:hover #closeButton {
 
 .timer {
     color: #ffffff;
-    font-size: 4em;
-    padding: 0 0.25em;
+    font-size: 5em;
+    padding: 0 0.1em;
     margin: 4px;
     background: #212121;
 }
 
 #clock {
-    font-size: 3em;
+    font-size: 5em;
     position: absolute;
     left: 0;
     bottom: 0;
     z-index: 500;
+    color: #ffffff;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #51ed82;
 }
 
 .showSidebar #clock {
@@ -132,18 +132,13 @@ body:hover #settingsButton, body:hover #closeButton {
     border-color: #ffff00;
 }
 
-#clock {
-    color: #ffffff;
-    border-width: 4px;
-    border-style: solid;
-    border-color: #51ed82;
+#clockHoursMinutes {
+    font-size: 1em;
 }
 
-#timeHoursMinutes {
-    font-size: 1.5em;
-}
-
-#timeSeconds {
+#clockSeconds {
+    margin-left: 0.2em;
+    font-size: 0.6em;
 }
 
 #playlist {
@@ -166,15 +161,14 @@ body:hover #settingsButton, body:hover #closeButton {
     display: block;
     font-size: 2.5em;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     padding: 4px;
     min-height: 1em;
     background: #111111;
 }
 
 .playlistItemIndex {
-    font-size: 0.8em;
+    font-size: 0.7em;
     margin-right: 0.25em;
 }
 
@@ -210,10 +204,10 @@ body:hover #settingsButton, body:hover #closeButton {
 #errorLabel {
     margin-left: 8px;
     text-align: left;
-    font-size: 2em;
+    font-size: 1.5em;
 }
 
 #errorMessage {
-    font-size: 4em;
+    font-size: 3em;
     margin: 8px;
 }

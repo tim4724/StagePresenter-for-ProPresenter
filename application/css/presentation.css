@@ -27,7 +27,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: #ffde3b;
-    font-size: 4em;
+    font-size: 5em;
     animation: fadeInAnimation 1s normal forwards;
 }
 
@@ -48,9 +48,8 @@
 
 .groupWithLongText {
     text-align: start;
-    font-size: 3.5em;
+    font-size: 4em;
 }
-
 
 .groupWithLongText .slide .text, .slide.biblePassage .text {
     padding: 8px 0;
