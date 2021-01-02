@@ -4,9 +4,11 @@ const alignLeftCharactersThreshold = 80
 
 function PresentationDomUpdater() {
     const presentationContainerElement = document.getElementById('presentationContainer')
-    const titleElement = document.getElementById('title')
+    const titleElement = presentationContainerElement.querySelector('#title')
     const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
     const scroller = Scroller(presentationContainerElement)
+    const slideElements = presentationContainerElement.getElementsByClassName('slide')
+    const groupElements = presentationContainerElement.getElementsByClassName('group')
 
     let onResizeTimout = undefined
     if (ResizeObserver) {
@@ -36,9 +38,9 @@ function PresentationDomUpdater() {
         }
 
         function display() {
-            // Remove old elements from DOM
-            const groupElements = presentationContainerElement.querySelectorAll('.group')
-            groupElements.forEach(e => e.parentElement.removeChild(e))
+            while(groupElements.length > 0) {
+                groupElements[0].remove();
+            }
 
             // Update elements
             titleElement.innerHTML = presentation.name
@@ -50,11 +52,11 @@ function PresentationDomUpdater() {
                 presentationContainerElement.insertBefore(groupElement, bottomSpacer)
             }
 
+            // TODO: Also update this if new group inserted at index 0
             // Hide the first group if it only contains empty slides
             const firstGroupSlides = presentation.groups[0].slides
             if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
-                const firstGroup = presentationContainerElement.querySelector('.group')
-                firstGroup.style.display = 'none'
+                groupElements[0].style.display = 'none'
             }
             fixGroupNameElementPosition()
             fixSlidesTextSize()
@@ -65,9 +67,9 @@ function PresentationDomUpdater() {
         const groupElement = buildGroupElement(group)
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
 
-        const groups = presentationContainerElement.getElementsByClassName('group')
-        const elementBefore = index < groups.length ? groups[index] : bottomSpacer
+        const elementBefore = index < groupElements.length ? groupElements[index] : bottomSpacer
         presentationContainerElement.insertBefore(groupElement, elementBefore)
+
         fixGroupNameElementPosition()
         fixSlidesTextSize()
         if (insertedBeforeCurrent) {
@@ -76,7 +78,6 @@ function PresentationDomUpdater() {
     }
 
     function fixGroupNameElementPosition() {
-        const groupElements = presentationContainerElement.querySelectorAll('.group')
         for (const groupElement of groupElements) {
             const groupNameElement = groupElement.querySelector('.groupName')
             groupNameElement.style.position = 'absolute'
@@ -92,7 +93,6 @@ function PresentationDomUpdater() {
     function fixSlidesTextSize() {
         let maxHeight = presentationContainerElement.clientHeight - 56
 
-        const slideElements = presentationContainerElement.querySelectorAll('.slide')
         for (const slideElement of slideElements) {
             slideElement.style.fontSize = '1em'
             fontSizeReducer(slideElement, maxHeight)
@@ -157,24 +157,22 @@ function PresentationDomUpdater() {
     }
 
     function getCurrentSlideIndex() {
-        const slides = presentationContainerElement.getElementsByClassName('slide')
         const currentSlide = presentationContainerElement.querySelector('.currentSlide')
-        return Array.prototype.indexOf.call(slides, currentSlide)
+        return Array.prototype.indexOf.call(slideElements, currentSlide)
     }
 
     function changeCurrentSlideAndScroll(slideIndex, animate = true) {
-        const slides = presentationContainerElement.getElementsByClassName('slide')
-        if (!slides || slides.length === 0) {
+        if (!slideElements || slideElements.length === 0) {
             return
         }
 
         const oldSlide = presentationContainerElement.querySelector('.currentSlide')
-        const newSlide = slides[Math.min(slideIndex, slides.length -1)]
-        const newSlideIsHidden = newSlide && newSlide.parentElement.style.display === 'none'
+        const newSlide = slideElements[Math.min(slideIndex, slideElements.length -1)]
+        const newSlideGroupIsNotDisplayed = newSlide && newSlide.parentElement.style.display === 'none'
 
         if (oldSlide) {
             oldSlide.parentNode.classList.remove('currentGroup')
-            if (newSlide && !newSlideIsHidden) {
+            if (newSlide && !newSlideGroupIsNotDisplayed) {
                 oldSlide.classList.remove('currentSlide')
             } else {
                 // Keep class as a hint, what was the last slide
@@ -182,7 +180,7 @@ function PresentationDomUpdater() {
         }
 
         // Do not scroll to a slide whos group is not visible
-        if (newSlide && !newSlideIsHidden) {
+        if (newSlide && !newSlideGroupIsNotDisplayed) {
             newSlide.classList.add('currentSlide')
             newSlide.parentElement.classList.add('currentGroup')
             scrollToCurrentSlide(animate)
@@ -196,6 +194,10 @@ function PresentationDomUpdater() {
     }
 
     function scrollToCurrentSlide(animate = true) {
+        if (Array.prototype.every.call(groupElements, g => g.classList.contains('emptyGroup'))) {
+            // Only empty groups that are not visible, do not scroll
+            return
+        }
         const slide = presentationContainerElement.querySelector('.currentSlide')
         if (!slide) {
             return
