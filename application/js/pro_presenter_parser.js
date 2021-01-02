@@ -146,7 +146,7 @@ function ProPresenterParser() {
 							previousVerseNumber = verseNumber
 						}
 					}
-					newLines.push(line.substring(previousIndex, line.length -1))
+					newLines.push(line.substring(previousIndex, line.length))
 				}
 
 				return newLines
