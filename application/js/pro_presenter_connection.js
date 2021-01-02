@@ -273,7 +273,7 @@ function ProPresenter() {
         previewDomUpdater.clearPreview(name)
 
         const itemIndex = currentPlaylist.items.findIndex(item => item.text === name)
-        if (itemIndex) {
+        if (itemIndex > 0) {
             const newPresentation = Presentation(name, [])
             const newPresentationPath = currentPlaylist.items[itemIndex].location
             changePresentation(newPresentation, newPresentationPath, -1, true, true)
