@@ -90,7 +90,7 @@ function PresentationDomUpdater() {
     }
 
     function fixSlidesTextSize() {
-        let maxHeight = presentationContainerElement.clientHeight - 64
+        let maxHeight = presentationContainerElement.clientHeight - 56
 
         const slideElements = presentationContainerElement.querySelectorAll('.slide')
         for (const slideElement of slideElements) {

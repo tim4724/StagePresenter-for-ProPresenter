@@ -23,7 +23,7 @@ function escapeRegExp(string) {
 function fontSizeReducer(element, maxHeight) {
     let fontSize = 1
     if (element.offsetHeight > maxHeight) {
-        const steps = [0.2, 0.05, 0.0125]
+        const steps = [0.2, 0.05, 0.0125, 0.003125]
         for (let i = 0; i < steps.length; i++) {
             while (element.offsetHeight > maxHeight) {
                 fontSize -= steps[i]

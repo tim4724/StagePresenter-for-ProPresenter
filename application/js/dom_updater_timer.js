@@ -1,26 +1,27 @@
 "use strict"
 
+const minimumVideoLengthForTimer = '00:01:00'
+
 function TimerDomUpdater() {
 	const timezoneOffsetInMinutes = new Date().getTimezoneOffset()
-	
-	const timerContainer = document.getElementById('left')
-	const timeHoursMinutes = document.getElementById('timeHoursMinutes')
-	const timeSeconds = document.getElementById('timeSeconds')
+
+	const timerContainer = document.getElementById('sidebar')
+	const timeHoursMinutes = document.getElementById('clockHoursMinutes')
+	const timeSeconds = document.getElementById('clockSeconds')
 	const videoTimer = document.getElementById('videoTimer')
 	const playlistElement = document.getElementById('playlist')
-	
-	const minimumVideoLengthForTimer = '00:01:00'
+
 	let lastKnownVideoTimerText = undefined
 	let removeTimeouts = {}
-	
+
 	function updateClock(seconds) {
 		// TODO: is the time correct?
 		let totalMinutes = Math.floor(seconds / 60) - timezoneOffsetInMinutes
-		
+
 		let hours = Math.floor(totalMinutes / 60 % 24)
 		let minutes = totalMinutes % 60
 		seconds = seconds % 60
-		
+
 		if (hours < 10) {
 			hours = '0' + hours
 		}
@@ -33,7 +34,7 @@ function TimerDomUpdater() {
 		timeHoursMinutes.innerText = hours + ':' + minutes
 		timeSeconds.innerText = seconds
 	}
-	
+
 	function updateTimer(uid, text, mode) {
 		let timerElement = document.getElementById(uid)
 		if (!timerElement) {
@@ -47,20 +48,20 @@ function TimerDomUpdater() {
 				timerContainer.appendChild(timerElement)
 			}
 		}
-		
+
 		// TODO: if startval does not change, keep timer visible?
-	
+
 		if (text.startsWith('00:')) {
 			text = text.substr(3)
 		}
 		timerElement.innerText = text
-		
+
 		clearTimeout(removeTimeouts[uid])
 		removeTimeouts[uid] = setTimeout(function () {
 			timerElement.parentElement.removeChild(timerElement)
 		}, 5000)
 	}
-	
+
 	function updateVideo(uid, text) {
 		uid = 'videoTimer'
 
@@ -74,7 +75,7 @@ function TimerDomUpdater() {
 				videoTimer.style.display = 'none'
 			}, 1200)
 		}
-		
+
 		if (text > lastKnownVideoTimerText) {
 			// A new timer since text is larger than before
 			// If the video length is short, do not display a timer
@@ -84,7 +85,7 @@ function TimerDomUpdater() {
 				videoTimer.style.display = 'none'
 			}
 		}
-		
+
 		// Always show timer if the timer has a value greater than the minimum length
 		if (text > minimumVideoLengthForTimer) {
 			videoTimer.style.display = 'inline'
@@ -99,7 +100,7 @@ function TimerDomUpdater() {
 		}
 		videoTimer.innerText = text
 	}
-	
+
 	return {
 		updateClock: updateClock,
 		updateTimer: updateTimer,
