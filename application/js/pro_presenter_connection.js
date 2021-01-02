@@ -83,6 +83,8 @@ function ProPresenter() {
                 // Also there are bugs in pro presenter 7.4 and this is wrong sometimes
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
+
+                remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
             }
             remoteWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -131,6 +133,9 @@ function ProPresenter() {
                     case 'presentationSlideIndex':
                         // This action only will be received, when queried first, which does not happen at the moment.
                         onNewSlideIndex(data)
+                        break
+                    case 'audioTriggered':
+                        onAudioTriggered(data)
                         break
                     default:
                         console.log('Unknown action', data.action)
@@ -263,6 +268,18 @@ function ProPresenter() {
         }
     }
 
+    function onAudioTriggered(data) {
+        const name = data.audioName
+        previewDomUpdater.clearPreview(name)
+
+        const itemIndex = currentPlaylist.items.findIndex(item => item.text === name)
+        if (itemIndex) {
+            const newPresentation = Presentation(name, [])
+            const newPresentationPath = currentPlaylist.items[itemIndex].location
+            changePresentation(newPresentation, newPresentationPath, -1, true, true)
+        }
+    }
+
     function onNewPresentation(data) {
         const newPresentationPath = data.presentationPath
         const newPresentation = proPresenterParser.parsePresentation(data)
@@ -284,7 +301,7 @@ function ProPresenter() {
 
         currentSlideUid = cs.uid
         const nextSlideUid = ns ? ns.uid : undefined
-        previewDomUpdater.changeSlide(currentSlideUid, nextSlideUid)
+        previewDomUpdater.changePreview(currentSlideUid, nextSlideUid)
 
         // Current slide with uid 0000...0000 means clear :)
         if (cs.uid === '00000000-0000-0000-0000-000000000000') {

@@ -54,10 +54,15 @@ function ProPresenterParser() {
 	const onlyFirstTextInSlide = true
 
 	function parsePlaylistAndIndex(data, currentPresentationPath) {
-		const currentLocation = currentPresentationPath.split(':')[0]
-		const playlist = data.playlistAll.find(p => p.playlistLocation === currentLocation)
+		let playlist = undefined
+		if (data.playlistAll.length === 1) {
+			playlist = data.playlistAll[0]
+		} else if (currentPresentationPath) {
+			const currentLocation = currentPresentationPath.split(':')[0]
+			playlist = data.playlistAll.find(p => p.playlistLocation === currentLocation)
+		}
 		if (!playlist) {
-			return undefined
+			return [undefined, -1]
 		}
 		const newItems = playlist.playlist.map(function (item) {
 			const isHeader = item.playlistItemType === 'playlistItemTypeHeader'

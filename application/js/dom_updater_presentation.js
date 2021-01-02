@@ -3,16 +3,16 @@
 const alignLeftCharactersThreshold = 80
 
 function PresentationDomUpdater() {
-    const presentationContainerElement = document.getElementById('presentationContainer')
-    const titleElement = presentationContainerElement.querySelector('#title')
-    const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
-    const scroller = Scroller(presentationContainerElement)
-    const slideElements = presentationContainerElement.getElementsByClassName('slide')
-    const groupElements = presentationContainerElement.getElementsByClassName('group')
+    const presentationContentElement = document.getElementById('presentationContent')
+    const titleElement = presentationContentElement.querySelector('#title')
+    const bottomSpacer = presentationContentElement.querySelector('#bottomSpacer')
+    const scroller = Scroller(presentationContentElement)
+    const slideElements = presentationContentElement.getElementsByClassName('slide')
+    const groupElements = presentationContentElement.getElementsByClassName('group')
 
     let onResizeTimout = undefined
     if (ResizeObserver) {
-        new ResizeObserver(onresize).observe(presentationContainerElement)
+        new ResizeObserver(onresize).observe(presentationContentElement)
     } else {
         window.onresize = onresize
     }
@@ -25,11 +25,12 @@ function PresentationDomUpdater() {
 
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
-            presentationContainer.style.opacity = 0
+            presentationContentElement.style.opacity = 0
             setTimeout(function () {
                 display()
-                presentationContainerElement.scrollTo(0, 0)
-                presentationContainer.style.opacity = 1
+                presentationContentElement.scrollTo(0, 0)
+                // TODO: do not change opacity of preview
+                presentationContentElement.style.opacity = 1
                 changeCurrentSlideAndScroll(slideIndex, true)
             }, 300)
         } else {
@@ -49,15 +50,18 @@ function PresentationDomUpdater() {
             // Insert new elements
             for (const group of presentation.groups) {
                 const groupElement = buildGroupElement(group)
-                presentationContainerElement.insertBefore(groupElement, bottomSpacer)
+                presentationContentElement.insertBefore(groupElement, bottomSpacer)
             }
 
-            // TODO: Also update this if new group inserted at index 0
-            // Hide the first group if it only contains empty slides
-            const firstGroupSlides = presentation.groups[0].slides
-            if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
-                groupElements[0].style.display = 'none'
+            if(presentation.groups.length > 0) {
+                // TODO: Also update this if new group inserted at index 0
+                // Hide the first group if it only contains empty slides
+                const firstGroupSlides = presentation.groups[0].slides
+                if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
+                    groupElements[0].style.display = 'none'
+                }
             }
+
             fixGroupNameElementPosition()
             fixSlidesTextSize()
         }
@@ -68,7 +72,7 @@ function PresentationDomUpdater() {
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
 
         const elementBefore = index < groupElements.length ? groupElements[index] : bottomSpacer
-        presentationContainerElement.insertBefore(groupElement, elementBefore)
+        presentationContentElement.insertBefore(groupElement, elementBefore)
 
         fixGroupNameElementPosition()
         fixSlidesTextSize()
@@ -91,7 +95,7 @@ function PresentationDomUpdater() {
     }
 
     function fixSlidesTextSize() {
-        let maxHeight = presentationContainerElement.clientHeight - 56
+        let maxHeight = presentationContentElement.clientHeight - 56
 
         for (const slideElement of slideElements) {
             slideElement.style.fontSize = '1em'
@@ -157,7 +161,7 @@ function PresentationDomUpdater() {
     }
 
     function getCurrentSlideIndex() {
-        const currentSlide = presentationContainerElement.querySelector('.currentSlide')
+        const currentSlide = presentationContentElement.querySelector('.currentSlide')
         return Array.prototype.indexOf.call(slideElements, currentSlide)
     }
 
@@ -166,7 +170,7 @@ function PresentationDomUpdater() {
             return
         }
 
-        const oldSlide = presentationContainerElement.querySelector('.currentSlide')
+        const oldSlide = presentationContentElement.querySelector('.currentSlide')
         const newSlide = slideElements[Math.min(slideIndex, slideElements.length -1)]
         const newSlideGroupIsNotDisplayed = newSlide && newSlide.parentElement.style.display === 'none'
 
@@ -198,39 +202,39 @@ function PresentationDomUpdater() {
             // Only empty groups that are not visible, do not scroll
             return
         }
-        const slide = presentationContainerElement.querySelector('.currentSlide')
+        const slide = presentationContentElement.querySelector('.currentSlide')
         if (!slide) {
             return
         }
 
-        const presentationContainerHeight = presentationContainerElement.clientHeight
+        const presentationContentElementHeight = presentationContentElement.clientHeight
         const isFirstSlideInGroup = slide.parentElement.querySelector('.slide') === slide
 
         let slideBoundingRect = slide.getBoundingClientRect()
 
         let deltaY = undefined
-        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerHeight * 0.9)) {
+        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContentElementHeight * 0.9)) {
             // Just a small offfset to make it look good
             const smallOffset = 8
             // Whole group is fits in screen or this is the first slide
             deltaY = slide.parentElement.getBoundingClientRect().top - smallOffset
         } else {
-            if (slide.offsetHeight < presentationContainerHeight * 0.8) {
-                deltaY = slideBoundingRect.top - presentationContainerHeight * 0.2
+            if (slide.offsetHeight < presentationContentElementHeight * 0.8) {
+                deltaY = slideBoundingRect.top - presentationContentElementHeight * 0.2
             } else {
                 deltaY = slideBoundingRect.top
             }
         }
 
         if (animate) {
-            if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerHeight) {
+            if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContentElementHeight) {
                 const duration = Math.abs(deltaY) * 2
                 scroller.scroll(0 | deltaY, duration)
             } else {
                 scroller.scroll(0 | deltaY, 200)
             }
         } else {
-            presentationContainerElement.scrollTop += deltaY
+            presentationContentElement.scrollTop += deltaY
         }
     }
 

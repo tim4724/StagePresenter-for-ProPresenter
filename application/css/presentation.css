@@ -106,8 +106,3 @@
 #bottomSpacer {
     height: 20%;
 }
-
-#message {
-    position: sticky;
-    bottom: 0;
-}
