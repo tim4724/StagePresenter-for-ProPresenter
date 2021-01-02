@@ -43,7 +43,9 @@ function PreviewDomUpdater() {
 	let nextUrl = undefined
 
 	tiffDecoderWorker.onmessage = function(e) {
-		const { url, objectURL } = e.data
+		const { url, blob } = e.data
+		console.log('image size', blob.size)
+		const objectURL = URL.createObjectURL(blob)
 		cache.add(url, objectURL || '')
 		if (url === currentUrl || url === nextUrl) {
 			showCurrentAndNext()
@@ -63,6 +65,7 @@ function PreviewDomUpdater() {
 					previewElement.src = nextObjectUrl || ''
 					previewElement.style.opacity = 1
 				} else {
+					// next is still loading
 					previewElement.style.opacity = 0
 				}
 			} else {
