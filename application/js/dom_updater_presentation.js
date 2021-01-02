@@ -1,6 +1,5 @@
 "use strict"
 
-const flexibleSlides = true
 const alignLeftCharactersThreshold = 80
 
 function PresentationDomUpdater() {
@@ -118,9 +117,7 @@ function PresentationDomUpdater() {
 
             const slideElement = document.createElement('div')
             slideElement.classList.add('slide')
-            if (flexibleSlides) {
-                slideElement.classList.add('flexibleSlide')
-            }
+
             if (slide.isBiblePassage) {
                 slideElement.classList.add('biblePassage')
             }

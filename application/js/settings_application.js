@@ -1,3 +1,5 @@
+"use strict"
+
 function ApplicationSettings() {
     let screen, app, ipcRenderer
     try {

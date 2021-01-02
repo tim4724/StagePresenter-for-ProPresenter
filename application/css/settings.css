@@ -80,27 +80,25 @@ main {
     float: right;
 }
 
+#stagemonitorSettingsContainer {
+    display: flex;
+    justify-content: space-between;
+}
+
+#stagemonitorSettings {
+    flex-grow: 1;
+    margin-right: 16px;
+}
+
+#previewIframe {
+    border: 0;
+    flex-grow: 1;
+}
+
 .disabled {
     opacity: 0.5;
 }
 
 input[type="text"], input[type="number"] {
     padding: 0.375em 0.75em;
-}
-
-#savedHint {
-    position: fixed;
-    top: 0;
-    right: 0;
-    background: #49bc49;
-    color: #ffffff;
-    border: 0.2em solid #ffffff;
-    border-radius: 0.25em;
-    padding: 0.5em;
-    margin: 1em;
-    transition: opacity 1s;
-}
-
-.invisible {
-    opacity: 0;
 }

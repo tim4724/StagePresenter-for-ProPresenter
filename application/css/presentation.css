@@ -60,7 +60,7 @@
     border-left: 8px solid;
     border-right: 8px solid;
     border-color: #000000;
-    padding: 2px 4px;
+    padding: 8px 4px;
     min-height: 1em;
 }
 
@@ -69,13 +69,15 @@
     margin-bottom: 0.125em;
 }
 
-.flexibleSlide {
-}
-
 .slide .line {
     /* Average space width is 0.25em http://jkorpela.fi/styles/spaces.html */
     margin-left: 0.125em;
     margin-right: 0.125em;
+    display: block;
+}
+
+.flexibleSlides .line {
+    display: inline-block;
 }
 
 .slide.biblePassage {

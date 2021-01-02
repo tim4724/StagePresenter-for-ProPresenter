@@ -51,7 +51,6 @@ function StageDisplaySlide(uid, text) {
 }
 
 function ProPresenterParser() {
-	const optimizeBiblePresentations = true
 	const onlyFirstTextInSlide = true
 
 	function parsePlaylistAndIndex(data, currentPresentationPath) {
@@ -92,7 +91,7 @@ function ProPresenterParser() {
 
 		let textBoxes = text.split('\r')
 
-		if (optimizeBiblePresentations) {
+		if (localStorage.improveBiblePassages !== 'false') {
 			let lines
 			if (onlyFirstTextInSlide) {
 				if (isBiblePassage) {
