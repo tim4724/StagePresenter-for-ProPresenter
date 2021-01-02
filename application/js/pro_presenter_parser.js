@@ -69,13 +69,20 @@ function ProPresenterParser() {
 	}
 
 	function parseSlide(text, label, color, assumeIsBiblePassage = false) {
+		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s(\d)+:(\d)+(-(\d)+)?(\s\(.+\))?$/
-		const isBiblePassage = label !== undefined
-			&& (assumeIsBiblePassage || bibleRegex.test(label))
+
+		const isBiblePassage = assumeIsBiblePassage || 
+			(label !== undefined && bibleRegex.test(label))
 
 		let bibleReferenceRegex
 		if (isBiblePassage) {
-			 bibleReferenceRegex = new RegExp(escapeRegExp(label) + '(\\s\\(.+\\))?$')
+			if (label === undefined) {
+				bibleReferenceRegex = bibleRegex
+			} else {
+				// Matches e.g. '<label>' or '<label> (LU17)'
+				bibleReferenceRegex = new RegExp(escapeRegExp(label) + '(\\s\\(.+\\))?$')
+			}
 		} else {
 			// Always false...
 			bibleReferenceRegex = /$.^/
@@ -96,22 +103,56 @@ function ProPresenterParser() {
 			if (onlyFirstTextInSlide) {
 				if (isBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
-					lines = removeBibleReference(textBoxes[0].split('\n'))
+					lines = removeBibleReference(textBoxes[0].trim().split('\n'))
 				} else {
-					lines = textBoxes[0].split('\n')
+					lines = textBoxes[0].trim().split('\n')
 				}
 			} else {
-				lines = textBoxes.join('\n').split('\n')
+				lines = textBoxes.join('\n').trim().split('\n')
 				if (isBiblePassage) {
 					lines = removeBibleReference(lines)
 				}
 			}
 
+			function fixNewLineOfBiblePassage(lines) {
+				// Foreach line, split line on a verse number
+				// Ugly but best we can do...
+				const verseNumberRegex = /\d+\w/g
+				let newLines = []
+
+				for (let i = 0; i < lines.length; i++) {
+					const line = lines[i]
+					let matches = [...line.matchAll(verseNumberRegex)]
+
+					let previousVerseNumber = undefined
+					let previousIndex = 0
+
+					for (let i = 0; i < matches.length; i++) {
+						const match = matches[i]
+						const verseNumber = parseInt(match[0].substr(0, match[0].length -1))
+						const index = match.index
+						if (!previousVerseNumber ||
+								previousVerseNumber + 1 === verseNumber ||
+								previousVerseNumber === verseNumber) {
+							if (index !== 0) {
+								newLines.push(line.substring(previousIndex, index))
+							}
+							previousIndex = index
+							previousVerseNumber = verseNumber
+						}
+					}
+					newLines.push(line.substring(previousIndex, line.length -1))
+				}
+
+				return newLines
+			}
+			lines = fixNewLineOfBiblePassage(lines)
+
 			let bibleVerseNumbers = undefined
 			let firstVerseNumber = undefined
 			let lastVerseNumber = undefined
 
-			const verseNumberRegex = /^\d+[^\s\d]/
+			const verseNumberRegex = /^\d+\w/
 			if (lines.some(l => verseNumberRegex.test(l))) {
 				bibleVerseNumbers = []
 				for (let i = 0; i < lines.length; i++) {
@@ -146,7 +187,7 @@ function ProPresenterParser() {
 			return Slide(lines, text, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
 			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
-			let lines = text.split('\n')
+			let lines = text.trim().split('\n')
 			return Slide(lines, text, label, color, isBiblePassage, undefined)
 		}
 	}

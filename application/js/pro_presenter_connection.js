@@ -300,14 +300,14 @@ function ProPresenter() {
 
         // Assume text is bible passage...
         // Because most of the time it will be a bible passage...
-        const currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text, '', undefined, true)
+        const currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text, undefined, undefined, true)
 
         let nextStageDisplaySlide
         if (ns && ns.uid === '00000000-0000-0000-0000-000000000000'
                 && undefinedToEmpty(ns.text).length === 0) {
             nextStageDisplaySlide = undefined
         } else {
-            nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text, '', undefined, true)
+            nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text, undefined, undefined, true)
         }
 
         // currentPresentationPath "stagedisplay" would mean, the current displayed texts
