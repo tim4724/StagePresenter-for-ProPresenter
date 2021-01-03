@@ -1,6 +1,6 @@
 #presentationContainer {
-    position: relative;
     overflow: hidden;
+    position: relative;
     transition: opacity 0.3s ease-in-out;
 }
 
