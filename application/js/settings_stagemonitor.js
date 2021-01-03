@@ -5,6 +5,7 @@ function StageMonitorSettings() {
     const previewIframe = document.getElementById('previewIframe')
     const flexibleSlides = document.getElementById('flexibleSlides')
     const showSidebar = document.getElementById('showSidebar')
+    const showClockRight = document.getElementById('showClockRight')
     const improveBiblePassages = document.getElementById('improveBiblePassages')
     let zoomValue = 1
 
@@ -52,6 +53,7 @@ function StageMonitorSettings() {
     function initInputs() {
         flexibleSlides.checked = localStorage.flexibleSlides !== 'false'
         showSidebar.checked = localStorage.showSidebar !== 'false'
+        showClockRight.checked = localStorage.showClockRight === 'true'
         improveBiblePassages.checked = localStorage.improveBiblePassages !== 'false'
     }
 
@@ -69,6 +71,10 @@ function StageMonitorSettings() {
 
     function showSidebarChanged() {
         localStorage.showSidebar = showSidebar.checked
+    }
+
+    function showClockRightChanged() {
+        localStorage.showClockRight = showClockRight.checked
     }
 
     function improveBiblePassagesChanged() {
@@ -98,6 +104,7 @@ function StageMonitorSettings() {
         zoomChanged: zoomInputChanged,
         improveBiblePassagesChanged: improveBiblePassagesChanged,
         showSidebarChanged: showSidebarChanged,
+        showClockRightChanged: showClockRightChanged,
         flexibleSlidesChanged: flexibleSlidesChanged
     }
 }
