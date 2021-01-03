@@ -4,6 +4,7 @@ function ErrorDomUpdater() {
 	const errorElement = document.getElementById('error')
 	const errorMessageElement = document.getElementById('errorMessage')
 	window.onerror = function (e) {
+		console.log(e)
 		const text = 'An error occurred\n' + e
 		errorElement.style.display = 'block'
 		errorMessageElement.innerText = text
@@ -16,7 +17,7 @@ function ErrorDomUpdater() {
 
 	function updateConnectionErrors(remoteWebsocketConnectionState,  stageWebSocketConnectionState) {
 		let errorMessages = []
-		
+
 		function checkState(connectionState, name) {
 			if (connectionState.error && connectionState.error.length > 0) {
 				errorMessages.push(name + ': ' + remoteWebsocketConnectionState.error)
@@ -26,7 +27,7 @@ function ErrorDomUpdater() {
 				errorMessages.push(name + ': Not Authenticated')
 			}
 		}
-		
+
 		checkState(remoteWebsocketConnectionState, 'Remote App Interface')
 		checkState(stageWebSocketConnectionState, 'Stage App Interface')
 		if (errorMessages.length > 0) {
@@ -36,7 +37,7 @@ function ErrorDomUpdater() {
 			errorElement.style.display = 'none'
 		}
 	}
-	
+
 	return {
 		updateConnectionErrors: updateConnectionErrors,
 	}

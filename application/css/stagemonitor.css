@@ -56,9 +56,15 @@ body:hover #settingsButton, body:hover #closeButton {
     display: flex;
 }
 
-#presentationContainer {
+main {
     height: 100%;
     flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+#presentationContainer {
+    height: 100%;
     padding: 0 8px;
 }
 
@@ -73,7 +79,7 @@ body:hover #settingsButton, body:hover #closeButton {
     border: 6px solid #cf008a;
     font-size: 5em;
     background: #ffffff;
-    padding: 0 8px;    
+    padding: 0 8px;
 }
 
 #previewContainer {
