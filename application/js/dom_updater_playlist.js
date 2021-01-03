@@ -7,7 +7,15 @@ function PlaylistDomUpdater() {
 	let containerCenterY = centerY(playlistContainerElement.getBoundingClientRect())
 
 	if (ResizeObserver) {
-		new ResizeObserver(onresize).observe(playlistContainerElement)
+		new ResizeObserver(entries => {
+		   // Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
+		   requestAnimationFrame(() => {
+			 if (!Array.isArray(entries) || !entries.length) {
+			   return;
+			 }
+			 onresize()
+		   });
+		}).observe(playlistContainerElement)
 	}
 
 	let onResizeTimout = undefined
