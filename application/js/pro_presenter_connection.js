@@ -13,7 +13,6 @@ let remoteWebSocket = undefined
 let stageWebSocket = undefined
 
 function ProPresenter() {
-    const layoutDomUpdater = LayoutDomUpdater()
     const proPresenterParser = ProPresenterParser()
     const errorDomUpdater = ErrorDomUpdater()
     const messageDomUpdater = MessageDomUpdater()

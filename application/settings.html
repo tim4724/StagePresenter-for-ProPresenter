@@ -110,22 +110,33 @@
 
                     <div class='setting'>
                         <span class='settingText'>
-                            Auto-Remove Linebreaks
+                            Show Sidebar
                         </span>
                         <label class='switch right'>
-                            <input id='flexibleSlides' type='checkbox'
-                                onchange='stagemonitorSettings.flexibleSlidesChanged()'>
+                            <input id='showSidebar' type='checkbox'
+                                onchange='stagemonitorSettings.showSidebarChanged()'>
                             <span class='slider'></span>
                         </label>
                     </div>
 
                     <div class='setting'>
                         <span class='settingText'>
-                            Show Sidebar
+                            Show Clock on the right
                         </span>
                         <label class='switch right'>
-                            <input id='showSidebar' type='checkbox'
-                                onchange='stagemonitorSettings.showSidebarChanged()'>
+                            <input id='showClockRight' type='checkbox'
+                                onchange='stagemonitorSettings.showClockRightChanged()'>
+                            <span class='slider'></span>
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Auto-Remove Linebreaks
+                        </span>
+                        <label class='switch right'>
+                            <input id='flexibleSlides' type='checkbox'
+                                onchange='stagemonitorSettings.flexibleSlidesChanged()'>
                             <span class='slider'></span>
                         </label>
                     </div>

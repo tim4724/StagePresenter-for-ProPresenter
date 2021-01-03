@@ -223,9 +223,8 @@ function PresentationDomUpdater() {
         let deltaY = undefined
         if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerElementHeight * 0.9)) {
             // Just a small offfset to make it look good
-            const smallOffset = 8
             // Whole group is fits in screen or this is the first slide
-            deltaY = slide.parentElement.getBoundingClientRect().top - smallOffset
+            deltaY = slide.parentElement.getBoundingClientRect().top
         } else {
             if (slide.offsetHeight < presentationContainerElementHeight * 0.8) {
                 deltaY = slideBoundingRect.top - presentationContainerElementHeight * 0.2
