@@ -52,8 +52,8 @@ function StageMonitorSettings() {
 
     function initInputs() {
         flexibleSlides.checked = localStorage.flexibleSlides !== 'false'
-        showSidebar.checked = localStorage.showSidebar !== 'false'
-        showClockRight.checked = localStorage.showClockRight === 'true'
+        showSidebar.checked = localStorage.showSidebar === 'true'
+        showClockRight.checked = localStorage.showClockRight !== 'false'
         improveBiblePassages.checked = localStorage.improveBiblePassages !== 'false'
     }
 

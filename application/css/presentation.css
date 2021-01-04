@@ -70,8 +70,8 @@
 
 .slide .line {
     /* Average space width is 0.25em http://jkorpela.fi/styles/spaces.html */
-    margin-left: 0.125em;
-    margin-right: 0.125em;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
     display: block;
 }
 
