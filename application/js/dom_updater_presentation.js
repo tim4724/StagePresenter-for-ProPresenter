@@ -11,9 +11,6 @@ function PresentationDomUpdater() {
     const groupElements = presentationContainerElement.getElementsByClassName('group')
     const clockElement = document.getElementById('clock')
 
-    const maxSlideHeight =
-        presentationContainerElement.clientHeight - 56 - clockElement.scrollHeight / 2
-
     let onResizeTimout = undefined
     if (ResizeObserver) {
         new ResizeObserver(entries => {
@@ -109,6 +106,9 @@ function PresentationDomUpdater() {
     }
 
     function fixSlidesTextSize() {
+        const maxSlideHeight = presentationContainerElement.clientHeight
+            - 56 - clockElement.scrollHeight / 2
+
         for (const slideElement of slideElements) {
             slideElement.style.fontSize = '1em'
             fontSizeReducer(slideElement, maxSlideHeight)
