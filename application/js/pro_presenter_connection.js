@@ -361,7 +361,7 @@ function ProPresenter() {
                     if (index === -1 && allPresentationSlides.length > 0 && nextStageDisplaySlide &&
                             nextStageDisplaySlide.rawText === allPresentationSlides[0].rawText) {
                         // currentStageDisplaySlide is not already displayed, insert group at index 0
-                        const newGroup = Group('', '', [currentStageDisplaySlide])
+                        const newGroup = Group(currentStageDisplaySlide.label, '', [currentStageDisplaySlide])
                         insertGroupToPresentation(newGroup, 0)
                         changeCurrentSlide(0, false, true)
                         return
@@ -371,7 +371,7 @@ function ProPresenter() {
                     if (index >= 0 && index === currentSlideIndex + 1 && index + 1 === allPresentationSlides.length) {
                         if (nextStageDisplaySlide) {
                             // nextStageDisplaySlide is not already on screen, therefore append a new group to presentation
-                            const newGroup = Group('', '', [nextStageDisplaySlide])
+                            const newGroup = Group(nextStageDisplaySlide.label, '', [nextStageDisplaySlide])
                             insertGroupToPresentation(newGroup, index + 1)
                         }
                         // Scroll to new slide
@@ -389,9 +389,9 @@ function ProPresenter() {
             }
 
             // Build a presentation to display
-            let groups = [Group('', '', [currentStageDisplaySlide])]
+            let groups = [Group(currentStageDisplaySlide.label, '', [currentStageDisplaySlide])]
             if (nextStageDisplaySlide) {
-                groups.push(Group('', '', [nextStageDisplaySlide]))
+                groups.push(Group(nextStageDisplaySlide.label, '', [nextStageDisplaySlide]))
             }
             // TODO: presentation has text?
             const presentation = Presentation(undefined, groups)
@@ -432,6 +432,7 @@ function ProPresenter() {
                 const nextItem = currentPlaylist.items[itemIndex + 1]
                 presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
             } else {
+                playlistDomUpdater.changeCurrentItemAndScroll(-1)
                 presentationDomUpdater.clearNextPresentationTitle()
             }
         }

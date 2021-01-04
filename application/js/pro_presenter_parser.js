@@ -66,7 +66,8 @@ function ProPresenterParser() {
 		}
 		const newItems = playlist.playlist.map(function (item) {
 			const isHeader = item.playlistItemType === 'playlistItemTypeHeader'
-			return PlaylistItem(item.playlistItemName, isHeader, item.playlistItemLocation)
+			const name = parsePresentationName(item.playlistItemName, true)
+			return PlaylistItem(name, isHeader, item.playlistItemLocation)
 		})
 		const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
 		const currentIndex = newItems.findIndex(item => item.location === currentPresentationPath)
@@ -75,7 +76,7 @@ function ProPresenterParser() {
 
 	function parseSlide(text, label, color, assumeIsBiblePassage = false) {
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
-		const bibleRegex = /.+\s(\d)+:(\d)+(-(\d)+)?(\s\(.+\))?$/
+		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
 		const isBiblePassage = assumeIsBiblePassage || 
 			(label !== undefined && bibleRegex.test(label))
@@ -93,7 +94,7 @@ function ProPresenterParser() {
 					bookAndChapter = bookAndChapter.substr(0, colonIndex)
 				}
 				bibleReferenceRegex = new RegExp(
-					escapeRegExp(bookAndChapter) + ':(\\d)+(-(\\d)+)?(\\s\\(.+\\))?$')
+					escapeRegExp(bookAndChapter) + ':\\d+(-\\d+)?(\\s\\(.+\\))?$')
 			}
 		} else {
 			// Always false...
@@ -101,9 +102,14 @@ function ProPresenterParser() {
 		}
 
 		function removeBibleReference(strings) {
-			const notBibleReference = s => !bibleReferenceRegex.test(s)
-			if (strings.length > 1 && strings.some(notBibleReference)) {
-				return strings.filter(notBibleReference)
+			if (strings.length > 1) {
+				const stringsWithoutBibleRef = strings.filter(s => !bibleReferenceRegex.test(s))
+				if (label === undefined) {
+					label = parseGroupName(strings.find(s => bibleReferenceRegex.test(s)))
+				}
+				if (stringsWithoutBibleRef.length > 0) {
+					return stringsWithoutBibleRef
+				}
 			}
 			return strings
 		}
@@ -129,31 +135,31 @@ function ProPresenterParser() {
 			function fixNewLineOfBiblePassage(lines) {
 				// Foreach line, split line on a verse number
 				// Ugly but best we can do...
-				const verseNumberRegex = /\d+\w/g
+				const verseRegex = /\s(\d+)\w/g
 				let newLines = []
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i]
-					let matches = [...line.matchAll(verseNumberRegex)]
+					let matches = [...line.matchAll(verseRegex)]
 
 					let previousVerseNumber = undefined
 					let previousIndex = 0
 
 					for (let i = 0; i < matches.length; i++) {
 						const match = matches[i]
-						const verseNumber = parseInt(match[0].substr(0, match[0].length -1))
+						const verseNumber = parseInt(match[1])
 						const index = match.index
 						if (!previousVerseNumber ||
 								previousVerseNumber + 1 === verseNumber ||
 								previousVerseNumber === verseNumber) {
 							if (index !== 0) {
-								newLines.push(line.substring(previousIndex, index))
+								newLines.push(line.substring(previousIndex, index).trim())
 							}
 							previousIndex = index
 							previousVerseNumber = verseNumber
 						}
 					}
-					newLines.push(line.substring(previousIndex, line.length))
+					newLines.push(line.substring(previousIndex, line.length).trim())
 				}
 
 				return newLines
@@ -164,18 +170,19 @@ function ProPresenterParser() {
 			let firstVerseNumber = undefined
 			let lastVerseNumber = undefined
 
-			const verseNumberRegex = /^\d+\w/
+			const verseNumberRegex = /^(\d+)(\w.*)/
 			if (lines.some(l => verseNumberRegex.test(l))) {
 				bibleVerseNumbers = []
 				for (let i = 0; i < lines.length; i++) {
-					if (verseNumberRegex.test(lines[i])) {
-						const verseNumber = lines[i].match(/^\d+/)[0]
-						lines[i] = lines[i].replace(/^\d+/, '')
+					const match = lines[i].match(verseNumberRegex)
+					if (match) {
+						const verseNumber = parseInt(match[1])
+						lines[i] = match[2]
 						if (firstVerseNumber === undefined) {
-							firstVerseNumber = verseNumber
+							firstVerseNumber = verseNumber - (i > 0 ? 1 : 0)
 						}
 						lastVerseNumber = verseNumber
-						bibleVerseNumbers.push(verseNumber)
+						bibleVerseNumbers.push('' + verseNumber)
 					} else {
 						bibleVerseNumbers.push('')
 					}
@@ -183,11 +190,11 @@ function ProPresenterParser() {
 			}
 
 			// Fix slidelabel to show wich verses are actually in slide
-			if (firstVerseNumber && /.+\s(\d)+:/.test(label)) {
-				const parts = label.match(/.+\s(\d)+:(\d)+(-(\d)+)?(\s\(.+\))$/)
-				const translation = parts ? parts[5] : undefined
+			if (firstVerseNumber && /.+\s\d+:/.test(label)) {
+				const parts = label.match(/.+\s\d+:\d+(-\d+)?(\s\(.+\))$/)
+				const translation = parts ? parts[2] : undefined
 
-				const bookAndChapter = label.match(/.+\s(\d)+:/)[0]
+				const bookAndChapter = label.match(/.+\s\d+:/)[0]
 				label = bookAndChapter + firstVerseNumber
 				if (lastVerseNumber && lastVerseNumber != firstVerseNumber) {
 					label += '-' + lastVerseNumber
@@ -210,11 +217,7 @@ function ProPresenterParser() {
 		}
 
 		const presentation = data.presentation
-		let presentationName = presentation.presentationName
-		// TODO: Shorten presentation name of bible presentations
-		if (!presentationName) {
-			presentationName = 'Presentation'
-		}
+		const presentationName = parsePresentationName(presentation.presentationName)
 
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
@@ -233,7 +236,7 @@ function ProPresenterParser() {
 					const name = newSlide.label
 					const groupColor = newSlide.color
 					newGroups.push(Group(
-						name, groupColor, [newSlide]))
+						parseGroupName(groupName), groupColor, [newSlide]))
 				} else {
 					newSlides.push(newSlide)
 				}
@@ -241,11 +244,51 @@ function ProPresenterParser() {
 
 			if (!splitSlidesInGroups) {
 				const groupColor = asCSSColor(group.groupColor)
-				newGroups.push(Group(
-					groupName, groupColor, newSlides))
+				newGroups.push(Group(parseGroupName(groupName), groupColor, newSlides))
 			}
 		}
+
 		return Presentation(presentationName, newGroups)
+	}
+
+	function parsePresentationName(presentationName, shorterBibleName) {
+		if (!presentationName) {
+			return 'Presentation'
+		}
+		presentationName = presentationName.trim().normalize()
+		const biblePresentationNameRegex = /^((\d+).?\s?)?(.+)\s(\d+)_(\d+(-\d+)?(\s\(.+\))?)$/
+		const match = presentationName.match(biblePresentationNameRegex)
+		if (match) {
+			// Römer 8_12-15 -> Römer 8:12-15
+			let bookName = ''
+			if (match[2]) {
+				bookName = match[2] + '. '
+			}
+			if(shorterBibleName) {
+				// Römer 8_12-15 -> Röm 8:12-15
+				bookName += match[3].substring(0, 3)
+			} else {
+				bookName += match[3]
+			}
+			return bookName + ' ' + match[4] + ':' + match[5]
+		}
+		return presentationName
+	}
+
+	function parseGroupName(groupName) {
+		groupName = (groupName || '').trim().normalize()
+		const bibleGroupNameRegex = /^((\d+).?\s?)?(.+)\s(\d+):(\d+(-\d+)?(\s\(.+\))?)$/u
+		const match = groupName.match(bibleGroupNameRegex)
+		if (match) {
+			// 1 John 1:1 -> 1. John 1:1
+			let bookName = ''
+			if (match[2]) {
+				bookName = match[2] + '. '
+			}
+			bookName += match[3]
+			return bookName + ' ' + match[4] + ':' + match[5]
+		}
+		return groupName
 	}
 
 	function parseStageDisplayCurrentAndNext(data) {
