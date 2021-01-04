@@ -1,7 +1,7 @@
 #presentationContainer {
     overflow: hidden;
-    position: relative;
     transition: opacity 0.3s ease-in-out;
+    position: relative;
 }
 
 @keyframes fadeInAnimation {
@@ -29,6 +29,7 @@
     border-color: #ffde3b;
     font-size: 5em;
     animation: fadeInAnimation 1s normal forwards;
+    background: #000000;
 }
 
 .groupName {
@@ -103,6 +104,20 @@
     background: #111111;
 }
 
-#bottomSpacer {
-    height: 20%;
+.group:last-of-type{
+    margin-bottom: 3em;
+}
+
+#nextUpContainer {
+    display: inline-block;
+    position: fixed;
+    bottom: 4px;
+    right: 16px;
+    z-index: -1;
+    text-align: left;
+    font-size: 3.5em;
+    color: #994a00;
+}
+
+#nextUp {
 }

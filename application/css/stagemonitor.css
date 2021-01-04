@@ -108,10 +108,10 @@ main {
 #largePreview {
     display: block;
     position: absolute;
-    top: 6em;
-    margin: auto;
+    top: 0;
+    margin: 6em 6em auto auto;
     width: 100%;
-    max-height: calc(100% - 6em);
+    max-height: calc(100% - 12em);
     object-fit: contain;
 }
 
@@ -127,7 +127,7 @@ main {
 #clock {
     font-size: 5em;
     position: absolute;
-    right: 0;
+    left: 0;
     margin: 0;
     bottom: 0;
 }

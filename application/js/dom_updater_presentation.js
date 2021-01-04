@@ -6,10 +6,10 @@ function PresentationDomUpdater() {
     const presentationContainerElement = document.getElementById('presentationContainer')
     const scroller = Scroller(presentationContainerElement)
     const titleElement = presentationContainerElement.querySelector('#title')
-    const bottomSpacer = presentationContainerElement.querySelector('#bottomSpacer')
+    const nextUpContainerElement = presentationContainerElement.querySelector('#nextUpContainer')
+    const nextUpElement = presentationContainerElement.querySelector('#nextUp')
     const slideElements = presentationContainerElement.getElementsByClassName('slide')
     const groupElements = presentationContainerElement.getElementsByClassName('group')
-    const clockElement = document.getElementById('clock')
 
     let onResizeTimout = undefined
     if (ResizeObserver) {
@@ -61,7 +61,7 @@ function PresentationDomUpdater() {
             // Insert new elements
             for (const group of presentation.groups) {
                 const groupElement = buildGroupElement(group)
-                presentationContainerElement.insertBefore(groupElement, bottomSpacer)
+                presentationContainerElement.insertBefore(groupElement, nextUpContainerElement)
             }
 
             if(presentation.groups.length > 0) {
@@ -78,11 +78,20 @@ function PresentationDomUpdater() {
         }
     }
 
+    function setNextPresentationTitle(nextTitle) {
+        if(nextTitle && nextTitle.length > 0) {
+            nextUpElement.innerText = nextTitle
+        } else {
+            nextUpElement.innerText = ''
+            nextUpContainerElement.style.display = 'none'
+        }
+    }
+
     function insertGroupToPresentation(group, index = 0) {
         const groupElement = buildGroupElement(group)
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
 
-        const elementBefore = index < groupElements.length ? groupElements[index] : bottomSpacer
+        const elementBefore = index < groupElements.length ? groupElements[index] : nextUpContainerElement
         presentationContainerElement.insertBefore(groupElement, elementBefore)
 
         fixGroupNameElementPosition()
@@ -107,7 +116,7 @@ function PresentationDomUpdater() {
 
     function fixSlidesTextSize() {
         const maxSlideHeight = presentationContainerElement.clientHeight
-            - 56 - clockElement.scrollHeight / 2
+            - 128
 
         for (const slideElement of slideElements) {
             slideElement.style.fontSize = '1em'
@@ -178,12 +187,16 @@ function PresentationDomUpdater() {
 
     function changeCurrentSlideAndScroll(slideIndex, animate = true) {
         if (!slideElements || slideElements.length === 0) {
+            if (nextUpElement.innerText.length > 0) {
+                nextUpContainerElement.style.display = 'inline-block'
+            }
             return
         }
 
         const oldSlide = presentationContainerElement.querySelector('.currentSlide')
         const newSlide = slideElements[Math.min(slideIndex, slideElements.length -1)]
-        const newSlideGroupIsNotDisplayed = newSlide && newSlide.parentElement.style.display === 'none'
+        const newGroup = newSlide ? newSlide.parentElement : undefined
+        const newSlideGroupIsNotDisplayed = newGroup && newGroup.style.display === 'none'
 
         if (oldSlide) {
             oldSlide.parentNode.classList.remove('currentGroup')
@@ -198,13 +211,22 @@ function PresentationDomUpdater() {
         if (newSlide && !newSlideGroupIsNotDisplayed) {
             newSlide.classList.add('currentSlide')
             newSlide.parentElement.classList.add('currentGroup')
-            scrollToCurrentSlide(animate)
 
-            // Yes sometimes it just does not scroll...
-            // Try again
-            setTimeout(function () {
-                scrollToCurrentSlide(animate)
-            }, 32)
+            scrollToCurrentSlide(animate)
+        }
+
+        if (nextUpElement.innerText.length > 0) {
+            const slide = newSlide ? newSlide : oldSlide
+            const lastSlide = slideElements[slideElements.length - 1]
+            const isLastSlide = slide === lastSlide
+
+            const lastGroup = groupElements[groupElements.length -1]
+            const isLastGroupAndNotEmpty = slide && lastGroup === slide.parentElement &&
+                !lastGroup.classList.contains('emptyGroup')
+            const showNextUp = isLastSlide || isLastGroupAndNotEmpty
+            nextUpContainerElement.style.display = showNextUp ? 'inline-block' : 'none'
+        } else {
+            nextUpContainerElement.style.display = 'none'
         }
     }
 
@@ -239,34 +261,19 @@ function PresentationDomUpdater() {
         if (animate) {
             if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerElementHeight) {
                 const duration = Math.abs(deltaY) * 2
-                scroller.scroll(0 | deltaY, duration, fixClockOverlap)
+                scroller.scroll(0 | deltaY, duration)
             } else {
-                scroller.scroll(0 | deltaY, 200, fixClockOverlap)
+                scroller.scroll(0 | deltaY, 200)
             }
         } else {
             presentationContainerElement.scrollTop += deltaY
-            fixClockOverlap()
-        }
-    }
-
-    function fixClockOverlap() {
-        const slide = presentationContainerElement.querySelector('.currentSlide')
-        if (!slide) {
-            return ;
-        }
-
-        const slideBoundingRect = slide.getBoundingClientRect()
-        clockElement.style.zoom = 1
-        const clockBoundingRect = clockElement.getBoundingClientRect()
-        if (doOverlap(slideBoundingRect, clockBoundingRect)) {
-            clockElement.style.zoom = 0.85
-        } else {
-            clockElement.style.zoom = 1
         }
     }
 
     return {
         displayPresentation: displayPresentation,
+        setNextPresentationTitle: setNextPresentationTitle,
+        clearNextPresentationTitle: () => setNextPresentationTitle(undefined),
         insertGroupToPresentation: insertGroupToPresentation,
         changeCurrentSlideAndScroll: changeCurrentSlideAndScroll
     }
