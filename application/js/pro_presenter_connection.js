@@ -39,6 +39,17 @@ function ProPresenter() {
     let currentSlideUid = undefined
     let displaySlideFromStageDisplayTimeout = undefined
 
+    const Actions = {
+        playlistRequestAll: JSON.stringify({action: 'playlistRequestAll'}),
+        authenticate: (p) => JSON.stringify({action: 'authenticate', protocol: '700', password: p}),
+        ath: (p) => JSON.stringify({ acn: 'ath', pwd: p, ptl: 610 }),
+        presentationRequest: (path) => JSON.stringify({
+            action: 'presentationRequest',
+            presentationPath: path,
+            presentationSlideQuality: 0
+        })
+    }
+
     function connect() {
         window.onbeforeunload = function () {
             if (remoteWebSocket) {
@@ -56,13 +67,9 @@ function ProPresenter() {
             remoteWebSocket.onopen = function () {
                 remoteWebsocketConnectionState.isConnected = true
 
-                const authenticateAction = {
-                    action: 'authenticate',
-                    protocol: '700',
-                    password: localStorage.remoteAppPass || 'observer'
-                }
+                const password = localStorage.remoteAppPass || 'observer'
                 // Authenticating is not necessary apparently, but do it anyway :)
-                remoteWebSocket.send(JSON.stringify(authenticateAction))
+                remoteWebSocket.send(Actions.authenticate(password))
 
                 // In case authenticate is not successful
                 setTimeout(function() {
@@ -83,7 +90,7 @@ function ProPresenter() {
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
 
-                remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
+                remoteWebSocket.send(Actions.playlistRequestAll)
             }
             remoteWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -106,12 +113,14 @@ function ProPresenter() {
                         } else if (!undefinedToEmpty(currentPresentationPath).startsWith(currentPlaylist.location)) {
                             const itemIndex = currentPlaylist.items.findIndex(item => item.location === currentPresentationPath)
                             playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
+                            const nextItem = currentPlaylist.items[itemIndex + 1]
+                            presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
                         }
                         break
                     case 'presentationCurrent':
                     case 'presentationRequest':
                         onNewPresentation(data)
-                        remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
+                        remoteWebSocket.send(Actions.playlistRequestAll)
                         break
                     case 'presentationTriggerIndex':
                         // Slide was clicked in pro presenter...
@@ -121,13 +130,7 @@ function ProPresenter() {
                         // Instead of requesting current presentation,
                         // we request a specific presentation using the presentationPath
                         // Because we can set presentationSlideQuality
-
-                        // TODO: reload without images, then reload with images?
-                        remoteWebSocket.send(JSON.stringify({
-                            action: 'presentationRequest',
-                            presentationPath: data['presentationPath'],
-                            presentationSlideQuality: 0
-                        }))
+                        remoteWebSocket.send(Actions.presentationRequest(data['presentationPath']))
                         break
                     case 'presentationSlideIndex':
                         // This action only will be received, when queried first, which does not happen at the moment.
@@ -164,9 +167,8 @@ function ProPresenter() {
             stageWebSocket.onopen = function () {
                 stageWebsocketConnectionState.isConnected = true
 
-                const pwd = localStorage.stageAppPass || 'stage'
-                const authenticateAction = { acn: 'ath', pwd: pwd, ptl: 610 }
-                stageWebSocket.send(JSON.stringify(authenticateAction))
+                const password = localStorage.stageAppPass || 'stage'
+                stageWebSocket.send(Actions.ath(password))
 
                 setTimeout(function() {
                     if (!stageWebsocketConnectionState.isAuthenticated) {
@@ -237,11 +239,6 @@ function ProPresenter() {
 
         connectToStageWebSocket()
         connectToRemoteWebsocket()
-        setInterval(() => {
-            if (remoteWebSocket && remoteWebSocket.readyState === WebSocket.OPEN){
-                remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
-            }
-        }, 2000)
     }
 
     function updateConnectionErrors() {
@@ -250,6 +247,7 @@ function ProPresenter() {
 
     function onNewPlaylistAll(data) {
         const [playlist, index] = proPresenterParser.parsePlaylistAndIndex(data, currentPresentationPath)
+        currentPlaylist = playlist
         if (playlist) {
             playlistDomUpdater.displayPlaylist(playlist, index)
             const nextItem = playlist.items[index + 1]
@@ -258,7 +256,6 @@ function ProPresenter() {
             playlistDomUpdater.clear()
             presentationDomUpdater.clearNextPresentationTitle()
         }
-        currentPlaylist = playlist
     }
 
     function onNewSlideIndex(data) {

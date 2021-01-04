@@ -35,6 +35,7 @@ function PresentationDomUpdater() {
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
             presentationContainerElement.style.opacity = 0
+            nextUpContainerElement.style.display = 'none'
             setTimeout(() => {
                 display()
                 presentationContainerElement.style.opacity = 1
@@ -44,6 +45,7 @@ function PresentationDomUpdater() {
                 }, 150)
             }, 300)
         } else {
+            nextUpContainerElement.style.display = 'none'
             display()
             presentationContainerElement.scrollTop = 0
             changeCurrentSlideAndScroll(slideIndex, false)
