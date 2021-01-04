@@ -35,24 +35,32 @@ function renderPreviewImage(text, width, height) {
 	const context = canvas.getContext('2d')
 
 	context.rect(0, 0, width, height)
-	context.fillStyle = "#212121"
+	context.fillStyle = "#111111"
 	context.fill()
-
-	if (text) {
-		context.fillStyle = "#69c0ff"
+	if (text && text.length > 0) {
+		if (text.length > 26) {
+			text = text.substr(0, 24) + '...'
+		}
 		const fontArgs = context.font.split(' ')
-		context.font = width / 16 + 'px ' + fontArgs[1]
-		context.fillText(text, width / 32, height / 2)
+
+		context.fillStyle = "#ffffff"
+		context.textAlign = "center"
+		context.font = width / 8 + 'px ' + fontArgs[1]
+		context.fillText('Media', width / 2, height / 3)
+
+		context.fillStyle = "#69c0ff"
+		context.textAlign = "center"
+		context.font = width / 14 + 'px ' + fontArgs[1]
+		context.fillText(text, width / 2, height * 2 / 3)
 	}
 
-	return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 })
+	return canvas.convertToBlob({ type: "image/jpeg", quality: 0.9 })
 }
 
 function PreviewDomUpdater() {
 	const previewElement = document.getElementById('preview')
 	const largePreviewElement = document.getElementById('largePreview')
 	const tiffDecoderWorker = new Worker('js/tiff_decoder_worker.js')
-	// const videoTimer = document.getElementById('videoTimer')
 	const cache = Cache()
 	let currentUrlNotLoaded = false
 
@@ -89,7 +97,7 @@ function PreviewDomUpdater() {
 					previewElement.style.opacity = 1
 				} else {
 					// next is still loading
-					previewElement.style.opacity = 0
+					previewElement.src = cache.get('')
 				}
 			} else {
 				previewElement.src = currentObjectUrl
@@ -97,7 +105,8 @@ function PreviewDomUpdater() {
 			}
 		} else {
 			// Still loading...
-			previewElement.style.opacity = 0
+			previewElement.src = cache.get('')
+			// previewElement.style.opacity = 0
 			largePreviewElement.style.opacity = 0
 		}
 	}
@@ -134,8 +143,9 @@ function PreviewDomUpdater() {
 		if (cache.get(currentUrl)) {
 			showCurrentAndNext()
 		} else {
-			const width = previewElement.width * 4
-			const height = previewElement.height * 4
+			// TODO: ratio from preview width/heigt
+			const width = 1920
+			const height = 1080
 			renderPreviewImage(text, width, height).then((blob) => {
 				onBlobLoaded(text, blob)
 			})
@@ -161,6 +171,7 @@ function PreviewDomUpdater() {
 			showCurrentAndNext()
 		}
 	}
+	clearPreview('')
 
 	return {
 		changePreview: changePreview,

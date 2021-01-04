@@ -22,10 +22,10 @@ function LayoutDomUpdater() {
 		const flexibleSlides = localStorage.flexibleSlides !== 'false'
 		setFeature('flexibleSlides', flexibleSlides)
 
-		const showSidebar = localStorage.showSidebar !== 'false'
+		const showSidebar = localStorage.showSidebar === 'true'
 		setFeature('showSidebar', showSidebar)
 
-		const showClockRight = localStorage.showClockRight === 'true'
+		const showClockRight = localStorage.showClockRight !== 'false'
 
 		const sidebar = document.getElementById('sidebar')
 		const clockInSidebar = sidebar.querySelector('#clock')

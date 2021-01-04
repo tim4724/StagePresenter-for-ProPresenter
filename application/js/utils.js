@@ -37,10 +37,14 @@ function fontSizeReducer(element, maxHeight) {
     }
 }
 
+function doOverlap(a, b) {
+  return !(a.left > b.right || a.right < b.left || a.top > b.bottom || a.bottom < b.top)
+}
+
 function Scroller(container) {
     let scrollCounter = 0
 
-    function scroll(deltaY, duration) {
+    function scroll(deltaY, duration, doneCallback) {
         deltaY = 0 | deltaY
         if (deltaY === 0) {
             return
@@ -76,14 +80,17 @@ function Scroller(container) {
                 requestAnimationFrame(animateScroll)
             } else {
                 container.scrollTop = startY + deltaY
+                if (doneCallback) {
+                    doneCallback()
+                }
             }
         }
         animateScroll();
 
     }
 
-    function scrollTo(to, duration) {
-        scroll(to - container.scrollTop, duration)
+    function scrollTo(to, duration, doneCallback) {
+        scroll(to - container.scrollTop, duration, doneCallback)
     }
 
     return {

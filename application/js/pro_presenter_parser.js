@@ -221,6 +221,7 @@ function ProPresenterParser() {
 					asCSSColor(slide.slideColor)
 				)
 
+				// TODO: only if groupname is not defined
 				if (presentation.presentationSlideGroups.length === 1) {
 					const name = newSlide.label
 					const groupColor = newSlide.color
