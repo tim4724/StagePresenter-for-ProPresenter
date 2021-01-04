@@ -86,7 +86,14 @@ function ProPresenterParser() {
 				bibleReferenceRegex = bibleRegex
 			} else {
 				// Matches e.g. '<label>' or '<label> (LU17)'
-				bibleReferenceRegex = new RegExp(escapeRegExp(label) + '(\\s\\(.+\\))?$')
+				let bookAndChapter = label
+				// Book and chapter is always correct
+				const colonIndex = bookAndChapter.indexOf(':')
+				if (colonIndex > 0) {
+					bookAndChapter = bookAndChapter.substr(0, colonIndex)
+				}
+				bibleReferenceRegex = new RegExp(
+					escapeRegExp(bookAndChapter) + ':(\\d)+(-(\\d)+)?(\\s\\(.+\\))?$')
 			}
 		} else {
 			// Always false...
@@ -211,7 +218,8 @@ function ProPresenterParser() {
 
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
-			const groupName = group.groupName
+			const groupName = group.groupName || ''
+			const splitSlidesInGroups = presentation.presentationSlideGroups.length === 1 && groupName.length === 0
 
 			let newSlides = []
 			for (const slide of group.groupSlides) {
@@ -221,8 +229,7 @@ function ProPresenterParser() {
 					asCSSColor(slide.slideColor)
 				)
 
-				// TODO: only if groupname is not defined
-				if (presentation.presentationSlideGroups.length === 1) {
+				if (splitSlidesInGroups) {
 					const name = newSlide.label
 					const groupColor = newSlide.color
 					newGroups.push(Group(
@@ -232,7 +239,7 @@ function ProPresenterParser() {
 				}
 			}
 
-			if (presentation.presentationSlideGroups.length !== 1) {
+			if (!splitSlidesInGroups) {
 				const groupColor = asCSSColor(group.groupColor)
 				newGroups.push(Group(
 					groupName, groupColor, newSlides))

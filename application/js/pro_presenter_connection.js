@@ -104,8 +104,8 @@ function ProPresenter() {
                             currentPlaylistDataCache = ev.data
                             onNewPlaylistAll(data)
                         } else if (!undefinedToEmpty(currentPresentationPath).startsWith(currentPlaylist.location)) {
-                            // TODO: only scroll to current
-                            onNewPlaylistAll(data)
+                            const itemIndex = currentPlaylist.items.findIndex(item => item.location === currentPresentationPath)
+                            playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
                         }
                         break
                     case 'presentationCurrent':
@@ -237,6 +237,11 @@ function ProPresenter() {
 
         connectToStageWebSocket()
         connectToRemoteWebsocket()
+        setInterval(() => {
+            if (remoteWebSocket && remoteWebSocket.readyState === WebSocket.OPEN){
+                remoteWebSocket.send(JSON.stringify({action: 'playlistRequestAll'}))
+            }
+        }, 2000)
     }
 
     function updateConnectionErrors() {
@@ -247,8 +252,11 @@ function ProPresenter() {
         const [playlist, index] = proPresenterParser.parsePlaylistAndIndex(data, currentPresentationPath)
         if (playlist) {
             playlistDomUpdater.displayPlaylist(playlist, index)
+            const nextItem = playlist.items[index + 1]
+            presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
         } else {
             playlistDomUpdater.clear()
+            presentationDomUpdater.clearNextPresentationTitle()
         }
         currentPlaylist = playlist
     }
@@ -415,6 +423,11 @@ function ProPresenter() {
             if (currentPlaylist && currentPlaylist.items && newPresentationPath.startsWith(currentPlaylist.location)) {
                 const itemIndex = currentPlaylist.items.findIndex(item => item.location === currentPresentationPath)
                 playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
+
+                const nextItem = currentPlaylist.items[itemIndex + 1]
+                presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
+            } else {
+                presentationDomUpdater.clearNextPresentationTitle()
             }
         }
         currentSlideIndex = newSlideIndex

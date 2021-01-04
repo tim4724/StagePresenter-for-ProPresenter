@@ -25,14 +25,12 @@ function LayoutDomUpdater() {
 		const showSidebar = localStorage.showSidebar === 'true'
 		setFeature('showSidebar', showSidebar)
 
-		const showClockRight = localStorage.showClockRight !== 'false'
-
 		const sidebar = document.getElementById('sidebar')
 		const clockInSidebar = sidebar.querySelector('#clock')
-		if (showClockRight && clockInSidebar) {
+		if (!showSidebar && clockInSidebar) {
 			clockInSidebar.remove()
 			document.body.appendChild(clockInSidebar)
-		} else if (!showClockRight && !clockInSidebar) {
+		} else if (showSidebar && !clockInSidebar) {
 			const clock = document.getElementById('clock')
 			clock.remove()
 			sidebar.insertBefore(clock, sidebar.children[0]);
