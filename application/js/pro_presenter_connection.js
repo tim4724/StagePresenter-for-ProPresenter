@@ -274,20 +274,28 @@ function ProPresenter() {
 
     function onAudioTriggered(data) {
         const name = data.audioName
-        previewDomUpdater.clearPreview(name)
 
         const itemIndex = currentPlaylist.items.findIndex(item => item.text === name)
         if (itemIndex > 0) {
+            previewDomUpdater.clearPreview(name)
             const newPresentation = Presentation(name, [])
             const newPresentationPath = currentPlaylist.items[itemIndex].location
-            changePresentation(newPresentation, newPresentationPath, -1, true, true)
+            changePresentation(newPresentation, newPresentationPath, -1, true, false)
+        } else if (!currentPresentation.hasText()) {
+            previewDomUpdater.clearPreview(name)
+            const newPresentation = Presentation(name, [])
+            const newPresentationPath = '-1:-1'
+            changePresentation(newPresentation, newPresentationPath, -1, true, false)
+        } else {
+            // Do nothing
         }
     }
 
     function onNewPresentation(data) {
         const newPresentationPath = data.presentationPath
         const newPresentation = proPresenterParser.parsePresentation(data)
-        changePresentation(newPresentation, newPresentationPath, currentSlideIndex, currentSlideCleared, true)
+        const animate = newPresentation.hasText() || (currentPresentation !== undefined && currentPresentation.hasText())
+        changePresentation(newPresentation, newPresentationPath, currentSlideIndex, currentSlideCleared, animate)
     }
 
     function onNewStageDisplayFrameValue(data) {
