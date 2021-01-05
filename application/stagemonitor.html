@@ -5,7 +5,7 @@
     <meta charset='utf-8'>
 
     <script src='js/utils.js'></script>
-    <script src='js/dom_updater_layout.js'></script>
+    <script src='js/observer_local_storage.js'></script>
     <script src='js/dom_updater_error.js'></script>
     <script src='js/dom_updater_playlist.js'></script>
     <script src='js/dom_updater_timer.js'></script>
@@ -22,7 +22,7 @@
     <title>Stage Monitor</title>
 </head>
 
-<body onload='LayoutDomUpdater(); proPresenter = ProPresenter(); proPresenter.connect();'
+<body onload='LocalStorageObserver(); proPresenter = ProPresenter(); proPresenter.connect();'
       class="showSidebarBottom showPlaylist showPreview">
     <button id='settingsButton' onclick='window.open("settings.html", "popup")'>
         Settings
@@ -39,12 +39,9 @@
 
         <img id='preview' src='black16x9.png' alt='Failed to load image'/>
 
-        <div id='timerContainer'>
+        <div id='timerContainer'></div>
 
-        </div>
-
-        <span class="spacer">
-        </span>
+        <span class="spacer"></span>
 
         <span id='clock' class='timer'>
             <span id='clockHoursMinutes'>00:00</span><span id='clockSeconds'>00</span>

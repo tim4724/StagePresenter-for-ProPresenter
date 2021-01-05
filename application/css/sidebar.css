@@ -37,17 +37,13 @@
     height: 100%;
 }
 
-#sidebar > * {
+.showSidebarLeft #sidebar > * {
     margin-top: 6px;
     margin-bottom: 6px;
-    margin-left: 0;
-    margin-right: 0;
     width: 100%;
 }
 
 .showSidebarBottom #sidebar > * {
-    margin-top: 0;
-    margin-bottom: 0;
     margin-left: 6px;
     margin-right: 6px;
     width: initial;
@@ -59,7 +55,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     margin-top: 0;
 }
 
-.showSidebarBottom #sidebar > #clock {
+.showSidebarBottom #sidebar > #clock, .showSidebarLeft #sidebar > #clock {
     margin-right: 0;
     margin-bottom: 0;
 }
@@ -156,8 +152,24 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     width: 100%;
 }
 
-#timerContainer .timer:first-of-type {
+.showSidebarLeft #timerContainer .timer:first-of-type {
+    margin-top: 0;
+}
+
+.showSidebarBottom #timerContainer .timer:first-of-type {
     margin-left: 0;
+}
+
+.showSidebarBottom #timerContainer .timer:last-of-type {
+    margin-right: 0;
+}
+
+.showSidebarLeft #timerContainer .timer:last-of-type {
+    margin-bottom: 0;
+}
+
+#timerContainer:empty {
+    display: none;
 }
 
 #sidebar .spacer {

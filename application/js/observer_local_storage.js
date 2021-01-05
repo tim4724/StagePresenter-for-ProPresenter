@@ -1,18 +1,12 @@
 "use strict"
 
-function LayoutDomUpdater() {
-	let updateTimout = undefined
-	function callUpdateAfterTimout() {
-		clearTimeout(updateTimout)
-		updateTimout = setTimeout(update, 500)
-	}
+function LocalStorageObserver() {
 	if (window.addEventListener) {
-		window.addEventListener("storage", callUpdateAfterTimout, false)
+		window.addEventListener("storage", update, false)
 	} else {
-		window.attachEvent("onstorage", callUpdateAfterTimout)
+		window.attachEvent("onstorage", update)
 	}
 
-	const body = document.body
 	const sidebarContainerElement = document.getElementById('sidebar')
 	const nextUpContainerElement = document.getElementById('nextUpContainer')
 	const clockElement = document.getElementById('clock')
@@ -21,6 +15,8 @@ function LayoutDomUpdater() {
 		localStorage.alignLeftCharactersThreshold = 60
 	}
 	let alignLeftCharactersThreshold = localStorage.alignLeftCharactersThreshold
+	let oldFeatures = []
+	let reloadPresentationTimeout = undefined
 
 	function update() {
 		if (localStorage.features === undefined) {
@@ -30,8 +26,8 @@ function LayoutDomUpdater() {
 			localStorage.sidebarMaxSize = 150
 		}
 
-		const oldFeatures = body.className.split(' ')
-		body.className = localStorage.features
+		const oldFeatures = document.body.className.split(' ')
+		document.body.className = localStorage.features
 		const features = localStorage.features.split(' ')
 
 		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
@@ -54,12 +50,22 @@ function LayoutDomUpdater() {
 			}
 		}
 
+		clearTimeout(reloadPresentationTimeout)
+		reloadPresentationTimeout = setTimeout(reloadPresentationIfNecessary, 500)
+	}
+
+	function reloadPresentationIfNecessary() {
+		const features = localStorage.features.split(' ')
+
 		const parsingFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages']
 		if (parsingFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold) {
 			proPresenter.reloadCurrentPresentation()
 		}
+
 		alignLeftCharactersThreshold = localStorage.alignLeftCharactersThreshold
+		oldFeatures = document.body.className.split(' ')
 	}
+
 	requestAnimationFrame(update)
 }
