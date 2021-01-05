@@ -20,8 +20,10 @@ function LayoutDomUpdater() {
 			localStorage.sidebarMaxSize = 150
 		}
 
+		const oldFeatures = body.className.split(' ')
 		body.className = localStorage.features
-
+		const features = localStorage.features.split(' ')
+		
 		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
 			const clockWidth = clockElement.scrollWidth
 			nextUpContainerElement.style.right = clockWidth + 'px'
@@ -30,7 +32,7 @@ function LayoutDomUpdater() {
 		} else {
 			nextUpContainerElement.style.right = ''
 
-			if (body.className.includes('showSidebarBottom')) {
+			if (features.includes('showSidebarBottom')) {
 				sidebarContainerElement.style.maxWidth = ''
 				sidebarContainerElement.style.maxHeight = localStorage.sidebarMaxSize + 'px'
 			} else {
@@ -38,7 +40,15 @@ function LayoutDomUpdater() {
 				sidebarContainerElement.style.maxHeight = ''
 			}
 		}
-		// TODO: nextupcontainer and clock...
+
+		if (oldFeatures.includes('onlyFirstTextInSlide') !==
+				features.includes('onlyFirstTextInSlide')) {
+			proPresenter.parserConfigChanged()
+		}
+		if (oldFeatures.includes('improveBiblePassages') !==
+				features.includes('improveBiblePassages')) {
+			proPresenter.parserConfigChanged()
+		}
 	}
-	update()
+	requestAnimationFrame(update)
 }

@@ -64,13 +64,19 @@ function TimerDomUpdater() {
 	}
 
 	function updateVideo(uid, text) {
+		if (localStorage.minimumVideoLength === undefined) {
+			localStorage.minimumVideoLength = '00:01:00'
+		}
+		text = text.normalize()
 		const isNewVideoTimer = text > lastKnownVideoTimerText
 		if (isNewVideoTimer) {
 			// A new timer since text is greater than before
 			// If the video length is short, do not display a timer
 			// To avoid timers for background videos.
 			// TODO: Is there a way to improve this logic?
-			if (text < minimumVideoLengthForTimer) {
+			if (text < localStorage.minimumVideoLength) {
+				console.log('localStorage.minimumVideoLength', localStorage.minimumVideoLength)
+				console.log('text', text)
 				return
 			}
 		}

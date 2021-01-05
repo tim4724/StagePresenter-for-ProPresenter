@@ -117,9 +117,11 @@ function ProPresenterParser() {
 		let textBoxes = text.split('\r')
 
 		const features = localStorage.features.split(' ')
+		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
+
 		if (features.includes('improveBiblePassages')) {
 			let lines
-			if (features.includes('onlyFirstTextInSlide')) {
+			if (onlyFirstTextInSlide) {
 				if (isBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
 					lines = removeBibleReference(textBoxes[0].trim().split('\n'))
@@ -206,6 +208,16 @@ function ProPresenterParser() {
 			}
 			return Slide(lines, text, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
+			// Remove a textbox that only contains the label
+			if (onlyFirstTextInSlide
+					&& textBoxes.length > 1
+					&& label !== undefined) {
+				if (label.length > 5 && textBoxes[0].length <= label.length + 8
+						&& textBoxes[0].startsWith(label)) {
+					textBoxes.shift()
+				}
+			}
+
 			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
 			let lines = text.trim().split('\n')
 			return Slide(lines, text, label, color, isBiblePassage, undefined)

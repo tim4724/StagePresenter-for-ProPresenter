@@ -51,6 +51,10 @@ main {
     min-height: 2em;
 }
 
+.settingSpacer {
+    height: 16px;
+}
+
 .right {
     float: right;
 }

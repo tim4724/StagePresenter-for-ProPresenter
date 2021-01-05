@@ -507,7 +507,10 @@ function ProPresenter() {
         currentSlideUid = state.currentSlideUid
 
         previewDomUpdater.changePreview(currentSlideUid, undefined)
+        reloadPresentation()
+    }
 
+    function reloadPresentation() {
         if(remoteWebSocket.readyState === WebSocket.OPEN) {
             remoteWebSocket.send(Actions.presentationRequest(currentPresentationPath))
         }
@@ -516,6 +519,7 @@ function ProPresenter() {
     return {
         connect: connect,
         exportState: exportState,
-        importState: importState
+        importState: importState,
+        parserConfigChanged: reloadPresentation
     }
 }
