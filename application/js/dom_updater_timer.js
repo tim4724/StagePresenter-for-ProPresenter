@@ -7,15 +7,14 @@ function TimerDomUpdater() {
 
 	const timerContainer = document.getElementById('timerContainer')
 
-	const timeHoursMinutes = document.getElementById('clockHoursMinutes')
-	const timeSeconds = document.getElementById('clockSeconds')
+	const clockHoursMinutes = document.getElementById('clockHoursMinutes')
+	const clockSeconds = document.getElementById('clockSeconds')
 	const videoTimer = document.getElementById('videoTimer')
 
-	let lastKnownVideoTimerText = undefined
-	let removeTimeouts = {}
+	let lastKnownVideoTimerText = '00:00'
+	let timeouts = {}
 
 	function updateClock(seconds) {
-		// TODO: is the time correct?
 		let totalMinutes = Math.floor(seconds / 60) - timezoneOffsetInMinutes
 
 		let hours = Math.floor(totalMinutes / 60 % 24)
@@ -31,17 +30,21 @@ function TimerDomUpdater() {
 		if (seconds < 10) {
 			seconds = '0' + seconds
 		}
-		timeHoursMinutes.innerText = hours + ':' + minutes
-		timeSeconds.innerText = seconds
+		clockHoursMinutes.innerText = hours + ':' + minutes
+		clockSeconds.innerText = seconds
 	}
 
 	function updateTimer(uid, text, mode) {
 		let timerElement = document.getElementById(uid)
 		if (!timerElement) {
+			if (text === '00:00:00' || text === '-00:00:00' || text === '--:--:--') {
+				return
+			}
+
 			timerElement = document.createElement("span")
 			timerElement.id = uid
 			timerElement.classList.add('timer')
-			timerElement.classList.add(mode === '0' ? 'timerMode0' : 'timerMode1')
+			timerElement.classList.add('timerMode' + mode)
 			timerContainer.appendChild(timerElement)
 		}
 
@@ -49,60 +52,52 @@ function TimerDomUpdater() {
 
 		if (text.startsWith('00:')) {
 			text = text.substr(3)
+		} else if (text.startsWith('-00:')) {
+			text = text.substr(4)
 		}
 		timerElement.innerText = text
 
-		clearTimeout(removeTimeouts[uid])
-		removeTimeouts[uid] = setTimeout(function () {
+		clearTimeout(timeouts[uid])
+		timeouts[uid] = setTimeout(() => {
 			timerElement.parentElement.removeChild(timerElement)
 		}, 5000)
 	}
 
 	function updateVideo(uid, text) {
-		// TODO: fix
-		/*
-		uid = 'videoTimer'
-
-		clearTimeout(removeTimeouts[uid])
-		if (text === '00:00:00' || text === '-00:00:00' || text === '--:--:--') {
-			if (videoTimer.style.display === 'none') {
-				// Do not show a timer, that stars with '00:00:00
-				return
-			}
-			removeTimeouts[uid] = setTimeout(function () {
-				videoTimer.style.display = 'none'
-			}, 1200)
-		}
-
-		if (text > lastKnownVideoTimerText) {
-			// A new timer since text is larger than before
+		const isNewVideoTimer = text > lastKnownVideoTimerText
+		if (isNewVideoTimer) {
+			// A new timer since text is greater than before
 			// If the video length is short, do not display a timer
 			// To avoid timers for background videos.
 			// TODO: Is there a way to improve this logic?
 			if (text < minimumVideoLengthForTimer) {
-				videoTimer.style.display = 'none'
+				return
 			}
-		}
-
-		// Always show timer if the timer has a value greater than the minimum length
-		if (text > minimumVideoLengthForTimer) {
-			videoTimer.style.display = 'inline'
 		}
 
 		lastKnownVideoTimerText = text
 
-		if (text.startsWith('00:')) {
-			text = text.substr(3)
-		} else if (text.startsWith('-00:')) {
-			text = text.substr(4)
-		}
-		videoTimer.innerText = text
-		*/
+		clearTimeout('videoTimerlastKnownVideoTimerText')
+		timeouts['videoTimerlastKnownVideoTimerText'] = setTimeout(() => {
+			// IF timer is not updated for some time
+			lastKnownVideoTimerText = '00:00:00'
+		}, 2000)
+
+		updateTimer('videoTimer', text, 'Video')
+	}
+
+	function forceShowVideo() {
+		lastKnownVideoTimerText = '99:99:99'
+		timeouts['videoTimerlastKnownVideoTimerText'] = setTimeout(() => {
+			// IF timer is not updated for some time
+			lastKnownVideoTimerText = '00:00:00'
+		}, 2000)
 	}
 
 	return {
 		updateClock: updateClock,
 		updateTimer: updateTimer,
-		updateVideo: updateVideo
+		updateVideo: updateVideo,
+		forceShowVideo: forceShowVideo,
 	}
 }

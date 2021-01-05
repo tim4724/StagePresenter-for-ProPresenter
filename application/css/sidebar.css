@@ -170,12 +170,18 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     background: #21382a;
 }
 
-.timerMode0 {
+.timerMode1 {
+    background: #540808;
+}
+
+.timerMode2 {
     background: #545000;
 }
 
-.timerMode1 {
-    background: #540808;
+.timerModeVideo {
+    background: #69c0ff;
+    color: #000000;
+    order: -1;
 }
 
 #clockHoursMinutes {
