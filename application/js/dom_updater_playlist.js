@@ -18,6 +18,7 @@ function PlaylistDomUpdater() {
 		   });
 		}).observe(playlistContainerElement)
 	}
+	window.addEventListener('styleChanged', onresize)
 
 	let onResizeTimout = undefined
 	function onresize() {

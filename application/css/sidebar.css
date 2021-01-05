@@ -70,7 +70,6 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     display: none;
     text-align: left;
     flex-grow: 10000;
-    font-size: 2.5em;
     overflow: hidden;
     order: -1;
     background: #111111;
@@ -80,7 +79,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     display: none;
     text-align: center;
     margin-bottom: 4px;
-    font-size: 0.8em;
+    font-size: 1.75em;
 }
 
 .playlistItem {
@@ -91,6 +90,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     text-overflow: clip;
     padding: 4px;
     min-height: 1em;
+    font-size: 2.5em;
 }
 
 .playlistItemIndex {
@@ -99,9 +99,9 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 }
 
 .playlistHeader {
+    font-size: 1.75em;
     text-align: center;
     margin-top: 16px;
-    font-size: 0.5em;
     border: 2px solid;
 }
 
@@ -178,7 +178,6 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 }
 
 #clock {
-    font-size: 5em;
     background: #21382a;
 }
 
@@ -201,7 +200,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 }
 
 #clockHoursMinutes {
-    font-size: 1em;
+    font-size: 5em;
     padding-left: 0.1em;
     padding-right: 0.1em;
     background: #21382a
@@ -210,6 +209,6 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 #clockSeconds {
     padding-left: 0.1em;
     padding-right: 0.1em;
-    font-size: 0.6em;
+    font-size: 3em;
     background: #21382a
 }

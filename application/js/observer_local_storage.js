@@ -18,12 +18,39 @@ function LocalStorageObserver() {
 	let oldFeatures = []
 	let reloadPresentationTimeout = undefined
 
+	const style = document.createElement("style");
+	document.head.appendChild(style);
+
 	function update() {
 		if (localStorage.features === undefined) {
 			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
         }
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150
+		}
+
+		style.innerText = ''
+		if (localStorage.presentationFontSize) {
+			const fontSize = localStorage.presentationFontSize / 100
+			style.appendChild(document.createTextNode(
+				".group:not(.groupWithLongText) { font-size: " + fontSize + "em }"))
+		}
+		if (localStorage.presentationLongTextFontSize) {
+			const fontSize = localStorage.presentationLongTextFontSize / 100
+			style.appendChild(document.createTextNode(
+				".group.groupWithLongText { font-size: " + fontSize + "em }"))
+		}
+		if (localStorage.timerFontSize) {
+			const fontSize = localStorage.timerFontSize / 100
+			style.appendChild (document.createTextNode (
+				"#timerContainer { font-size: " + fontSize + "em }"))
+			style.appendChild(document.createTextNode(
+				"#clock { font-size: " + fontSize + "em }"))
+		}
+		if (localStorage.playlistFontSize) {
+			const fontSize = localStorage.playlistFontSize / 100
+			style.appendChild(document.createTextNode(
+				"#playlist { font-size: " + fontSize + "em }"))
 		}
 
 		const oldFeatures = document.body.className.split(' ')
@@ -49,6 +76,8 @@ function LocalStorageObserver() {
 				sidebarContainerElement.style.maxHeight = ''
 			}
 		}
+
+		window.dispatchEvent(new Event('styleChanged'))
 
 		clearTimeout(reloadPresentationTimeout)
 		reloadPresentationTimeout = setTimeout(reloadPresentationIfNecessary, 500)

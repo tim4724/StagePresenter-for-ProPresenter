@@ -3,6 +3,7 @@
     transition: opacity 0.3s ease-in-out;
     position: relative;
     height: 100%;
+    font-size: 5em;
 }
 
 @keyframes fadeInAnimation {
@@ -15,11 +16,7 @@
     padding-top: 8px;
     color: #ff7c00;
     font-weight: normal;
-    font-size: 3em;
-}
-
-#groupTemplate {
-    display: none;
+    font-size: 0.8em;
 }
 
 .group {
@@ -74,6 +71,10 @@
     margin-left: 0.125em;
     margin-right: 0.125em;
     display: block;
+}
+
+.slide .line:first-of-type {
+    display: inline-block;
 }
 
 .flexibleSlides .line {
