@@ -44,6 +44,7 @@ input:checked + .slider:before {
     transform: translateX(1.05em);
 }
 
-.disabled .slider {
+input[type="checkbox"]:disabled + .slider {
     cursor: default;
+    opacity: 0.5;
 }

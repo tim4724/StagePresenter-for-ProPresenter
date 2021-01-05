@@ -9,7 +9,6 @@ function PresentationDomUpdater() {
     const slideElements = presentationContainerElement.getElementsByClassName('slide')
     const groupElements = presentationContainerElement.getElementsByClassName('group')
 
-    let onResizeTimout = undefined
     if (ResizeObserver) {
         new ResizeObserver(entries => {
            // Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
@@ -23,11 +22,14 @@ function PresentationDomUpdater() {
     } else {
         window.onresize = onresize
     }
+    window.addEventListener('styleChanged', onresize)
+
+    let issueScrollTimeout = undefined
     function onresize() {
-        clearTimeout(onResizeTimout)
+        clearTimeout(issueScrollTimeout)
         fixGroupNameElementPosition()
         fixSlidesTextSize()
-        onResizeTimout = setTimeout(scrollToCurrentSlide, 500)
+        issueScrollTimeout = setTimeout(scrollToCurrentSlide, 500)
     }
 
     function displayPresentation(presentation, slideIndex, animate) {

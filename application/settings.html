@@ -63,6 +63,11 @@
                 <span id='stageAppConnectionResult'></span>
             </div>
 
+            <button id='connectButton'
+                    onclick='connectionSettings.connect()'>
+                Test Connection
+            </button>
+
             <button id='resetButton' disabled
                     onclick='connectionSettings.initInputsFromStorage()'>
                 Reset
@@ -98,7 +103,7 @@
 
                     <div class='setting' id="zoomSetting">
                         <span class='settingText'>
-                            Zoom
+                            Window Zoom
                         </span>
                         <label class='right'>
                             <input id='zoom' type='number' min='10' max='500'
@@ -108,15 +113,14 @@
                         </label>
                     </div>
 
-                    <div class="settingSpacer">
-                    </div>
+                    <div class="settingSpacer"></div>
 
                     <div class='setting'>
-                        Show Sidebar
+                        Clock, Timers, Playlist, Preview Position
                         <select id='showSidebar' onchange='stagemonitorSettings.selectChanged(this)'>
-                            <option value=''> Do not show </option>
-                            <option value='showSidebarLeft'> Show on the left </option>
-                            <option value='showSidebarBottom'> Show on the bottom </option>
+                            <option value=''>None</option>
+                            <option value='showSidebarLeft'>Left</option>
+                            <option value='showSidebarBottom'>Bottom</option>
                        </select>
                     </div>
 
@@ -133,7 +137,7 @@
 
                     <div class='setting'>
                         <span class='settingText'>
-                            Show small Slide Preview
+                            Show small Slide Preview in sidebar
                         </span>
                         <label class='switch right'>
                             <input id='showSmallSlidePreview' type='checkbox'
@@ -159,8 +163,7 @@
                 </iframe>
             </div>
 
-            <div class="settingSpacer">
-            </div>
+            <div class="settingSpacer"></div>
 
             <div class='setting'>
                 <span class='settingText'>
@@ -186,7 +189,7 @@
 
             <div class='setting'>
                 <span class='settingText'>
-                    Only include first Textbox of Slide
+                    Only include the first Textbox of each Slide
                 </span>
                 <label class='switch right'>
                     <input id='onlyFirstTextInSlide' type='checkbox'
@@ -218,6 +221,52 @@
                             value="00:01:00"
                             oninput='stagemonitorSettings.minimumVideoLengthForTimerChanged()'>
 
+                </label>
+            </div>
+
+            <div class="settingSpacer"></div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Normal Presentation Font-Size
+                </span>
+                <label class='right'>
+                    <input id='presentationFontSize' type='number' min='1' max='1000'
+                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                    %
+                </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Presentation with long textlines (e.g. bible passages) maximum Font-Size
+                </span>
+                <label class='right'>
+                    <input id='presentationLongTextFontSize' type='number' min='1' max='1000'
+                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                    %
+                </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Timer and Clock Font-Size
+                </span>
+                <label class='right'>
+                    <input id='timerFontSize' type='number' min='1' max='1000'
+                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                    %
+                </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Playlist Font-Size
+                </span>
+                <label class='right'>
+                    <input id='playlistFontSize' type='number' min='1' max='1000'
+                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                    %
                 </label>
             </div>
         </section>

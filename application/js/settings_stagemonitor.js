@@ -5,9 +5,15 @@ function StageMonitorSettings() {
     const settingsGroupElement = document.getElementById('stagemonitorSettingsGroup')
     const zoomInput = document.getElementById('zoom')
     const showSidebar = document.getElementById('showSidebar')
+    const previewCheckboxInput = document.getElementById('showSmallSlidePreview')
+    const playlistCheckboxInput = document.getElementById('showPlaylist')
     const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
     const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
     const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
+
+    const checkBoxInputs = settingsGroupElement.querySelectorAll('input[type="checkbox"]')
+    const numberInputs = settingsGroupElement.querySelectorAll('input[type="number"]')
+
     let zoomValue = 1
 
     let BrowserWindow
@@ -67,9 +73,14 @@ function StageMonitorSettings() {
 
         let features = localStorage.features.split(' ')
 
-        const checkBoxes = settingsGroupElement.querySelectorAll('input[type="checkbox"]')
-        for (const checkbox of checkBoxes) {
+        for (const checkbox of checkBoxInputs) {
             checkbox.checked = features.includes(checkbox.id)
+        }
+
+        for (const number of numberInputs) {
+            if(localStorage[number.id]) {
+                number.value = localStorage[number.id]
+            }
         }
 
         for (const option of showSidebar.options) {
@@ -81,12 +92,20 @@ function StageMonitorSettings() {
 
         sidebarMaxSizeInput.value = localStorage.sidebarMaxSize
 
-        if (features.includes('showSidebarBottom')
-                && !features.includes('showPlaylist')
-                && !features.includes('showSmallSlidePreview')) {
+        if (!features.includes('showPlaylist') && !features.includes('showSmallSlidePreview')
+            || !features.includes('showSidebarBottom') && !features.includes('showSidebarLeft')) {
             sidebarMaxSizeInput.disabled = true
         } else {
             sidebarMaxSizeInput.disabled = false
+        }
+
+        if (!features.includes('showSidebarBottom')
+                && !features.includes('showSidebarLeft')) {
+            previewCheckboxInput.disabled = true
+            playlistCheckboxInput.disabled = true
+        } else {
+            previewCheckboxInput.disabled = false
+            playlistCheckboxInput.disabled = false
         }
 
         alignLeftCharactersThreshold.value = localStorage.alignLeftCharactersThreshold
@@ -179,6 +198,10 @@ function StageMonitorSettings() {
             = alignLeftCharactersThreshold.value
     }
 
+    function numberInputChanged(element) {
+        localStorage[element.id] = element.value
+    }
+
     if (BrowserWindow) {
         listenToZoomChanges()
     }
@@ -190,6 +213,7 @@ function StageMonitorSettings() {
         checkBoxChanged: checkBoxChanged,
         selectChanged: selectChanged,
         minimumVideoLengthForTimerChanged: minimumVideoLengthForTimerChanged,
-        alignLeftCharactersThresholdChanged: alignLeftCharactersThresholdChanged
+        alignLeftCharactersThresholdChanged: alignLeftCharactersThresholdChanged,
+        numberInputChanged: numberInputChanged
     }
 }

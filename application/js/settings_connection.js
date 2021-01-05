@@ -34,7 +34,7 @@ function ConnectionSettings() {
 		stageAppPassElement.value = undefinedToEmpty(localStorage.stageAppPass)
 		resetResults()
 		updateHostIsLocal()
-		connect()
+		updateResetButtonState()
 	}
 
 	function resetResults() {
@@ -156,10 +156,6 @@ function ConnectionSettings() {
 	function onInputChanged() {
 		resetResults()
 		updateResetButtonState()
-		clearTimeout(connectTimeout)
-		connectTimeout = setTimeout(function() {
-			connect()
-		}, 500)
 	}
 
 	function connect() {
@@ -181,6 +177,7 @@ function ConnectionSettings() {
 		initInputsFromStorage: initInputsFromStorage,
 		hostIsLocalComputer: hostIsLocalComputer,
 		hostIsRemoteComputer: hostIsRemoteComputer,
-		resetResults: resetResults
+		resetResults: resetResults,
+		connect: connect
 	}
 }
