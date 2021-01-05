@@ -50,7 +50,6 @@
 
 .groupWithLongText {
     text-align: start;
-    font-size: 4em;
 }
 
 .groupWithLongText .slide .text, .slide.biblePassage .text {
