@@ -79,6 +79,7 @@ function PreviewDomUpdater() {
 			placeholderImageObjectURL = URL.createObjectURL(blob)
 		})
 	}
+	renderPlaceholderImage()
 
 	tiffDecoderWorker.onmessage = (ev) => {
 		const { url, objectURL, w, h } = ev.data
