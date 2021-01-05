@@ -275,13 +275,16 @@ function ProPresenter() {
     function onAudioTriggered(data) {
         const name = data.audioName
 
-        const itemIndex = currentPlaylist.items.findIndex(item => item.text === name)
-        if (itemIndex > 0) {
+        let currentPlaylistItemIndex = -1
+        if(currentPlaylist && currentPlaylist.items) {
+            currentPlaylistItemIndex = currentPlaylist.items.findIndex(item => item.text === name)
+        }
+        if (currentPlaylistItemIndex >= 0) {
             previewDomUpdater.clearPreview(name)
             const newPresentation = Presentation(name, [])
-            const newPresentationPath = currentPlaylist.items[itemIndex].location
+            const newPresentationPath = currentPlaylist.items[currentPlaylistItemIndex].location
             changePresentation(newPresentation, newPresentationPath, -1, true, false)
-        } else if (!currentPresentation.hasText()) {
+        } else if (!currentPresentation || !currentPresentation.hasText()) {
             previewDomUpdater.clearPreview(name)
             const newPresentation = Presentation(name, [])
             const newPresentationPath = '-1:-1'
@@ -361,7 +364,7 @@ function ProPresenter() {
                     if (index === -1 && allPresentationSlides.length > 0 && nextStageDisplaySlide &&
                             nextStageDisplaySlide.rawText === allPresentationSlides[0].rawText) {
                         // currentStageDisplaySlide is not already displayed, insert group at index 0
-                        const newGroup = Group(currentStageDisplaySlide.label, '', [currentStageDisplaySlide])
+                        const newGroup = Group(parseGroupName(currentStageDisplaySlide.label), '', [currentStageDisplaySlide])
                         insertGroupToPresentation(newGroup, 0)
                         changeCurrentSlide(0, false, true)
                         return

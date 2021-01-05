@@ -109,13 +109,44 @@
                     </div>
 
                     <div class='setting'>
+                        Show Sidebar
+                        <select id='showSidebar' onchange='stagemonitorSettings.selectChanged(this)'>
+                            <option value=''> Do not show </option>
+                            <option value='showSidebarLeft'> Show on the left </option>
+                            <option value='showSidebarBottom'> Show on the bottom </option>
+                       </select>
+                    </div>
+
+                    <div class='setting'>
                         <span class='settingText'>
-                            Show Sidebar
+                            Show small Slide Preview
                         </span>
                         <label class='switch right'>
-                            <input id='showSidebar' type='checkbox'
-                                onchange='stagemonitorSettings.showSidebarChanged()'>
+                            <input id='showSmallSlidePreview' type='checkbox'
+                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
                             <span class='slider'></span>
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Show Playlist
+                        </span>
+                        <label class='switch right'>
+                            <input id='showPlaylist' type='checkbox'
+                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
+                            <span class='slider'></span>
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Sidebar Maximum Size
+                        </span>
+                        <label class='right'>
+                            <input id='sidebarMaxSize' type='number' min='30' max='1000'
+                                    value="150"
+                                    oninput='stagemonitorSettings.sidebarMaxSizeChanged()'>
                         </label>
                     </div>
 
@@ -125,18 +156,29 @@
                         </span>
                         <label class='switch right'>
                             <input id='flexibleSlides' type='checkbox'
-                                onchange='stagemonitorSettings.flexibleSlidesChanged()'>
+                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
                             <span class='slider'></span>
                         </label>
                     </div>
 
                     <div class='setting'>
                         <span class='settingText'>
-                            Improve layout of Bible presentations
+                            Improve layout of Bible Presentations
                         </span>
                         <label class='switch right'>
                             <input id='improveBiblePassages' type='checkbox'
-                                onchange='stagemonitorSettings.improveBiblePassagesChanged()'>
+                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
+                            <span class='slider'></span>
+                        </label>
+                    </div>
+
+                    <div class='setting'>
+                        <span class='settingText'>
+                            Only include first Textbox of Slide
+                        </span>
+                        <label class='switch right'>
+                            <input id='onlyFirstTextInSlide' type='checkbox'
+                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
                             <span class='slider'></span>
                         </label>
                     </div>

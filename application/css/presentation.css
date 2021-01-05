@@ -2,6 +2,7 @@
     overflow: hidden;
     transition: opacity 0.3s ease-in-out;
     position: relative;
+    height: 100%;
 }
 
 @keyframes fadeInAnimation {
@@ -104,20 +105,6 @@
     background: #111111;
 }
 
-.group:last-of-type{
+.group:last-of-type {
     margin-bottom: 3em;
-}
-
-#nextUpContainer {
-    display: inline-block;
-    position: fixed;
-    bottom: 4px;
-    right: 16px;
-    z-index: -1;
-    text-align: left;
-    font-size: 3.5em;
-    color: #994a00;
-}
-
-#nextUp {
 }

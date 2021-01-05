@@ -17,11 +17,13 @@
 
     <link rel='stylesheet' href='css/stagemonitor.css'>
     <link rel='stylesheet' href='css/presentation.css'>
+    <link rel='stylesheet' href='css/sidebar.css'>
 
     <title>Stage Monitor</title>
 </head>
 
-<body onload='LayoutDomUpdater(); proPresenter = ProPresenter(); proPresenter.connect();'>
+<body onload='LayoutDomUpdater(); proPresenter = ProPresenter(); proPresenter.connect();'
+      class="showSidebarBottom showPlaylist showPreview">
     <button id='settingsButton' onclick='window.open("settings.html", "popup")'>
         Settings
     </button>
@@ -31,27 +33,32 @@
     </button>
 
     <section id='sidebar'>
-        <span id='clock' class='timer'>
-            <span id='clockHoursMinutes'>00:00</span><span id='clockSeconds'>00</span>
-        </span>
-
-        <div id='previewContainer'>
-            <span id='videoTimer'></span>
-            <img id='preview' src='black16x9.png' alt='Failed to load image'/>
-        </div>
-
         <div id='playlist'>
             <div id='playlistName'></div>
         </div>
+
+        <img id='preview' src='black16x9.png' alt='Failed to load image'/>
+
+        <div id='timerContainer'>
+
+        </div>
+
+        <span class="spacer">
+        </span>
+
+        <span id='clock' class='timer'>
+            <span id='clockHoursMinutes'>00:00</span><span id='clockSeconds'>00</span>
+        </span>
     </section>
 
     <main>
         <div id="presentationContainer">
             <h1 id='title'>No presentation selected</h1>
-            <span id="nextUpContainer">
-                ➔ <span id="nextUp"></span>
-            </span>
         </div>
+
+        <span id='nextUpContainer'>
+            ➔ <span id='nextUp'></span>
+        </span>
         <img id='largePreview' src=''/>
         <span id='message'></span>
     </main>

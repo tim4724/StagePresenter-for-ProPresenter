@@ -116,9 +116,10 @@ function ProPresenterParser() {
 
 		let textBoxes = text.split('\r')
 
-		if (localStorage.improveBiblePassages !== 'false') {
+		const features = localStorage.features.split(' ')
+		if (features.includes('improveBiblePassages')) {
 			let lines
-			if (onlyFirstTextInSlide) {
+			if (features.includes('onlyFirstTextInSlide')) {
 				if (isBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
 					lines = removeBibleReference(textBoxes[0].trim().split('\n'))

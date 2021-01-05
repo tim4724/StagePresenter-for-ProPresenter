@@ -139,7 +139,7 @@ function PreviewDomUpdater() {
 
 	function clearPreview(text) {
 		currentUrl = text
-		nextUrl = text
+		nextUrl = ''
 		if (cache.get(currentUrl)) {
 			showCurrentAndNext()
 		} else {

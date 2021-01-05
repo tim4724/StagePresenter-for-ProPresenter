@@ -5,11 +5,11 @@ const minimumVideoLengthForTimer = '00:01:00'
 function TimerDomUpdater() {
 	const timezoneOffsetInMinutes = new Date().getTimezoneOffset()
 
-	const timerContainer = document.getElementById('sidebar')
+	const timerContainer = document.getElementById('timerContainer')
+
 	const timeHoursMinutes = document.getElementById('clockHoursMinutes')
 	const timeSeconds = document.getElementById('clockSeconds')
 	const videoTimer = document.getElementById('videoTimer')
-	const playlistElement = document.getElementById('playlist')
 
 	let lastKnownVideoTimerText = undefined
 	let removeTimeouts = {}
@@ -42,11 +42,7 @@ function TimerDomUpdater() {
 			timerElement.id = uid
 			timerElement.classList.add('timer')
 			timerElement.classList.add(mode === '0' ? 'timerMode0' : 'timerMode1')
-			if (playlistElement) {
-				timerContainer.insertBefore(timerElement, playlistElement)
-			} else {
-				timerContainer.appendChild(timerElement)
-			}
+			timerContainer.appendChild(timerElement)
 		}
 
 		// TODO: if startval does not change, keep timer visible?
@@ -63,6 +59,8 @@ function TimerDomUpdater() {
 	}
 
 	function updateVideo(uid, text) {
+		// TODO: fix
+		/*
 		uid = 'videoTimer'
 
 		clearTimeout(removeTimeouts[uid])
@@ -99,6 +97,7 @@ function TimerDomUpdater() {
 			text = text.substr(4)
 		}
 		videoTimer.innerText = text
+		*/
 	}
 
 	return {

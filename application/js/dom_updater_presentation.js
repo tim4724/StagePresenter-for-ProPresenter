@@ -3,11 +3,11 @@
 const alignLeftCharactersThreshold = 60
 
 function PresentationDomUpdater() {
+    const nextUpContainerElement = document.getElementById('nextUpContainer')
+    const nextUpElement = document.getElementById('nextUp')
     const presentationContainerElement = document.getElementById('presentationContainer')
     const scroller = Scroller(presentationContainerElement)
     const titleElement = presentationContainerElement.querySelector('#title')
-    const nextUpContainerElement = presentationContainerElement.querySelector('#nextUpContainer')
-    const nextUpElement = presentationContainerElement.querySelector('#nextUp')
     const slideElements = presentationContainerElement.getElementsByClassName('slide')
     const groupElements = presentationContainerElement.getElementsByClassName('group')
 
@@ -63,7 +63,8 @@ function PresentationDomUpdater() {
             // Insert new elements
             for (const group of presentation.groups) {
                 const groupElement = buildGroupElement(group)
-                presentationContainerElement.insertBefore(groupElement, nextUpContainerElement)
+                presentationContainerElement.append(groupElement)
+//                presentationContainerElement.insertBefore(groupElement, nextUpContainerElement)
             }
 
             if(presentation.groups.length > 0) {
@@ -82,6 +83,9 @@ function PresentationDomUpdater() {
 
     function setNextPresentationTitle(nextTitle) {
         if(nextTitle && nextTitle.length > 0) {
+            if (nextTitle.length > 27) {
+                nextTitle = nextTitle.substring(0, 24) + '...'
+            }
             nextUpElement.innerText = nextTitle
         } else {
             nextUpElement.innerText = ''
@@ -117,8 +121,7 @@ function PresentationDomUpdater() {
     }
 
     function fixSlidesTextSize() {
-        const maxSlideHeight = presentationContainerElement.clientHeight
-            - 128
+        const maxSlideHeight = presentationContainerElement.parentElement.clientHeight - 128
 
         for (const slideElement of slideElements) {
             slideElement.style.fontSize = '1em'
@@ -190,7 +193,7 @@ function PresentationDomUpdater() {
     function changeCurrentSlideAndScroll(slideIndex, animate = true) {
         if (!slideElements || slideElements.length === 0) {
             if (nextUpElement.innerText.length > 0) {
-                nextUpContainerElement.style.display = 'inline-block'
+                nextUpContainerElement.style.display = 'inherit'
             }
             return
         }
@@ -226,7 +229,7 @@ function PresentationDomUpdater() {
             const isLastGroupAndNotEmpty = slide && lastGroup === slide.parentElement &&
                 !lastGroup.classList.contains('emptyGroup')
             const showNextUp = isLastSlide || isLastGroupAndNotEmpty
-            nextUpContainerElement.style.display = showNextUp ? 'inline-block' : 'none'
+            nextUpContainerElement.style.display = showNextUp ? 'inherit' : 'none'
         } else {
             nextUpContainerElement.style.display = 'none'
         }

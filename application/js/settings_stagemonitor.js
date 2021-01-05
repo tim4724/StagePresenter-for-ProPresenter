@@ -1,11 +1,18 @@
 "use strict"
 
 function StageMonitorSettings() {
-    const zoomInput = document.getElementById('zoom')
     const previewIframe = document.getElementById('previewIframe')
-    const flexibleSlides = document.getElementById('flexibleSlides')
+    const settingsGroupElement = document.getElementById('stagemonitorSettings')
+
+    const zoomInput = document.getElementById('zoom')
     const showSidebar = document.getElementById('showSidebar')
+    const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
+
+    /*
+    const flexibleSlides = document.getElementById('flexibleSlides')
     const improveBiblePassages = document.getElementById('improveBiblePassages')
+    const onlyFirstTextInSlide = document.getElementById('onlyFirstTextInSlide')
+    */
     let zoomValue = 1
 
     let BrowserWindow
@@ -50,9 +57,36 @@ function StageMonitorSettings() {
     }
 
     function initInputs() {
-        flexibleSlides.checked = localStorage.flexibleSlides !== 'false'
-        showSidebar.checked = localStorage.showSidebar === 'true'
-        improveBiblePassages.checked = localStorage.improveBiblePassages !== 'false'
+        if (localStorage.features === undefined) {
+            localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
+        }
+        if (localStorage.sidebarMaxSize === undefined) {
+            localStorage.sidebarMaxSize = 150
+        }
+
+        let features = localStorage.features.split(' ')
+
+        const checkBoxes = settingsGroupElement.querySelectorAll('input[type="checkbox"]')
+        for (const checkbox of checkBoxes) {
+            checkbox.checked = features.includes(checkbox.id)
+        }
+
+        for (const option of showSidebar.options) {
+            if (features.includes(option.value)) {
+                option.selected = true;
+                break;
+            }
+        }
+
+        sidebarMaxSizeInput.value = localStorage.sidebarMaxSize
+
+        if (features.includes('showSidebarBottom')
+                && !features.includes('showPlaylist')
+                && !features.includes('showSmallSlidePreview')) {
+            sidebarMaxSizeInput.disabled = true
+        } else {
+            sidebarMaxSizeInput.disabled = false
+        }
     }
 
     function zoomInputChanged() {
@@ -63,16 +97,55 @@ function StageMonitorSettings() {
         updateZoomPreviewIFrame()
     }
 
-    function flexibleSlidesChanged() {
-        localStorage.flexibleSlides = flexibleSlides.checked
+    function checkBoxChanged(element) {
+        let features = localStorage.features.split(' ')
+        if (element.checked) {
+            if (!localStorage.features.includes(element.id)) {
+                features.push(element.id)
+            }
+        } else {
+            features = features.filter(f => f !== element.id)
+        }
+        localStorage.features = features.join(' ')
+        initInputs()
     }
 
-    function showSidebarChanged() {
-        localStorage.showSidebar = showSidebar.checked
+    function selectChanged(select) {
+        let features = localStorage.features.split(' ')
+        let changedFeature = false
+        for (const option of select.options) {
+            if (option.selected) {
+                if (!features.includes(option.value)) {
+                    features.push(select.value)
+                    changedFeature = true
+                }
+            } else if(features.includes(option.value)) {
+                features = features.filter(f => f !== option.value)
+            }
+        }
+        localStorage.features = features.join(' ')
+
+        if(select.id === 'showSidebar' && changedFeature) {
+            if (features.includes('showSidebarBottom')) {
+                localStorage.sidebarMaxSize = 150
+                features = features.filter(f => !['showSmallSlidePreview','showPlaylist'].includes(f))
+            } else if(features.includes('showSidebarLeft')) {
+                localStorage.sidebarMaxSize = 340
+                if (!features.includes('showSmallSlidePreview')) {
+                    features.push('showSmallSlidePreview')
+                }
+                if (!features.includes('showPlaylist')) {
+                    features.push('showPlaylist')
+                }
+            }
+
+            localStorage.features = features.join(' ')
+            initInputs()
+        }
     }
 
-    function improveBiblePassagesChanged() {
-        localStorage.improveBiblePassages = improveBiblePassages.checked
+    function sidebarMaxSizeChanged() {
+        localStorage.sidebarMaxSize = sidebarMaxSizeInput.value
     }
 
     function updateZoomPreviewIFrame() {
@@ -96,8 +169,8 @@ function StageMonitorSettings() {
     updateZoomPreviewIFrame()
     return {
         zoomChanged: zoomInputChanged,
-        improveBiblePassagesChanged: improveBiblePassagesChanged,
-        showSidebarChanged: showSidebarChanged,
-        flexibleSlidesChanged: flexibleSlidesChanged
+        sidebarMaxSizeChanged: sidebarMaxSizeChanged,
+        checkBoxChanged: checkBoxChanged,
+        selectChanged: selectChanged,
     }
 }
