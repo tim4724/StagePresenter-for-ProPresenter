@@ -284,13 +284,15 @@ function ProPresenter() {
             const newPresentation = Presentation(name, [])
             const newPresentationPath = currentPlaylist.items[currentPlaylistItemIndex].location
             changePresentation(newPresentation, newPresentationPath, -1, true, false)
+            timerDomUpdater.forceShowVideo()
         } else if (!currentPresentation || !currentPresentation.hasText()) {
             previewDomUpdater.clearPreview(name)
             const newPresentation = Presentation(name, [])
             const newPresentationPath = '-1:-1'
             changePresentation(newPresentation, newPresentationPath, -1, true, false)
+            timerDomUpdater.forceShowVideo()
         } else {
-            // Do nothing
+            previewDomUpdater.clearPreview(name)
         }
     }
 
