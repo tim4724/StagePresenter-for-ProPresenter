@@ -90,7 +90,7 @@
             </div>
         </section>
 
-        <section class='settingGroup'>
+        <section class='settingGroup' id="stagemonitorSettingsGroup">
             <div class='settingGroupTitle'>Stagemonitor</div>
 
             <div id="stagemonitorSettingsContainer">
@@ -106,6 +106,9 @@
                                     oninput='stagemonitorSettings.zoomChanged()'>
                             %
                         </label>
+                    </div>
+
+                    <div class="settingSpacer">
                     </div>
 
                     <div class='setting'>
@@ -150,43 +153,64 @@
                         </label>
                     </div>
 
-                    <div class='setting'>
-                        <span class='settingText'>
-                            Auto-Remove Linebreaks
-                        </span>
-                        <label class='switch right'>
-                            <input id='flexibleSlides' type='checkbox'
-                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
-                            <span class='slider'></span>
-                        </label>
-                    </div>
-
-                    <div class='setting'>
-                        <span class='settingText'>
-                            Improve layout of Bible Presentations
-                        </span>
-                        <label class='switch right'>
-                            <input id='improveBiblePassages' type='checkbox'
-                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
-                            <span class='slider'></span>
-                        </label>
-                    </div>
-
-                    <div class='setting'>
-                        <span class='settingText'>
-                            Only include first Textbox of Slide
-                        </span>
-                        <label class='switch right'>
-                            <input id='onlyFirstTextInSlide' type='checkbox'
-                                onchange='stagemonitorSettings.checkBoxChanged(this)'>
-                            <span class='slider'></span>
-                        </label>
-                    </div>
                 </div>
 
                 <iframe src="stagemonitor.html" id="previewIframe">
                 </iframe>
             </div>
+
+            <div class="settingSpacer">
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Auto-Remove Linebreaks
+                </span>
+                <label class='switch right'>
+                    <input id='flexibleSlides' type='checkbox'
+                        onchange='stagemonitorSettings.checkBoxChanged(this)'>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Improve layout of Bible Presentations
+                </span>
+                <label class='switch right'>
+                    <input id='improveBiblePassages' type='checkbox'
+                        onchange='stagemonitorSettings.checkBoxChanged(this)'>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Only include first Textbox of Slide
+                </span>
+                <label class='switch right'>
+                    <input id='onlyFirstTextInSlide' type='checkbox'
+                        onchange='stagemonitorSettings.checkBoxChanged(this)'>
+                    <span class='slider'></span>
+                </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Minimum Video length to show timer
+                </span>
+                <label class='right'>
+                    <input id='minimumVideoLengthForTimer'
+                            type='time'
+                            min="00:00:00"
+                            max="01:00:00"
+                            step="1"
+                            value="00:01:00"
+                            oninput='stagemonitorSettings.minimumVideoLengthForTimerChanged()'>
+
+                </label>
+            </div>
+        </section>
 
         <button id='doneButton' onclick='window.close()'>
             Done

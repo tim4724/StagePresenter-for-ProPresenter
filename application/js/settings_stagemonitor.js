@@ -2,17 +2,11 @@
 
 function StageMonitorSettings() {
     const previewIframe = document.getElementById('previewIframe')
-    const settingsGroupElement = document.getElementById('stagemonitorSettings')
-
+    const settingsGroupElement = document.getElementById('stagemonitorSettingsGroup')
     const zoomInput = document.getElementById('zoom')
     const showSidebar = document.getElementById('showSidebar')
     const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
-
-    /*
-    const flexibleSlides = document.getElementById('flexibleSlides')
-    const improveBiblePassages = document.getElementById('improveBiblePassages')
-    const onlyFirstTextInSlide = document.getElementById('onlyFirstTextInSlide')
-    */
+    const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
     let zoomValue = 1
 
     let BrowserWindow
@@ -63,6 +57,9 @@ function StageMonitorSettings() {
         if (localStorage.sidebarMaxSize === undefined) {
             localStorage.sidebarMaxSize = 150
         }
+        if (localStorage.minimumVideoLength === undefined) {
+			localStorage.minimumVideoLength = '00:01:00'
+		}
 
         let features = localStorage.features.split(' ')
 
@@ -87,6 +84,8 @@ function StageMonitorSettings() {
         } else {
             sidebarMaxSizeInput.disabled = false
         }
+
+        minimumVideoLengthForTimer.value = localStorage.minimumVideoLength || '00:01:00'
     }
 
     function zoomInputChanged() {
@@ -148,6 +147,14 @@ function StageMonitorSettings() {
         localStorage.sidebarMaxSize = sidebarMaxSizeInput.value
     }
 
+    function minimumVideoLengthForTimerChanged() {
+        let minimumVideoLength = minimumVideoLengthForTimer.value
+        if (minimumVideoLength.length == 5) {
+            minimumVideoLength = minimumVideoLength + ':00'
+        }
+        localStorage.minimumVideoLength = minimumVideoLength
+    }
+
     function updateZoomPreviewIFrame() {
         const previewIFrameWidth = previewIframe.clientWidth
         previewIframe.height = previewIFrameWidth * height / width
@@ -172,5 +179,6 @@ function StageMonitorSettings() {
         sidebarMaxSizeChanged: sidebarMaxSizeChanged,
         checkBoxChanged: checkBoxChanged,
         selectChanged: selectChanged,
+        minimumVideoLengthForTimerChanged: minimumVideoLengthForTimerChanged
     }
 }

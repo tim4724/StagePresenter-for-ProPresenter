@@ -89,24 +89,20 @@ function PreviewDomUpdater() {
 		if (currentObjectUrl) {
 			if (largePreviewElement.style.display !== 'none') {
 				largePreviewElement.src = currentObjectUrl
-				largePreviewElement.style.opacity = 1
 
 				if (nextObjectUrl) {
 					previewElement.src = nextObjectUrl
-					previewElement.style.opacity = 1
 				} else {
 					// next is still loading
 					previewElement.src = cache.get('')
 				}
 			} else {
 				previewElement.src = currentObjectUrl
-				previewElement.style.opacity = 1
 			}
 		} else {
 			// Still loading...
 			previewElement.src = cache.get('')
-			// previewElement.style.opacity = 0
-			largePreviewElement.style.opacity = 0
+			largePreviewElement.src = cache.get('')
 		}
 	}
 
@@ -136,16 +132,29 @@ function PreviewDomUpdater() {
 		}
 	}
 
+	function getSlidePreviewRatio() {
+		let w = largePreviewElement.width
+		let h = largePreviewElement.height
+		if (largePreviewElement.style.display === 'none' || w <= 0  || h <= 0) {
+			w = previewElement.width
+			h = previewElement.height
+		}
+
+		if (w > 0 && h > 0) {
+			return w / h
+		} else {
+			return 16 / 9
+		}
+	}
+
 	function clearPreview(text) {
 		currentUrl = text
 		nextUrl = ''
 		if (cache.get(currentUrl)) {
 			showCurrentAndNext()
 		} else {
-			// TODO: ratio from preview width/heigt
-			const width = 1920
-			const height = 1080
-			renderPreviewImage(text, width, height).then((blob) => {
+			const ratio = getSlidePreviewRatio()
+			renderPreviewImage(text, 1080 * ratio, 1080).then((blob) => {
 				onObjectURLLoaded(text, URL.createObjectURL(blob))
 			})
 		}
