@@ -91,6 +91,10 @@ function ProPresenter() {
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
 
                 remoteWebSocket.send(Actions.playlistRequestAll)
+
+                if (currentPresentationPath.length > 0) {
+                    remoteWebSocket.send(Actions.presentationRequest(currentPresentationPath))
+                }
             }
             remoteWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -359,6 +363,7 @@ function ProPresenter() {
 
         function displaySlideFromStageDisplay() {
             if (currentPresentationPath === 'stagedisplay') {
+                // TODO: Use UID to compare?
                 const index = allPresentationSlides.map(s => s.rawText).indexOf(currentStageDisplaySlide.rawText)
                 const index2 = allPresentationSlides.map(s => s.rawText).lastIndexOf(currentStageDisplaySlide.rawText)
 
@@ -480,7 +485,31 @@ function ProPresenter() {
         return slides
     }
 
+    function exportState() {
+        return {
+            currentPresentationPath: currentPresentationPath,
+            currentSlideIndex: currentSlideIndex,
+            currentSlideCleared: currentSlideCleared,
+            currentSlideUid: currentSlideUid,
+        }
+    }
+
+    function importState(state) {
+        currentPresentationPath = state.currentPresentationPath
+        currentSlideIndex = state.currentSlideIndex
+        currentSlideCleared = state.currentSlideCleared
+        currentSlideUid = state.currentSlideUid
+
+        previewDomUpdater.changePreview(currentSlideUid, undefined)
+
+        if(remoteWebSocket.readyState === WebSocket.OPEN) {
+            remoteWebSocket.send(Actions.presentationRequest(currentPresentationPath))
+        }
+    }
+
     return {
-        connect: connect
+        connect: connect,
+        exportState: exportState,
+        importState: importState
     }
 }

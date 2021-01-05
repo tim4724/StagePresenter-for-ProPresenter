@@ -71,12 +71,11 @@ function PreviewDomUpdater() {
 	let nextUrl = undefined
 
 	tiffDecoderWorker.onmessage = (ev) => {
-		const { url, blob } = ev.data
-		onBlobLoaded(url, blob)
+		const { url, objectURL } = ev.data
+		onObjectURLLoaded(url, objectURL)
 	}
 
-	function onBlobLoaded(url, blob) {
-		const objectURL = URL.createObjectURL(blob)
+	function onObjectURLLoaded(url, objectURL) {
 		cache.add(url, objectURL || '')
 		if (url === currentUrl || url === nextUrl) {
 			showCurrentAndNext()
@@ -147,7 +146,7 @@ function PreviewDomUpdater() {
 			const width = 1920
 			const height = 1080
 			renderPreviewImage(text, width, height).then((blob) => {
-				onBlobLoaded(text, blob)
+				onObjectURLLoaded(text, URL.createObjectURL(blob))
 			})
 		}
 	}
@@ -166,8 +165,8 @@ function PreviewDomUpdater() {
 
 	function hideLargePreview() {
 		if (largePreviewElement.style.display !== 'none') {
-			largePreviewElement.src = ''
 			largePreviewElement.style.display = 'none'
+			largePreviewElement.src = ''
 			showCurrentAndNext()
 		}
 	}

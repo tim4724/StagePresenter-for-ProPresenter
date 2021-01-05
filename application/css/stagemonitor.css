@@ -34,7 +34,7 @@ body:hover #settingsButton, body:hover #closeButton {
     display: none;
     position: absolute;
     font-size: 2em;
-    z-index: 100;
+    z-index: 99999999;
 }
 
 #settingsButton {
