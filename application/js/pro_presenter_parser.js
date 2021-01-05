@@ -105,7 +105,7 @@ function ProPresenterParser() {
 			if (strings.length > 1) {
 				const stringsWithoutBibleRef = strings.filter(s => !bibleReferenceRegex.test(s))
 				if (label === undefined) {
-					label = parseGroupName(strings.find(s => bibleReferenceRegex.test(s)))
+					label = strings.find(s => bibleReferenceRegex.test(s))
 				}
 				if (stringsWithoutBibleRef.length > 0) {
 					return stringsWithoutBibleRef
@@ -237,7 +237,7 @@ function ProPresenterParser() {
 					const name = newSlide.label
 					const groupColor = newSlide.color
 					newGroups.push(Group(
-						parseGroupName(groupName), groupColor, [newSlide]))
+						parseGroupName(name), groupColor, [newSlide]))
 				} else {
 					newSlides.push(newSlide)
 				}
