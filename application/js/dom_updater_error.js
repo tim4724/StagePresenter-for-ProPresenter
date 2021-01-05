@@ -38,7 +38,13 @@ function ErrorDomUpdater() {
 		}
 	}
 
+	function clearConnectionErrors() {
+		errorMessageElement.innerText = ''
+		errorElement.style.display = 'none'
+	}
+
 	return {
 		updateConnectionErrors: updateConnectionErrors,
+		clearConnectionErrors: clearConnectionErrors,
 	}
 }

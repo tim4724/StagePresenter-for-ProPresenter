@@ -65,6 +65,7 @@ function ProPresenter() {
         function connectToRemoteWebsocket() {
             remoteWebSocket = new WebSocket('ws://' + getHost() + '/remote')
             remoteWebSocket.onopen = function () {
+                clearConnectionErrors() // Will be shown after timeout
                 remoteWebsocketConnectionState.isConnected = true
 
                 const password = localStorage.remoteAppPass || 'observer'
@@ -169,6 +170,7 @@ function ProPresenter() {
         function connectToStageWebSocket() {
             stageWebSocket = new WebSocket('ws://' + getHost() + '/stagedisplay')
             stageWebSocket.onopen = function () {
+                clearConnectionErrors()
                 stageWebsocketConnectionState.isConnected = true
 
                 const password = localStorage.stageAppPass || 'stage'
@@ -247,6 +249,10 @@ function ProPresenter() {
 
     function updateConnectionErrors() {
         errorDomUpdater.updateConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
+    }
+
+    function clearConnectionErrors() {
+        errorDomUpdater.clearConnectionErrors()
     }
 
     function onNewPlaylistAll(data) {
