@@ -32,8 +32,8 @@ function StageMonitorSettings() {
         const stagemonitorWindow = wins.find(w => w.title === 'Stage Monitor')
         if (stagemonitorWindow && stagemonitorWindow.webContents) {
             webContents = stagemonitorWindow.webContents
-            webContents.executeJavaScript('proPresenter.currentPresentationPath').then((p) => {
-                console.log(p)
+            webContents.executeJavaScript('proPresenter.exportState()').then((p) => {
+                previewIframe.contentWindow.window.proPresenter.importState(p)
             })
 
             stagemonitorWindow.once('close', () => {

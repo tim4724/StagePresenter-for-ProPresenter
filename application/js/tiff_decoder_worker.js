@@ -46,9 +46,9 @@ onmessage = function(e) {
 		const canvas = new Tiff({buffer: arrayBuffer}).toOffscreenCanvas()
 		return canvas.convertToBlob({ type: "image/jpeg", quality: 0.5 })
 	}).then(blob => {
-		postMessage({url: url, blob: blob});
+		postMessage({url: url, objectURL: URL.createObjectURL(blob)});
 	}).catch(e => {
 		console.log(e)
-		postMessage({url: url, blob: undefined});
+		postMessage({url: url, objectURL: undefined});
 	})
 }
