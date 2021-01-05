@@ -8,33 +8,37 @@ function LayoutDomUpdater() {
 		window.attachEvent("onstorage", update)
 	}
 
-	function setFeature(name, enable) {
-		if(enable) {
-			if (!body.classList.contains(name)) {
-				body.classList.add(name)
-			}
-		} else {
-			body.classList.remove(name)
-		}
-	}
+	const sidebarContainerElement = document.getElementById('sidebar')
+	const nextUpContainerElement = document.getElementById('nextUpContainer')
+	const clockElement = document.getElementById('clock')
 
 	function update() {
-		const flexibleSlides = localStorage.flexibleSlides !== 'false'
-		setFeature('flexibleSlides', flexibleSlides)
-
-		const showSidebar = localStorage.showSidebar === 'true'
-		setFeature('showSidebar', showSidebar)
-
-		const sidebar = document.getElementById('sidebar')
-		const clockInSidebar = sidebar.querySelector('#clock')
-		if (!showSidebar && clockInSidebar) {
-			clockInSidebar.remove()
-			document.body.appendChild(clockInSidebar)
-		} else if (showSidebar && !clockInSidebar) {
-			const clock = document.getElementById('clock')
-			clock.remove()
-			sidebar.insertBefore(clock, sidebar.children[0]);
+		if (localStorage.features === undefined) {
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
+        }
+		if (localStorage.sidebarMaxSize === undefined) {
+			localStorage.sidebarMaxSize = 150
 		}
+
+		body.className = localStorage.features
+
+		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
+			const clockWidth = clockElement.scrollWidth
+			nextUpContainerElement.style.right = clockWidth + 'px'
+			sidebarContainerElement.style.maxWidth = ''
+			sidebarContainerElement.style.maxHeight = ''
+		} else {
+			nextUpContainerElement.style.right = ''
+
+			if (body.className.includes('showSidebarBottom')) {
+				sidebarContainerElement.style.maxWidth = ''
+				sidebarContainerElement.style.maxHeight = localStorage.sidebarMaxSize + 'px'
+			} else {
+				sidebarContainerElement.style.maxWidth = localStorage.sidebarMaxSize + 'px'
+				sidebarContainerElement.style.maxHeight = ''
+			}
+		}
+		// TODO: nextupcontainer and clock...
 	}
 	update()
 }

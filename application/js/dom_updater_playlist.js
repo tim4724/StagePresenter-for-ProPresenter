@@ -4,6 +4,7 @@ function PlaylistDomUpdater() {
 	const playlistContainerElement = document.getElementById('playlist')
 	const playlistNameElement = document.getElementById('playlistName')
 	const scroller = Scroller(playlistContainerElement)
+	let containerTop = playlistContainerElement.getBoundingClientRect().top
 	let containerCenterY = centerY(playlistContainerElement.getBoundingClientRect())
 
 	if (ResizeObserver) {
@@ -20,6 +21,7 @@ function PlaylistDomUpdater() {
 
 	let onResizeTimout = undefined
 	function onresize() {
+		containerTop = playlistContainerElement.getBoundingClientRect().top
 		containerCenterY = centerY(playlistContainerElement.getBoundingClientRect())
 		clearTimeout(onResizeTimout)
 		onResizeTimout = setTimeout(scrollToCurrentItem, 500)
@@ -93,8 +95,15 @@ function PlaylistDomUpdater() {
 			return
 		}
 
-		const itemCenterY = centerY(item.getBoundingClientRect())
-		const deltaY = itemCenterY - containerCenterY
+		// TODO is there a better way to scroll (without getBoundingClientRect)?
+		let deltaY
+		if (playlistContainerElement.offsetHeight > 300) {
+			const itemCenterY = centerY(item.getBoundingClientRect())
+			deltaY = itemCenterY - containerCenterY
+		} else {
+			const itemTop = item.getBoundingClientRect().top
+			deltaY = itemTop - containerTop
+		}
 
 		if (animate) {
 			scroller.scroll(deltaY, 1200)
