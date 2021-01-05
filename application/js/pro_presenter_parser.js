@@ -25,10 +25,13 @@ function Presentation(name, groups) {
 }
 
 function Group(name, color, slides) {
+	const alignLeftCharactersThreshold = parseInt(localStorage.alignLeftCharactersThreshold)
+	const longLines = slides.some(s => s.lines.some(l => l.length > alignLeftCharactersThreshold))
 	return {
 		name: name,
 		color: color,
-		slides: slides
+		slides: slides,
+		hasLongTextLines: longLines
 	}
 }
 
@@ -74,7 +77,7 @@ function ProPresenterParser() {
 		return [newPlaylist, currentIndex]
 	}
 
-	function parseSlide(text, label, color, assumeIsBiblePassage = false) {
+	function parseSlide(rawText, label, color, assumeIsBiblePassage = false) {
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
@@ -114,7 +117,7 @@ function ProPresenterParser() {
 			return strings
 		}
 
-		let textBoxes = text.split('\r')
+		let textBoxes = rawText.split('\r')
 
 		const features = localStorage.features.split(' ')
 		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
@@ -206,7 +209,7 @@ function ProPresenterParser() {
 					label += ' ' + translation.trim()
 				}
 			}
-			return Slide(lines, text, label, color, isBiblePassage, bibleVerseNumbers)
+			return Slide(lines, rawText, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
 			// Remove a textbox that only contains the label
 			if (onlyFirstTextInSlide
@@ -220,7 +223,10 @@ function ProPresenterParser() {
 
 			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
 			let lines = text.trim().split('\n')
-			return Slide(lines, text, label, color, isBiblePassage, undefined)
+			for (let i = 0; i < lines.length; i++) {
+				lines[i] = lines[i].trim()
+			}
+			return Slide(lines, rawText, label, color, isBiblePassage, undefined)
 		}
 	}
 

@@ -170,6 +170,10 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     background: #21382a;
 }
 
+.timerMode0 {
+    background: #570b40;
+}
+
 .timerMode1 {
     background: #540808;
 }

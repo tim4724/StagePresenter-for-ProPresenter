@@ -7,6 +7,7 @@ function StageMonitorSettings() {
     const showSidebar = document.getElementById('showSidebar')
     const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
     const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
+    const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
     let zoomValue = 1
 
     let BrowserWindow
@@ -60,6 +61,9 @@ function StageMonitorSettings() {
         if (localStorage.minimumVideoLength === undefined) {
 			localStorage.minimumVideoLength = '00:01:00'
 		}
+        if (localStorage.alignLeftCharactersThreshold === undefined) {
+			localStorage.alignLeftCharactersThreshold = 60
+		}
 
         let features = localStorage.features.split(' ')
 
@@ -85,7 +89,8 @@ function StageMonitorSettings() {
             sidebarMaxSizeInput.disabled = false
         }
 
-        minimumVideoLengthForTimer.value = localStorage.minimumVideoLength || '00:01:00'
+        alignLeftCharactersThreshold.value = localStorage.alignLeftCharactersThreshold
+        minimumVideoLengthForTimer.value = localStorage.minimumVideoLength
     }
 
     function zoomInputChanged() {
@@ -169,6 +174,11 @@ function StageMonitorSettings() {
         }
     }
 
+    function alignLeftCharactersThresholdChanged() {
+        localStorage.alignLeftCharactersThreshold
+            = alignLeftCharactersThreshold.value
+    }
+
     if (BrowserWindow) {
         listenToZoomChanges()
     }
@@ -179,6 +189,7 @@ function StageMonitorSettings() {
         sidebarMaxSizeChanged: sidebarMaxSizeChanged,
         checkBoxChanged: checkBoxChanged,
         selectChanged: selectChanged,
-        minimumVideoLengthForTimerChanged: minimumVideoLengthForTimerChanged
+        minimumVideoLengthForTimerChanged: minimumVideoLengthForTimerChanged,
+        alignLeftCharactersThresholdChanged: alignLeftCharactersThresholdChanged
     }
 }

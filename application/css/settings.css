@@ -97,6 +97,7 @@ select {
 #previewIframe {
     border: 0;
     flex-grow: 1;
+    pointer-events: none;
 }
 
 .disabled {

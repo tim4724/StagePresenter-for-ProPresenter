@@ -75,8 +75,6 @@ function TimerDomUpdater() {
 			// To avoid timers for background videos.
 			// TODO: Is there a way to improve this logic?
 			if (text < localStorage.minimumVideoLength) {
-				console.log('localStorage.minimumVideoLength', localStorage.minimumVideoLength)
-				console.log('text', text)
 				return
 			}
 		}
