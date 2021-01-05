@@ -1,7 +1,5 @@
 "use strict"
 
-const alignLeftCharactersThreshold = 60
-
 function PresentationDomUpdater() {
     const nextUpContainerElement = document.getElementById('nextUpContainer')
     const nextUpElement = document.getElementById('nextUp')
@@ -64,7 +62,6 @@ function PresentationDomUpdater() {
             for (const group of presentation.groups) {
                 const groupElement = buildGroupElement(group)
                 presentationContainerElement.append(groupElement)
-//                presentationContainerElement.insertBefore(groupElement, nextUpContainerElement)
             }
 
             if(presentation.groups.length > 0) {
@@ -140,11 +137,10 @@ function PresentationDomUpdater() {
         groupNameElement.style.color = group.color
         groupElement.appendChild(groupNameElement)
 
+        if (group.hasLongTextLines) {
+            groupElement.classList.add('groupWithLongText')
+        }
         for (const slide of group.slides) {
-            if (slide.lines && slide.lines.some(l => l.length > alignLeftCharactersThreshold)) {
-                groupElement.classList.add('groupWithLongText')
-            }
-
             const slideElement = document.createElement('div')
             slideElement.classList.add('slide')
 
@@ -238,8 +234,6 @@ function PresentationDomUpdater() {
     function scrollToCurrentSlide(animate = true) {
         if (Array.prototype.every.call(groupElements, g => g.classList.contains('emptyGroup'))) {
             // Only empty groups that are not visible, do not scroll
-            console.log('Do not scroll because of empty groups')
-            // presentationContainerElement.scrollTop = 0
             return
         }
         const slide = presentationContainerElement.querySelector('.currentSlide')
@@ -251,7 +245,6 @@ function PresentationDomUpdater() {
         const isFirstSlideInGroup = slide.parentElement.querySelector('.slide') === slide
 
         const slideBoundingRect = slide.getBoundingClientRect()
-
         let deltaY = undefined
         if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerElementHeight * 0.9)) {
             // Just a small offfset to make it look good

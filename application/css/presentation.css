@@ -92,10 +92,6 @@
     font-size: 0.8em
 }
 
-.flexibleSlide .line {
-    display: inline-block;
-}
-
 .currentGroup {
     color: #ffffff;
 }

@@ -70,9 +70,25 @@ function PreviewDomUpdater() {
 	let currentUrl = undefined
 	let nextUrl = undefined
 
+	let width = 1920
+	let height = 1080
+	let placeholderImageObjectURL = undefined
+	function renderPlaceholderImage() {
+		renderPreviewImage('', width, height).then((blob) => {
+			URL.revokeObjectURL(placeholderImageObjectURL)
+			placeholderImageObjectURL = URL.createObjectURL(blob)
+		})
+	}
+
 	tiffDecoderWorker.onmessage = (ev) => {
-		const { url, objectURL } = ev.data
+		const { url, objectURL, w, h } = ev.data
 		onObjectURLLoaded(url, objectURL)
+
+		if (w !== width || h !== height) {
+			width = w
+			height = h
+			renderPlaceholderImage()
+		}
 	}
 
 	function onObjectURLLoaded(url, objectURL) {
@@ -94,15 +110,15 @@ function PreviewDomUpdater() {
 					previewElement.src = nextObjectUrl
 				} else {
 					// next is still loading
-					previewElement.src = cache.get('')
+					previewElement.src = placeholderImageObjectURL
 				}
 			} else {
 				previewElement.src = currentObjectUrl
 			}
 		} else {
 			// Still loading...
-			previewElement.src = cache.get('')
-			largePreviewElement.src = cache.get('')
+			previewElement.src = placeholderImageObjectURL
+			largePreviewElement.src = placeholderImageObjectURL
 		}
 	}
 
@@ -132,29 +148,13 @@ function PreviewDomUpdater() {
 		}
 	}
 
-	function getSlidePreviewRatio() {
-		let w = largePreviewElement.width
-		let h = largePreviewElement.height
-		if (largePreviewElement.style.display === 'none' || w <= 0  || h <= 0) {
-			w = previewElement.width
-			h = previewElement.height
-		}
-
-		if (w > 0 && h > 0) {
-			return w / h
-		} else {
-			return 16 / 9
-		}
-	}
-
 	function clearPreview(text) {
 		currentUrl = text
 		nextUrl = ''
 		if (cache.get(currentUrl)) {
 			showCurrentAndNext()
 		} else {
-			const ratio = getSlidePreviewRatio()
-			renderPreviewImage(text, 1080 * ratio, 1080).then((blob) => {
+			renderPreviewImage(text, width, height).then((blob) => {
 				onObjectURLLoaded(text, URL.createObjectURL(blob))
 			})
 		}
@@ -166,7 +166,7 @@ function PreviewDomUpdater() {
 			if (currentUrlNotLoaded) {
 				tiffDecoderWorker.postMessage(currentUrl)
 				tiffDecoderWorker.postMessage(nextUrl)
-				currentUrlNotLoaded = true
+				currentUrlNotLoaded = false
 			}
 			showCurrentAndNext()
 		}

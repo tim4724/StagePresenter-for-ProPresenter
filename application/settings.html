@@ -197,6 +197,16 @@
 
             <div class='setting'>
                 <span class='settingText'>
+                    Align text left if more than
+                <input id='alignLeftCharactersThreshold' type='number' min='10' max='1000'
+                        value="60"
+                        oninput='stagemonitorSettings.alignLeftCharactersThresholdChanged()'>
+                characters in a line.
+                </span>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
                     Minimum Video length to show timer
                 </span>
                 <label class='right'>

@@ -35,6 +35,8 @@ Tiff.prototype.toOffscreenCanvas = function () {
 
 onmessage = function(e) {
 	const url = e.data
+	let width = undefined
+	let height = undefined
 	fetch(url).then(response => {
 		if (response.ok) {
 			return response.arrayBuffer()
@@ -44,11 +46,13 @@ onmessage = function(e) {
 	}).then(arrayBuffer => {
 		Tiff.initialize({TOTAL_MEMORY: arrayBuffer.byteLength})
 		const canvas = new Tiff({buffer: arrayBuffer}).toOffscreenCanvas()
+		width = canvas.width
+		height = canvas.height
 		return canvas.convertToBlob({ type: "image/jpeg", quality: 0.5 })
 	}).then(blob => {
-		postMessage({url: url, objectURL: URL.createObjectURL(blob)});
+		postMessage({url: url, objectURL: URL.createObjectURL(blob), w: width, h: height});
 	}).catch(e => {
 		console.log(e)
-		postMessage({url: url, objectURL: undefined});
+		postMessage({url: url, objectURL: undefined, w: width, h: height});
 	})
 }
