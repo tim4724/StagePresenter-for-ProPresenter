@@ -177,8 +177,9 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     margin: 0
 }
 
-#clock {
+.timer#clock {
     background: #21382a;
+    font-size: 1em;
 }
 
 .timerMode0 {
