@@ -90,12 +90,6 @@ function ProPresenter() {
                 // Also there are bugs in pro presenter 7.4 and this is wrong sometimes
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
                 // remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
-
-                remoteWebSocket.send(Actions.playlistRequestAll)
-
-                if (currentPresentationPath.length > 0) {
-                    remoteWebSocket.send(Actions.presentationRequest(currentPresentationPath))
-                }
             }
             remoteWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -110,6 +104,11 @@ function ProPresenter() {
                         remoteWebsocketConnectionState.proPresenterVersion = data.majorVersion + '.' + data.minorVersion
                         remoteWebsocketConnectionState.error = data.error
                         // const isController = data.controller === 1 || data.controller === true
+
+                        remoteWebSocket.send(Actions.playlistRequestAll)
+                        if (currentPresentationPath.length > 0) {
+                            remoteWebSocket.send(Actions.presentationRequest(currentPresentationPath))
+                        }
                         break
                     case 'playlistRequestAll':
                         if (!currentPlaylist || ev.data !== currentPlaylistDataCache) {
@@ -187,7 +186,7 @@ function ProPresenter() {
                         // stageWebSocket.onclose will also call showupdateConnectionErrors
                         updateConnectionErrors()
                     }
-                }, 1000)
+                }, 2000)
             }
             stageWebSocket.onmessage = function (ev) {
                 const data = JSON.parse(ev.data)
@@ -237,14 +236,16 @@ function ProPresenter() {
                 if (stageWebSocketCloseCounter === 1) {
                     setTimeout(connectToStageWebSocket, 50)
                 } else {
-                    setTimeout(connectToStageWebSocket, 5000)
+                    setTimeout(connectToStageWebSocket, 6500)
                 }
                 console.log('StageWebsocket close ' + JSON.stringify(ev))
             }
         }
 
-        connectToStageWebSocket()
-        connectToRemoteWebsocket()
+        // Pro Presenter will crash if not waiting between connecting...
+        setTimeout(connectToStageWebSocket, 0)
+        // Need to connect in that order for any weird reason...
+        setTimeout(connectToRemoteWebsocket, 2000)
     }
 
     function updateConnectionErrors() {
@@ -511,7 +512,7 @@ function ProPresenter() {
     }
 
     function reloadCurrentPresentation(force) {
-        if(remoteWebSocket.readyState === WebSocket.OPEN) {
+        if(remoteWebSocket && remoteWebSocket.readyState === WebSocket.OPEN) {
             remoteWebSocket.send(Actions.presentationRequest(currentPresentationPath))
             if (force) {
                 currentPresentationJSONString = ''
