@@ -177,9 +177,10 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     margin: 0
 }
 
-.timer#clock {
+#clock {
     background: #21382a;
     font-size: 1em;
+    padding: 0 0.1em;
 }
 
 .timerMode0 {
@@ -204,12 +205,12 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     font-size: 5em;
     padding-left: 0.1em;
     padding-right: 0.1em;
-    background: #21382a
+    background: inherit:
 }
 
 #clockSeconds {
     padding-left: 0.1em;
     padding-right: 0.1em;
     font-size: 3em;
-    background: #21382a
+    background: inherit;
 }

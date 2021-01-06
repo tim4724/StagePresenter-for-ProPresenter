@@ -72,11 +72,14 @@ function PreviewDomUpdater() {
 
 	let width = 1920
 	let height = 1080
-	let placeholderImageObjectURL = undefined
+	let placeholderImageURL = 'black16x9.png'
 	function renderPlaceholderImage() {
 		renderPreviewImage('', width, height).then((blob) => {
-			URL.revokeObjectURL(placeholderImageObjectURL)
-			placeholderImageObjectURL = URL.createObjectURL(blob)
+			URL.revokeObjectURL(placeholderImageURL)
+			placeholderImageURL = URL.createObjectURL(blob)
+			if (currentUrl === undefined && nextUrl === undefined) {
+				showCurrentAndNext()
+			}
 		})
 	}
 	renderPlaceholderImage()
@@ -111,22 +114,19 @@ function PreviewDomUpdater() {
 					previewElement.src = nextObjectUrl
 				} else {
 					// next is still loading
-					previewElement.src = placeholderImageObjectURL
+					previewElement.src = placeholderImageURL
 				}
 			} else {
 				previewElement.src = currentObjectUrl
 			}
 		} else {
 			// Still loading...
-			previewElement.src = placeholderImageObjectURL
-			largePreviewElement.src = placeholderImageObjectURL
+			previewElement.src = placeholderImageURL
+			largePreviewElement.src = placeholderImageURL
 		}
 	}
 
 	function changePreview(slideUid, nextSlideUid) {
-		currentUrl = getPreviewUrl(slideUid)
-		nextUrl = getPreviewUrl(nextSlideUid)
-
 		showCurrentAndNext()
 
 		const previewVisible = previewElement.offsetParent !== null
@@ -134,6 +134,7 @@ function PreviewDomUpdater() {
 
 		// Do not load if uid is 000...000
 		if (slideUid && slideUid !== '00000000-0000-0000-0000-000000000000') {
+			currentUrl = getPreviewUrl(slideUid)
 			if(previewVisible) {
 				// Always load preview image, because the slide could have been edited
 				tiffDecoderWorker.postMessage(currentUrl)
@@ -144,6 +145,7 @@ function PreviewDomUpdater() {
 		// Do not load if uid is 000...000
 		if (previewVisible &&
 				nextSlideUid && nextSlideUid !== '00000000-0000-0000-0000-000000000000') {
+			nextUrl = getPreviewUrl(nextSlideUid)
 			// Always load preview image, because the slide could have been edited
 			tiffDecoderWorker.postMessage(nextUrl)
 		}
@@ -180,7 +182,6 @@ function PreviewDomUpdater() {
 			showCurrentAndNext()
 		}
 	}
-	clearPreview('')
 
 	return {
 		changePreview: changePreview,

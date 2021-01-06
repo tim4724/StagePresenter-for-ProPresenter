@@ -11,8 +11,8 @@ function StageMonitorSettings() {
     const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
     const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
 
-    const checkBoxInputs = settingsGroupElement.querySelectorAll('input[type="checkbox"]')
-    const numberInputs = settingsGroupElement.querySelectorAll('input[type="number"]')
+    // const checkBoxInputs = settingsGroupElement.querySelectorAll('input[type="checkbox"]')
+    const inputs = settingsGroupElement.querySelectorAll('input, textarea')
 
     let zoomValue = 1
 
@@ -64,8 +64,8 @@ function StageMonitorSettings() {
         if (localStorage.sidebarMaxSize === undefined) {
             localStorage.sidebarMaxSize = 150
         }
-        if (localStorage.minimumVideoLength === undefined) {
-			localStorage.minimumVideoLength = '00:01:00'
+        if (localStorage.minimumVideoLengthForTimer === undefined) {
+			localStorage.minimumVideoLengthForTimer = '00:01:00'
 		}
         if (localStorage.alignLeftCharactersThreshold === undefined) {
 			localStorage.alignLeftCharactersThreshold = 60
@@ -73,13 +73,11 @@ function StageMonitorSettings() {
 
         let features = localStorage.features.split(' ')
 
-        for (const checkbox of checkBoxInputs) {
-            checkbox.checked = features.includes(checkbox.id)
-        }
-
-        for (const number of numberInputs) {
-            if(localStorage[number.id]) {
-                number.value = localStorage[number.id]
+        for (const input of inputs) {
+            if (input.type && input.type === 'checkbox') {
+                input.checked = features.includes(input.id)
+            } else if(localStorage[input.id]) {
+                input.value = localStorage[input.id]
             }
         }
 
@@ -89,8 +87,6 @@ function StageMonitorSettings() {
                 break;
             }
         }
-
-        sidebarMaxSizeInput.value = localStorage.sidebarMaxSize
 
         if (!features.includes('showPlaylist') && !features.includes('showSmallSlidePreview')
             || !features.includes('showSidebarBottom') && !features.includes('showSidebarLeft')) {
@@ -107,9 +103,6 @@ function StageMonitorSettings() {
             previewCheckboxInput.disabled = false
             playlistCheckboxInput.disabled = false
         }
-
-        alignLeftCharactersThreshold.value = localStorage.alignLeftCharactersThreshold
-        minimumVideoLengthForTimer.value = localStorage.minimumVideoLength
     }
 
     function zoomInputChanged() {
@@ -167,16 +160,12 @@ function StageMonitorSettings() {
         }
     }
 
-    function sidebarMaxSizeChanged() {
-        localStorage.sidebarMaxSize = sidebarMaxSizeInput.value
-    }
-
     function minimumVideoLengthForTimerChanged() {
         let minimumVideoLength = minimumVideoLengthForTimer.value
         if (minimumVideoLength.length == 5) {
             minimumVideoLength = minimumVideoLength + ':00'
         }
-        localStorage.minimumVideoLength = minimumVideoLength
+        localStorage.minimumVideoLengthForTimer = minimumVideoLength
     }
 
     function updateZoomPreviewIFrame() {
@@ -193,12 +182,7 @@ function StageMonitorSettings() {
         }
     }
 
-    function alignLeftCharactersThresholdChanged() {
-        localStorage.alignLeftCharactersThreshold
-            = alignLeftCharactersThreshold.value
-    }
-
-    function numberInputChanged(element) {
+    function inputChanged(element) {
         localStorage[element.id] = element.value
     }
 
@@ -209,11 +193,9 @@ function StageMonitorSettings() {
     updateZoomPreviewIFrame()
     return {
         zoomChanged: zoomInputChanged,
-        sidebarMaxSizeChanged: sidebarMaxSizeChanged,
         checkBoxChanged: checkBoxChanged,
         selectChanged: selectChanged,
         minimumVideoLengthForTimerChanged: minimumVideoLengthForTimerChanged,
-        alignLeftCharactersThresholdChanged: alignLeftCharactersThresholdChanged,
-        numberInputChanged: numberInputChanged
+        inputChanged: inputChanged
     }
 }

@@ -15,6 +15,7 @@ function LocalStorageObserver() {
 		localStorage.alignLeftCharactersThreshold = 60
 	}
 	let alignLeftCharactersThreshold = localStorage.alignLeftCharactersThreshold
+	let customCSS = undefined
 	let oldFeatures = []
 	let reloadPresentationTimeout = undefined
 
@@ -29,32 +30,9 @@ function LocalStorageObserver() {
 			localStorage.sidebarMaxSize = 150
 		}
 
-		style.innerText = ''
-		if (localStorage.presentationFontSize) {
-			const fontSize = localStorage.presentationFontSize / 100
-			style.appendChild(document.createTextNode(
-				".group:not(.groupWithLongText) { font-size: " + fontSize + "em }"))
-		}
-		if (localStorage.presentationLongTextFontSize) {
-			const fontSize = localStorage.presentationLongTextFontSize / 100
-			style.appendChild(document.createTextNode(
-				".group.groupWithLongText { font-size: " + fontSize + "em }"))
-		}
-		if (localStorage.timerFontSize) {
-			const fontSize = localStorage.timerFontSize / 100
-			style.appendChild (document.createTextNode (
-				"#timerContainer { font-size: " + fontSize + "em }"))
-			style.appendChild(document.createTextNode(
-				"#clock { font-size: " + fontSize + "em }"))
-		}
-		if (localStorage.playlistFontSize) {
-			const fontSize = localStorage.playlistFontSize / 100
-			style.appendChild(document.createTextNode(
-				"#playlist { font-size: " + fontSize + "em }"))
-		}
-
 		const oldFeatures = document.body.className.split(' ')
 		document.body.className = localStorage.features
+
 		const features = localStorage.features.split(' ')
 
 		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
@@ -77,6 +55,32 @@ function LocalStorageObserver() {
 			}
 		}
 
+		style.innerText = ''
+		let fontSizesStyle = ""
+		if (localStorage.presentationFontSize) {
+			const fontSize = localStorage.presentationFontSize / 100
+			fontSizesStyle += ".group:not(.groupWithLongText) { font-size: " + fontSize + "em }"
+		}
+		if (localStorage.presentationLongTextFontSize) {
+			const fontSize = localStorage.presentationLongTextFontSize / 100
+			fontSizesStyle += ".group.groupWithLongText { font-size: " + fontSize + "em }"
+		}
+		if (localStorage.timerFontSize) {
+			const fontSize = localStorage.timerFontSize / 100
+			fontSizesStyle += "#timerContainer { font-size: " + fontSize + "em }"
+			fontSizesStyle += "#clock { font-size: " + fontSize + "em }"
+		}
+		if (localStorage.playlistFontSize) {
+			const fontSize = localStorage.playlistFontSize / 100
+			fontSizesStyle += "#playlist { font-size: " + fontSize + "em }"
+		}
+		if (fontSizesStyle.length > 0) {
+			style.appendChild(document.createTextNode(fontSizesStyle))
+		}
+		if (localStorage.customCSS) {
+			style.appendChild(document.createTextNode(localStorage.customCSS))
+		}
+
 		window.dispatchEvent(new Event('styleChanged'))
 
 		clearTimeout(reloadPresentationTimeout)
@@ -88,12 +92,14 @@ function LocalStorageObserver() {
 
 		const parsingFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages']
 		if (parsingFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
-				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold) {
+				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
+				|| customCSS !== localStorage.customCSS) {
 			proPresenter.reloadCurrentPresentation()
 		}
 
-		alignLeftCharactersThreshold = localStorage.alignLeftCharactersThreshold
 		oldFeatures = document.body.className.split(' ')
+		alignLeftCharactersThreshold = localStorage.alignLeftCharactersThreshold
+		customCSS = localStorage.customCSS
 	}
 
 	requestAnimationFrame(update)
