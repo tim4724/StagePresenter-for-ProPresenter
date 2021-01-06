@@ -96,8 +96,12 @@ function PresentationDomUpdater() {
         const groupElement = buildGroupElement(group)
         const insertedBeforeCurrent = index <= getCurrentSlideIndex()
 
-        const elementBefore = index < groupElements.length ? groupElements[index] : nextUpContainerElement
-        presentationContainerElement.insertBefore(groupElement, elementBefore)
+        if (index < groupElements.length) {
+            const elementBefore = groupElements[index]
+            presentationContainerElement.insertBefore(groupElement, elementBefore)
+        } else {
+            presentationContainerElement.appendChild(groupElement)
+        }
 
         fixGroupNameElementPosition()
         fixSlidesTextSize()
