@@ -166,9 +166,11 @@ function ConnectionSettings() {
 		if (!ipAddress || ipAddress.length === 0 || !port || port.length === 0) {
 			showResult(proPresenterVersionElement, false, 'Invalid')
 		} else {
-			// TODO: improve
-			testWebSocketConnection(ipAddress, port, 'remote', remoteAppPassElement.value)
+			// TODO: improve?
 			testWebSocketConnection(ipAddress, port, 'stagedisplay', stageAppPassElement.value)
+			setTimeout(() => {
+				testWebSocketConnection(ipAddress, port, 'remote', remoteAppPassElement.value)
+			}, 1000)
 		}
 	}
 

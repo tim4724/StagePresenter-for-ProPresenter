@@ -107,3 +107,7 @@ select {
 input[type="text"], input[type="number"] {
     padding: 0.375em 0.75em;
 }
+
+textarea {
+    resize: vertical;
+}

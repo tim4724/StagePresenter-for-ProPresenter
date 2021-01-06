@@ -137,7 +137,7 @@
 
                     <div class='setting'>
                         <span class='settingText'>
-                            Show small Slide Preview in sidebar
+                            Show small Slide Preview
                         </span>
                         <label class='switch right'>
                             <input id='showSmallSlidePreview' type='checkbox'
@@ -153,7 +153,7 @@
                         <label class='right'>
                             <input id='sidebarMaxSize' type='number' min='30' max='1000'
                                     value="150"
-                                    oninput='stagemonitorSettings.sidebarMaxSizeChanged()'>
+                                    oninput='stagemonitorSettings.inputChanged(this)'>
                         </label>
                     </div>
 
@@ -203,7 +203,7 @@
                     Align text left if more than
                 <input id='alignLeftCharactersThreshold' type='number' min='10' max='1000'
                         value="60"
-                        oninput='stagemonitorSettings.alignLeftCharactersThresholdChanged()'>
+                        oninput='stagemonitorSettings.inputChanged(this)'>
                 characters in a line.
                 </span>
             </div>
@@ -232,7 +232,7 @@
                 </span>
                 <label class='right'>
                     <input id='presentationFontSize' type='number' min='1' max='1000'
-                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                        value="100" oninput='stagemonitorSettings.inputChanged(this)'>
                     %
                 </label>
             </div>
@@ -243,7 +243,7 @@
                 </span>
                 <label class='right'>
                     <input id='presentationLongTextFontSize' type='number' min='1' max='1000'
-                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                        value="100" oninput='stagemonitorSettings.inputChanged(this)'>
                     %
                 </label>
             </div>
@@ -254,7 +254,7 @@
                 </span>
                 <label class='right'>
                     <input id='timerFontSize' type='number' min='1' max='1000'
-                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                        value="100" oninput='stagemonitorSettings.inputChanged(this)'>
                     %
                 </label>
             </div>
@@ -265,9 +265,29 @@
                 </span>
                 <label class='right'>
                     <input id='playlistFontSize' type='number' min='1' max='1000'
-                        value="100" oninput='stagemonitorSettings.numberInputChanged(this)'>
+                        value="100" oninput='stagemonitorSettings.inputChanged(this)'>
                     %
                 </label>
+            </div>
+
+            <div class='setting'>
+                <span class='settingText'>
+                    Custom CSS
+                </span>
+
+                <textarea id="customCSS" class="right" name="customCSS" rows="6" cols="60"
+                    placeholder="/*For advanced layout customizing. E.g.*/
+.group {
+    border-radius: 8px;
+    border-color: #6b63e0;
+}
+.groupName { color: #6b63e0; }
+.bibleVerseNumber { color: #6b63e0; }
+#clock {
+    background: #ffffff;
+    color: #000000;
+}"
+                    onchange='stagemonitorSettings.inputChanged(this)'></textarea>
             </div>
         </section>
 
