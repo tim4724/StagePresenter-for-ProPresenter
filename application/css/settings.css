@@ -18,7 +18,7 @@ span, div, h1  {
 #title {
     color: #ff7c00;
     font-weight: normal;
-    margin-bottom: 0.6em;
+    margin: 0.1em;
     text-align: center;
 }
 
@@ -28,8 +28,9 @@ span, div, h1  {
 }
 
 main {
-    margin: 1em;
     display: inline-block;
+    width: 90%;
+    max-width: 1000px;
     padding: 0 1.5em 0 1.5em;
     background: #181818;
     border-radius: 0.25em;
