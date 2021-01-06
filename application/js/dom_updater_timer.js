@@ -1,7 +1,5 @@
 "use strict"
 
-const minimumVideoLengthForTimer = '00:01:00'
-
 function TimerDomUpdater() {
 	const timezoneOffsetInMinutes = new Date().getTimezoneOffset()
 
@@ -11,7 +9,7 @@ function TimerDomUpdater() {
 	const clockSeconds = document.getElementById('clockSeconds')
 	const videoTimer = document.getElementById('videoTimer')
 
-	let lastKnownVideoTimerText = '00:00'
+	let lastKnownVideoTimerText = '00:00:00'
 	let timeouts = {}
 
 	function updateClock(seconds) {
@@ -59,13 +57,16 @@ function TimerDomUpdater() {
 
 		clearTimeout(timeouts[uid])
 		timeouts[uid] = setTimeout(() => {
-			timerElement.parentElement.removeChild(timerElement)
+			const element = document.getElementById(uid)
+			if(element) {
+				element.remove()
+			}
 		}, 5000)
 	}
 
 	function updateVideo(uid, text) {
-		if (localStorage.minimumVideoLength === undefined) {
-			localStorage.minimumVideoLength = '00:01:00'
+		if (localStorage.minimumVideoLengthForTimer === undefined) {
+			localStorage.minimumVideoLengthForTimer = '00:01:00'
 		}
 		text = text.normalize()
 		const isNewVideoTimer = text > lastKnownVideoTimerText
@@ -74,14 +75,18 @@ function TimerDomUpdater() {
 			// If the video length is short, do not display a timer
 			// To avoid timers for background videos.
 			// TODO: Is there a way to improve this logic?
-			if (text < localStorage.minimumVideoLength) {
+			if (text < localStorage.minimumVideoLengthForTimer) {
+				console.log('text < localStorage.minimumVideoLengthForTimer')
+				const videoTimer = document.getElementById('videoTimer')
+				if(videoTimer) {
+					videoTimer.remove()
+				}
 				return
 			}
 		}
-
 		lastKnownVideoTimerText = text
 
-		clearTimeout('videoTimerlastKnownVideoTimerText')
+		clearTimeout(timeouts['videoTimerlastKnownVideoTimerText'])
 		timeouts['videoTimerlastKnownVideoTimerText'] = setTimeout(() => {
 			// IF timer is not updated for some time
 			lastKnownVideoTimerText = '00:00:00'
