@@ -378,7 +378,7 @@ function ProPresenter() {
                     if (index === -1 && allPresentationSlides.length > 0 && nextStageDisplaySlide &&
                             nextStageDisplaySlide.rawText === allPresentationSlides[0].rawText) {
                         // currentStageDisplaySlide is not already displayed, insert group at index 0
-                        const newGroup = Group(parseGroupName(currentStageDisplaySlide.label), '', [currentStageDisplaySlide])
+                        const newGroup = Group(currentStageDisplaySlide.label, '', [currentStageDisplaySlide])
                         insertGroupToPresentation(newGroup, 0)
                         changeCurrentSlide(0, false, true)
                         return
