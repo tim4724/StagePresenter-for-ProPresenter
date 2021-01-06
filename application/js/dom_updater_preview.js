@@ -85,7 +85,7 @@ function PreviewDomUpdater() {
 		const { url, objectURL, w, h } = ev.data
 		onObjectURLLoaded(url, objectURL)
 
-		if (w !== width || h !== height) {
+		if (w > 0 && h > 0 && (w !== width || h !== height)) {
 			width = w
 			height = h
 			renderPlaceholderImage()
