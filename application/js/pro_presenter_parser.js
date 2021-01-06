@@ -86,18 +86,18 @@ function ProPresenterParser() {
 
 		let bibleReferenceRegex
 		if (isBiblePassage) {
-			if (label === undefined) {
+			if (label === undefined || label.length === 0) {
 				bibleReferenceRegex = bibleRegex
 			} else {
-				// Matches e.g. '<label>' or '<label> (LU17)'
 				let bookAndChapter = label
 				// Book and chapter is always correct
 				const colonIndex = bookAndChapter.indexOf(':')
 				if (colonIndex > 0) {
 					bookAndChapter = bookAndChapter.substr(0, colonIndex)
 				}
-				bibleReferenceRegex = new RegExp(
-					escapeRegExp(bookAndChapter) + ':\\d+(-\\d+)?(\\s\\(.+\\))?$')
+				bibleReferenceRegex = new RegExp('^' +
+					escapeRegExp(bookAndChapter) +
+					':\\d+(-\\d+)?(\\s\\(.+\\))?$')
 			}
 		} else {
 			// Always false...
@@ -107,7 +107,7 @@ function ProPresenterParser() {
 		function removeBibleReference(strings) {
 			if (strings.length > 1) {
 				const stringsWithoutBibleRef = strings.filter(s => !bibleReferenceRegex.test(s))
-				if (label === undefined) {
+				if (label === undefined || label.length === 0) {
 					label = strings.find(s => bibleReferenceRegex.test(s))
 				}
 				if (stringsWithoutBibleRef.length > 0) {
@@ -121,8 +121,19 @@ function ProPresenterParser() {
 
 		const features = localStorage.features.split(' ')
 		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
+		const improveBiblePassages = features.includes('improveBiblePassages')
 
-		if (features.includes('improveBiblePassages')) {
+		// Remove a textbox that only contains the label
+		if (onlyFirstTextInSlide
+				&& textBoxes.length > 1
+				&& label !== undefined) {
+			if (label.length > 5 && textBoxes[0].length <= label.length + 8
+					&& textBoxes[0].startsWith(label)) {
+				textBoxes.shift()
+			}
+		}
+
+		if (improveBiblePassages) {
 			let lines
 			if (onlyFirstTextInSlide) {
 				if (isBiblePassage) {
@@ -141,7 +152,7 @@ function ProPresenterParser() {
 			function fixNewLineOfBiblePassage(lines) {
 				// Foreach line, split line on a verse number
 				// Ugly but best we can do...
-				const verseRegex = /\s(\d+)\w/g
+				const verseRegex = /\s(\d+)[a-zA-Z][\w\s]{7}/g
 				let newLines = []
 
 				for (let i = 0; i < lines.length; i++) {
@@ -211,16 +222,6 @@ function ProPresenterParser() {
 			}
 			return Slide(lines, rawText, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
-			// Remove a textbox that only contains the label
-			if (onlyFirstTextInSlide
-					&& textBoxes.length > 1
-					&& label !== undefined) {
-				if (label.length > 5 && textBoxes[0].length <= label.length + 8
-						&& textBoxes[0].startsWith(label)) {
-					textBoxes.shift()
-				}
-			}
-
 			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
 			let lines = text.trim().split('\n')
 			for (let i = 0; i < lines.length; i++) {
@@ -236,11 +237,19 @@ function ProPresenterParser() {
 		}
 
 		const presentation = data.presentation
+
+		// Matches e.g. 'Römer 8_18' or 'Römer 8_18-23 (LU17)'
+		const bibleRegex = /^.+\s\d+_\d+(-\d+)?(\s\(.+\))?$/
+		const isBiblePresentation = bibleRegex.test(presentation.presentationName)
+
 		const presentationName = parsePresentationName(presentation.presentationName)
 
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
 			const groupName = group.groupName || ''
+
+			const isBibleGroup = bibleRegex.test(groupName)
+
 			const splitSlidesInGroups = presentation.presentationSlideGroups.length === 1 && groupName.length === 0
 
 			let newSlides = []
@@ -248,7 +257,8 @@ function ProPresenterParser() {
 				const newSlide = parseSlide(
 					slide.slideText,
 					slide.slideLabel,
-					asCSSColor(slide.slideColor)
+					asCSSColor(slide.slideColor),
+					isBiblePresentation || isBibleGroup
 				)
 
 				if (splitSlidesInGroups) {
@@ -275,7 +285,10 @@ function ProPresenterParser() {
 			return 'Presentation'
 		}
 		presentationName = presentationName.trim().normalize()
+
+		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const biblePresentationNameRegex = /^((\d+).?\s?)?(.+)\s(\d+)_(\d+(-\d+)?(\s\(.+\))?)$/
+
 		const match = presentationName.match(biblePresentationNameRegex)
 		if (match) {
 			// Römer 8_12-15 -> Römer 8:12-15
