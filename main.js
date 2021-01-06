@@ -56,7 +56,7 @@ function createStageMonitorWindow(bounds) {
             nativeWindowOpen: true
         }
     })
-    stageMonitorWindow.loadFile('application/stagemonitor.html')
+    stageMonitorWindow.loadFile(`${__dirname}/application/stagemonitor.html`)
     function newWindow(event, url, frameName, disposition, options, additionalFeatures) {
         event.preventDefault()
         createSettingsWindow()
@@ -102,7 +102,7 @@ function createSettingsWindow () {
             enableRemoteModule: true
         },
     })
-    settingsWindow.loadFile('application/settings.html')
+    settingsWindow.loadFile(`${__dirname}/application/settings.html`)
     settingsWindow.once('close', function (ev) {
         if (ev === settingsWindow) {
             settingsWindow = undefined
