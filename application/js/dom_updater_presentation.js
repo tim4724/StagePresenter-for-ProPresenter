@@ -117,14 +117,14 @@ function PresentationDomUpdater() {
 
             const firstLine = groupElement.querySelector('.line')
             const groupNameOffsetRight = groupNameElement.offsetLeft + groupNameElement.offsetWidth
-            if (firstLine && firstLine.offsetLeft <= groupNameOffsetRight) {
+            if (firstLine && firstLine.offsetLeft < groupNameOffsetRight) {
                 groupNameElement.style.position = ''
             }
         }
     }
 
     function fixSlidesTextSize() {
-        const presentationContainerElementHeight = presentationContainerElement.clientHeight
+        const availableHeight = presentationContainerElement.clientHeight
 
         const nextUpContainerElementStyleDisplay = nextUpContainer.style.display
         nextUpContainer.style.display = 'block'
@@ -133,7 +133,7 @@ function PresentationDomUpdater() {
 
             const slideElements = groupElement.querySelectorAll('.slide')
             for (let i = 0; i < slideElements.length; i++) {
-                let maxHeight = presentationContainerElementHeight
+                let maxHeight = availableHeight
                 if (i === 0) {
                     maxHeight -= groupNameElement.scrollHeight + 6
                 }
@@ -263,28 +263,39 @@ function PresentationDomUpdater() {
             return
         }
 
-        const presentationContainerElementHeight = presentationContainerElement.clientHeight
+        const availableHeight = presentationContainerElement.clientHeight
         const isFirstSlideInGroup = slide.parentElement.querySelector('.slide') === slide
 
         const slideBoundingRect = slide.getBoundingClientRect()
         let deltaY = undefined
-        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerElementHeight * 0.8)) {
-            // Just a small offfset to make it look good
+
+        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (availableHeight * 0.8)) {
             // Whole group is fits in screen or this is the first slide
             deltaY = slide.parentElement.getBoundingClientRect().top
-        } else if (slide.offsetHeight < presentationContainerElementHeight * 0.6) {
-            const groupDeltaY = slide.parentElement.getBoundingClientRect().top
-            // TODO: Calculate offset to be the height of 2 lines
-            const offset = presentationContainerElementHeight * 0.2
-            deltaY = Math.max(groupDeltaY, slideBoundingRect.top - offset)
         } else {
-            deltaY = slideBoundingRect.top
+            const currentSlideIndex = Array.prototype.indexOf.call(slideElements, slide)
+            const prevSlideHeight = slideElements[currentSlideIndex - 1].scrollHeight
+            if (slide.offsetHeight < availableHeight * 0.8 - prevSlideHeight) {
+                const groupDeltaY = slide.parentElement.getBoundingClientRect().top
+                const groupBorderWidth = getComputedStyle(slide.parentElement, null)
+                    .getPropertyValue('border-top-width')
+                const prevSlideDeltaY = slideBoundingRect.top - prevSlideHeight - parseInt(groupBorderWidth)
+                deltaY = Math.max(groupDeltaY, prevSlideDeltaY)
+            } else {
+                deltaY = slideBoundingRect.top
+            }
         }
 
         if (animate) {
-            if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= presentationContainerElementHeight) {
+            // TODO: if first line is visible, scroll slow
+            // Colossians 1:1-29 verse 3 -> verse 4
+            if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= availableHeight) {
                 const duration = Math.abs(deltaY) * 2
-                scroller.scroll(0 | deltaY, duration)
+                scroller.scroll(0 | deltaY, Math.max(duration, 300))
+            } else if (slideBoundingRect.top >= 0 && slideBoundingRect.top <= availableHeight) {
+                // Atlease some of the next slide is visible...
+                // TODO Improve...
+                scroller.scroll(0 | deltaY, 300)
             } else {
                 scroller.scroll(0 | deltaY, 200)
             }

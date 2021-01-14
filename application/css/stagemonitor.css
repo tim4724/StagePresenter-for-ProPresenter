@@ -103,18 +103,3 @@ main {
     font-size: 3em;
     margin: 8px;
 }
-
-#nextUpContainer {
-    display: none;
-    position: absolute;
-    bottom: 4px;
-    right: 0;
-    padding: 4px 16px;
-    z-index: -1;
-    font-size: 3.5em;
-    color: #994a00;
-    background: #000000;
-}
-
-#nextUp {
-}
