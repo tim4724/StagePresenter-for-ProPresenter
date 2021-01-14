@@ -268,12 +268,15 @@ function PresentationDomUpdater() {
 
         const slideBoundingRect = slide.getBoundingClientRect()
         let deltaY = undefined
-        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerElementHeight * 0.9)) {
+        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (presentationContainerElementHeight * 0.8)) {
             // Just a small offfset to make it look good
             // Whole group is fits in screen or this is the first slide
             deltaY = slide.parentElement.getBoundingClientRect().top
         } else if (slide.offsetHeight < presentationContainerElementHeight * 0.6) {
-            deltaY = slideBoundingRect.top - presentationContainerElementHeight * 0.2
+            const groupDeltaY = slide.parentElement.getBoundingClientRect().top
+            // TODO: Calculate offset to be the height of 2 lines
+            const offset = presentationContainerElementHeight * 0.2
+            deltaY = Math.max(groupDeltaY, slideBoundingRect.top - offset)
         } else {
             deltaY = slideBoundingRect.top
         }
