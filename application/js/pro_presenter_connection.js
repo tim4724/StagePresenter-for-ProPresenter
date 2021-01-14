@@ -378,7 +378,8 @@ function ProPresenter() {
                     if (index === -1 && allPresentationSlides.length > 0 && nextStageDisplaySlide &&
                             nextStageDisplaySlide.rawText === allPresentationSlides[0].rawText) {
                         // currentStageDisplaySlide is not already displayed, insert group at index 0
-                        const newGroup = Group(currentStageDisplaySlide.label, '', [currentStageDisplaySlide])
+                        const name = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
+                        const newGroup = Group(name, '', [currentStageDisplaySlide])
                         insertGroupToPresentation(newGroup, 0)
                         changeCurrentSlide(0, false, true)
                         return
@@ -388,7 +389,8 @@ function ProPresenter() {
                     if (index >= 0 && index === currentSlideIndex + 1 && index + 1 === allPresentationSlides.length) {
                         if (nextStageDisplaySlide) {
                             // nextStageDisplaySlide is not already on screen, therefore append a new group to presentation
-                            const newGroup = Group(nextStageDisplaySlide.label, '', [nextStageDisplaySlide])
+                            const name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
+                            const newGroup = Group(name, '', [nextStageDisplaySlide])
                             insertGroupToPresentation(newGroup, index + 1)
                         }
                         // Scroll to new slide
@@ -406,9 +408,11 @@ function ProPresenter() {
             }
 
             // Build a presentation to display
-            let groups = [Group(currentStageDisplaySlide.label, '', [currentStageDisplaySlide])]
+            const currentName = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
+            let groups = [Group(currentName, '', [currentStageDisplaySlide])]
             if (nextStageDisplaySlide) {
-                groups.push(Group(nextStageDisplaySlide.label, '', [nextStageDisplaySlide]))
+                const nextName = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
+                groups.push(Group(nextName, '', [nextStageDisplaySlide]))
             }
             // TODO: presentation has text?
             const presentation = Presentation(undefined, groups)

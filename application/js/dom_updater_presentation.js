@@ -124,12 +124,28 @@ function PresentationDomUpdater() {
     }
 
     function fixSlidesTextSize() {
-        const maxSlideHeight = presentationContainerElement.parentElement.clientHeight - 128
+        const presentationContainerElementHeight = presentationContainerElement.clientHeight
 
-        for (const slideElement of slideElements) {
-            slideElement.style.fontSize = '1em'
-            fontSizeReducer(slideElement, maxSlideHeight)
+        const nextUpContainerElementStyleDisplay = nextUpContainer.style.display
+        nextUpContainer.style.display = 'block'
+        for (const groupElement of groupElements) {
+            const groupNameElement = groupElement.querySelector('.groupName')
+
+            const slideElements = groupElement.querySelectorAll('.slide')
+            for (let i = 0; i < slideElements.length; i++) {
+                let maxHeight = presentationContainerElementHeight
+                if (i === 0) {
+                    maxHeight -= groupNameElement.scrollHeight + 6
+                }
+                if (i === slideElements.length - 1) {
+                    maxHeight -= nextUpContainerElement.scrollHeight + 6
+                }
+
+                slideElements[i].style.fontSize = '1em'
+                fontSizeReducer(slideElements[i], maxHeight)
+            }
         }
+        nextUpContainer.style.display = nextUpContainerElementStyleDisplay
     }
 
     function buildGroupElement(group) {
@@ -139,7 +155,7 @@ function PresentationDomUpdater() {
 
         const groupNameElement = document.createElement('div')
         groupNameElement.classList.add('groupName')
-        groupNameElement.innerHTML = group.name
+        groupNameElement.innerText = group.name
         groupNameElement.style.color = group.color
         groupElement.appendChild(groupNameElement)
 

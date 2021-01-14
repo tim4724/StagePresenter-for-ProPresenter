@@ -142,8 +142,7 @@ function screenConfigChanged() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
     // TODO: Only first launch ?
-    // TODO: Only on mac?
-    if (app.isPackaged) {
+    if (app.isPackaged && !app.isInApplicationsFolder()) {
         app.moveToApplicationsFolder({
           conflictHandler: (conflictType) => {
             if (conflictType === 'exists') {

@@ -10,8 +10,6 @@ function StageMonitorSettings() {
     const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
     const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
     const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
-
-    // const checkBoxInputs = settingsGroupElement.querySelectorAll('input[type="checkbox"]')
     const inputs = settingsGroupElement.querySelectorAll('input, textarea')
 
     let zoomValue = 1
