@@ -31,13 +31,13 @@
 }
 
 .groupName {
-    color: #ffde3b;
+    display: block;
     text-align: left;
-    font-size: 0.5em;
     margin-top: 4px;
     margin-left: 14px;
-    display: block;
     left: 12px;
+    color: #ffde3b;
+    font-size: 0.5em;
 }
 
 .emptyGroup {
@@ -104,4 +104,19 @@
 
 .group:last-of-type {
     margin-bottom: 3em;
+}
+
+#nextUpContainer {
+    display: none;
+    position: absolute;
+    bottom: 4px;
+    right: 0;
+    padding: 4px 16px;
+    z-index: -1;
+    font-size: 3.5em;
+    color: #909090;
+    background: #000000;
+}
+
+#nextUp {
 }
