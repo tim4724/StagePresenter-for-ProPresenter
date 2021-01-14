@@ -38,8 +38,8 @@ function renderPreviewImage(text, width, height) {
 	context.fillStyle = "#111111"
 	context.fill()
 	if (text && text.length > 0) {
-		if (text.length > 26) {
-			text = text.substr(0, 24) + '...'
+		if (text.length > 22) {
+			text = text.substr(0, 20) + '...'
 		}
 		const fontArgs = context.font.split(' ')
 

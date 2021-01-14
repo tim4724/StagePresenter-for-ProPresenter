@@ -123,13 +123,17 @@ function ProPresenterParser() {
 		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
 		const improveBiblePassages = features.includes('improveBiblePassages')
 
-		// Remove a textbox that only contains the label
-		if (onlyFirstTextInSlide
-				&& textBoxes.length > 1
-				&& label !== undefined) {
-			if (label.length > 5 && textBoxes[0].length <= label.length + 8
-					&& textBoxes[0].startsWith(label)) {
-				textBoxes.shift()
+		// Remove a textbox that only contains the label of the slide
+		if (label !== undefined && label.length > 5 && textBoxes.length > 1) {
+			// We search the label in the textBoxes
+			let sortedTextBoxes = textBoxes.filter(
+				t => t.length > label.length + 8
+				&& !t.trim().includes('\n')
+				&& t.startsWith(label))
+			sortedTextBoxes.sort((a, b) => a.length - b.length)
+			if(sortedTextBoxes.length > 0) {
+				label = sortedTextBoxes[0]
+				textBoxes.splice(textBoxes.indexOf(label), 1)
 			}
 		}
 
@@ -138,42 +142,52 @@ function ProPresenterParser() {
 			if (onlyFirstTextInSlide) {
 				if (isBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
-					lines = removeBibleReference(textBoxes[0].trim().split('\n'))
-				} else {
-					lines = textBoxes[0].trim().split('\n')
 				}
+				lines = textBoxes[0].trim().split('\n')
 			} else {
 				lines = textBoxes.join('\n').trim().split('\n')
-				if (isBiblePassage) {
-					lines = removeBibleReference(lines)
-				}
+			}
+			if (isBiblePassage) {
+				lines = removeBibleReference(lines)
 			}
 
-			function fixNewLineOfBiblePassage(lines) {
+			function fixNewLineOfBiblePassage(lines, minMatches=2) {
 				// Foreach line, split line on a verse number
 				// Ugly but best we can do...
-				const verseRegex = /\s(\d+)[a-zA-Z][\w\s]{7}/g
+				const verseRegex = /(^|\s)(\d+)[^\d\n\r].{6}/g
 				let newLines = []
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i]
+
 					let matches = [...line.matchAll(verseRegex)]
 
+					let verseNumbersAndIndices = []
 					let previousVerseNumber = undefined
-					let previousIndex = 0
-
 					for (let i = 0; i < matches.length; i++) {
 						const match = matches[i]
-						const verseNumber = parseInt(match[1])
-						const index = match.index
-						if (!previousVerseNumber ||
-								previousVerseNumber + 1 === verseNumber ||
-								previousVerseNumber === verseNumber) {
-							if (index !== 0) {
+						const verseNumber = parseInt(match[2])
+						if(verseNumber > 176) {
+							// 176 is the highest verse number in the bible
+							continue
+						}
+						if (!previousVerseNumber
+								|| previousVerseNumber + 1 === verseNumber
+								|| previousVerseNumber === verseNumber) {
+							previousVerseNumber = verseNumber
+							verseNumbersAndIndices.push([verseNumber, match.index])
+						}
+					}
+
+					let previousIndex = 0
+					if(verseNumbersAndIndices.length >= minMatches) {
+						for (let i = 0; i < verseNumbersAndIndices.length; i++) {
+							const verseNumber = verseNumbersAndIndices[i][0]
+							const index = verseNumbersAndIndices[i][1]
+							if (index > 0) {
 								newLines.push(line.substring(previousIndex, index).trim())
 							}
 							previousIndex = index
-							previousVerseNumber = verseNumber
 						}
 					}
 					newLines.push(line.substring(previousIndex, line.length).trim())
@@ -187,7 +201,7 @@ function ProPresenterParser() {
 			let firstVerseNumber = undefined
 			let lastVerseNumber = undefined
 
-			const verseNumberRegex = /^(\d+)(\w.*)/
+			const verseNumberRegex = /^(\d+)([^\d\n\r].*$)/
 			if (lines.some(l => verseNumberRegex.test(l))) {
 				bibleVerseNumbers = []
 				for (let i = 0; i < lines.length; i++) {
@@ -250,7 +264,9 @@ function ProPresenterParser() {
 
 			const isBibleGroup = bibleRegex.test(groupName)
 
-			const splitSlidesInGroups = presentation.presentationSlideGroups.length === 1 && groupName.length === 0
+			const splitSlidesInGroups = presentation.presentationSlideGroups.length === 1
+				&& group.groupSlides.length > 1
+				&& groupName.length === 0
 
 			let newSlides = []
 			for (const slide of group.groupSlides) {
@@ -308,6 +324,9 @@ function ProPresenterParser() {
 	}
 
 	function parseGroupName(groupName) {
+		if(groupName === undefined) {
+			return ''
+		}
 		groupName = (groupName || '').trim().normalize()
 		const bibleGroupNameRegex = /^((\d+).?\s?)?(.+)\s(\d+):(\d+(-\d+)?(\s\(.+\))?)$/u
 		const match = groupName.match(bibleGroupNameRegex)
@@ -347,6 +366,7 @@ function ProPresenterParser() {
 		parsePlaylistAndIndex: parsePlaylistAndIndex,
 		parsePresentation: parsePresentation,
 		parseSlide: parseSlide,
+		parseGroupName: parseGroupName,
 		parseStageDisplayCurrentAndNext: parseStageDisplayCurrentAndNext
 	}
 }

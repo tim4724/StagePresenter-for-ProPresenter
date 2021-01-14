@@ -45,12 +45,12 @@
     opacity: 0;
 }
 
-.groupWithLongText {
-    text-align: start;
-}
-
 .groupWithLongText .slide .text, .slide.biblePassage .text {
     padding: 8px 0;
+}
+
+.groupWithLongText, .slide.biblePassage {
+    text-align: start;
 }
 
 .slide {
@@ -81,8 +81,9 @@
     display: inline-block;
 }
 
-.slide.biblePassage {
-    text-align: start;
+.flexibleSlides .slide.biblePassage .line,
+.flexibleSlides .groupWithLongText .slide .line {
+    display: block;
 }
 
 .bibleVerseNumber {
