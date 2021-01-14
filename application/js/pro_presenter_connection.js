@@ -143,6 +143,17 @@ function ProPresenter() {
                     case 'audioTriggered':
                         onAudioTriggered(data)
                         break
+                    case 'clearAudio':
+                        // No use for that information at the moment
+                        break
+                    case 'clearAll':
+                        // Also frame value (fv) with uid 000...000 on
+                        // stageWebSocketwill be recieved, this will hide text
+
+                        // Clear the preview because
+                        // nothing is displayed at the moment
+                        previewDomUpdater.clearPreview("")
+                        break
                     default:
                         console.log('Unknown action', data.action)
                         break
