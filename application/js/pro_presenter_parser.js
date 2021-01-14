@@ -221,19 +221,7 @@ function ProPresenterParser() {
 			}
 
 			// Fix slidelabel to show wich verses are actually in slide
-			if (firstVerseNumber && /.+\s\d+:/.test(label)) {
-				const parts = label.match(/.+\s\d+:\d+(-\d+)?(\s\(.+\))$/)
-				const translation = parts ? parts[2] : undefined
-
-				const bookAndChapter = label.match(/.+\s\d+:/)[0]
-				label = bookAndChapter + firstVerseNumber
-				if (lastVerseNumber && lastVerseNumber != firstVerseNumber) {
-					label += '-' + lastVerseNumber
-				}
-				if(translation) {
-					label += ' ' + translation.trim()
-				}
-			}
+			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
 			return Slide(lines, rawText, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
 			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
@@ -243,6 +231,23 @@ function ProPresenterParser() {
 			}
 			return Slide(lines, rawText, label, color, isBiblePassage, undefined)
 		}
+	}
+
+	function fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label) {
+		if (firstVerseNumber && /.+\s\d+:/.test(label)) {
+			const parts = label.match(/.+\s\d+:\d+(-\d+)?(\s\(.+\))$/)
+			const translation = parts ? parts[2] : undefined
+
+			const bookAndChapter = label.match(/.+\s\d+:/)[0]
+			label = bookAndChapter + firstVerseNumber
+			if (lastVerseNumber && lastVerseNumber > firstVerseNumber) {
+				label += '-' + lastVerseNumber
+			}
+			if(translation) {
+				label += ' ' + translation.trim()
+			}
+		}
+		return label
 	}
 
 	function parsePresentation(data) {
@@ -260,9 +265,11 @@ function ProPresenterParser() {
 
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
-			const groupName = group.groupName || ''
+			let groupName = parseGroupName(group.groupName || '')
 
-			const isBibleGroup = bibleRegex.test(groupName)
+			// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
+			let bibleRegex_colon = /^.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
+			const isBibleGroup = bibleRegex_colon.test(groupName)
 
 			const splitSlidesInGroups = presentation.presentationSlideGroups.length === 1
 				&& group.groupSlides.length > 1
@@ -289,7 +296,27 @@ function ProPresenterParser() {
 
 			if (!splitSlidesInGroups) {
 				const groupColor = asCSSColor(group.groupColor)
-				newGroups.push(Group(parseGroupName(groupName), groupColor, newSlides))
+				if(isBibleGroup) {
+					let firstVerseNumber = undefined
+					let lastVerseNumber = undefined
+					for (const slide of newSlides) {
+						if(!slide.bibleVerseNumbers) {
+							continue
+						}
+                        const bibleVerseNumbers = slide.bibleVerseNumbers
+							.filter(n =>  n && n.length > 0)
+
+                        if(bibleVerseNumbers.length > 0) {
+							if (firstVerseNumber === undefined) {
+								firstVerseNumber = bibleVerseNumbers[0]
+							}
+						    lastVerseNumber = bibleVerseNumbers[bibleVerseNumbers.length - 1]
+                        }
+					}
+                    groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
+				}
+				// TODO: Fix verse numbers of group?
+				newGroups.push(Group(groupName, groupColor, newSlides))
 			}
 		}
 
