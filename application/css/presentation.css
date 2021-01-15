@@ -88,18 +88,18 @@
 
 .bibleVerseNumber {
     color: #ffde3b;
-    /* Average space width is 0.25em http://jkorpela.fi/styles/spaces.html */
     margin-right: 0.25em;
-    font-size: 0.8em
+    font-size: 0.8em;
 }
 
 .currentGroup {
-    color: #ffffff;
+    color: #efefef;
 }
 
 .currentSlide {
     border-color: #ffffff;
     background: #111111;
+    color: #ffffff;
 }
 
 .group:last-of-type {
