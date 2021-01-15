@@ -99,6 +99,9 @@
 .currentSlide {
     border-color: #ffffff;
     background: #111111;
+}
+
+.currentGroup .currentSlide {
     color: #ffffff;
 }
 
