@@ -296,26 +296,23 @@ function ProPresenterParser() {
 
 			if (!splitSlidesInGroups) {
 				const groupColor = asCSSColor(group.groupColor)
-				if(isBibleGroup) {
-					let firstVerseNumber = undefined
-					let lastVerseNumber = undefined
-					for (const slide of newSlides) {
-						if(!slide.bibleVerseNumbers) {
-							continue
-						}
-                        const bibleVerseNumbers = slide.bibleVerseNumbers
-							.filter(n =>  n && n.length > 0)
+				if(isBibleGroup
+					&& newSlides.length > 0
+					&& newSlides[0].bibleVerseNumbers) {
+					const firstSlide = newSlides[0]
 
-                        if(bibleVerseNumbers.length > 0) {
-							if (firstVerseNumber === undefined) {
-								firstVerseNumber = bibleVerseNumbers[0]
-							}
-						    lastVerseNumber = bibleVerseNumbers[bibleVerseNumbers.length - 1]
-                        }
+					let firstVerseNumber = firstSlide.bibleVerseNumbers[0]
+					if (!firstVerseNumber && firstSlide.bibleVerseNumbers[1]) {
+						firstVerseNumber = parseInt(firstSlide.bibleVerseNumbers[1]) - 1
 					}
-                    groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
+
+					if (firstVerseNumber && !isNaN(firstVerseNumber)) {
+						const lastSlide = newSlides[newSlides.length - 1]
+						const lastIndex = lastSlide.bibleVerseNumbers.length - 1
+						let lastVerseNumber = lastSlide.bibleVerseNumbers[lastIndex]
+	                    groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
+					}
 				}
-				// TODO: Fix verse numbers of group?
 				newGroups.push(Group(groupName, groupColor, newSlides))
 			}
 		}
