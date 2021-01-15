@@ -258,49 +258,70 @@ function PresentationDomUpdater() {
             // Only empty groups that are not visible, do not scroll
             return
         }
-        const slide = presentationContainerElement.querySelector('.currentSlide')
-        if (!slide) {
+        const slideElement = presentationContainerElement.querySelector('.currentSlide')
+        if (!slideElement) {
             return
         }
+        const groupElement = slideElement.parentElement
 
         const availableHeight = presentationContainerElement.clientHeight
-        const isFirstSlideInGroup = slide.parentElement.querySelector('.slide') === slide
+        const isFirstSlideInGroup = groupElement.querySelector('.slide') === slideElement
 
-        const slideBoundingRect = slide.getBoundingClientRect()
-        let deltaY = undefined
+        let scrollDeltaY = undefined
 
-        if (isFirstSlideInGroup || slide.parentElement.offsetHeight < (availableHeight * 0.8)) {
-            // Whole group is fits in screen or this is the first slide
-            deltaY = slide.parentElement.getBoundingClientRect().top
+        if (isFirstSlideInGroup || groupElement.scrollHeight < (availableHeight * 0.8)) {
+            // Whole group is fits on the screen or this is the first slide
+            scrollDeltaY = groupElement.getBoundingClientRect().top
         } else {
-            const currentSlideIndex = Array.prototype.indexOf.call(slideElements, slide)
+            const slideTop = slideElement.getBoundingClientRect().top
+            const slideHeight = slideElement.scrollHeight
+            const currentSlideIndex = Array.prototype.indexOf.call(slideElements, slideElement)
             const prevSlideHeight = slideElements[currentSlideIndex - 1].scrollHeight
-            if (slide.offsetHeight < availableHeight * 0.8 - prevSlideHeight) {
-                const groupDeltaY = slide.parentElement.getBoundingClientRect().top
-                const groupBorderWidth = getComputedStyle(slide.parentElement, null)
-                    .getPropertyValue('border-top-width')
-                const prevSlideDeltaY = slideBoundingRect.top - prevSlideHeight - parseInt(groupBorderWidth)
-                deltaY = Math.max(groupDeltaY, prevSlideDeltaY)
+            if (prevSlideHeight + slideHeight * 0.5 < availableHeight * 0.5) {
+                // Enough screen available for prev slide and next slide on the screen
+                const groupTop = groupElement.getBoundingClientRect().top
+                const prevSlideTop = slideTop - prevSlideHeight
+                scrollDeltaY = Math.max(groupTop, prevSlideTop)
             } else {
-                deltaY = slideBoundingRect.top
+                if (slideHeight < availableHeight * 0.7) {
+                    scrollDeltaY = slideTop - (availableHeight - slideHeight) * 0.3
+                } else {
+                    // Not much space left, show slide at the top of the screen
+                    scrollDeltaY = slideTop
+                }
             }
         }
 
         if (animate) {
-            // TODO: if first line is visible, scroll slow
-            // Colossians 1:1-29 verse 3 -> verse 4
-            if (slideBoundingRect.top >= 0 && slideBoundingRect.bottom <= availableHeight) {
-                const duration = Math.abs(deltaY) * 2
-                scroller.scroll(0 | deltaY, Math.max(duration, 300))
-            } else if (slideBoundingRect.top >= 0 && slideBoundingRect.top <= availableHeight) {
-                // Atlease some of the next slide is visible...
-                // TODO Improve...
-                scroller.scroll(0 | deltaY, 300)
+            let isAlreadyVisible = false
+            const firstText = slideElement.querySelector('.line .text')
+            if (firstText) {
+                const top = firstText.getBoundingClientRect().top
+                if (top >= 0) {
+                    const fontSize = getComputedStyle(firstText).fontSize
+                    // Rough estimation of a line height
+                    // fontSize * 1.5 should be a little more than a line height
+                    const bottom = top + parseInt(fontSize) * 1.5
+                    isAlreadyVisible = bottom <= availableHeight
+                } else {
+                    isAlreadyVisible = false
+                }
             } else {
-                scroller.scroll(0 | deltaY, 200)
+                // Fallback if no text is in the line...
+                const { top, bottom } = slideElement.getBoundingClientRect()
+                isAlreadyVisible = top >= 0 && bottom <= availableHeight
+            }
+
+            if (isAlreadyVisible) {
+                // Textline is already visible, scroll slow... :)
+                const duration = Math.abs(scrollDeltaY) * 2
+                scroller.scroll(0 | scrollDeltaY, Math.max(duration, 300))
+            } else {
+                // Textline is not visible, scroll fast
+                scroller.scroll(0 | scrollDeltaY, 200)
             }
         } else {
-            presentationContainerElement.scrollTop += deltaY
+            presentationContainerElement.scrollTop += scrollDeltaY
         }
     }
 
