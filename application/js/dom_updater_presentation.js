@@ -73,6 +73,7 @@ function PresentationDomUpdater() {
                 if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
                     groupElements[0].style.display = 'none'
                 }
+                // TODO: Remove empty groups at the end?
             }
 
             fixGroupNameElementPosition()
@@ -135,9 +136,11 @@ function PresentationDomUpdater() {
             for (let i = 0; i < slideElements.length; i++) {
                 let maxHeight = availableHeight
                 if (i === 0) {
+                    // TODO: Use real border with instead of hardcoded 6
                     maxHeight -= groupNameElement.scrollHeight + 6
                 }
                 if (i === slideElements.length - 1) {
+                    // TODO: Use real border with instead of hardcoded 6
                     maxHeight -= nextUpContainerElement.scrollHeight + 6
                 }
 
@@ -189,6 +192,11 @@ function PresentationDomUpdater() {
 
                 lineSpan.appendChild(textSpan)
                 slideElement.appendChild(lineSpan)
+
+                if (line.length <= 0) {
+                    // Empty line in slide. Ensure that there is a line break.
+                    slideElement.appendChild(document.createElement('br'))
+                }
             }
 
             groupElement.appendChild(slideElement)
@@ -197,7 +205,8 @@ function PresentationDomUpdater() {
         if (group.containsBiblePassage) {
             groupElement.classList.add('groupWithBiblePassage')
         }
-        if (group.slides.length == 0 || !group.slides.every(s => s.lines.some(l => l.length > 0))) {
+        if (group.slides.length == 0 || 
+                group.slides.every(s => s.lines.every(l => l.length === 0))) {
             groupElement.classList.add('emptyGroup')
         }
         return groupElement
@@ -240,14 +249,9 @@ function PresentationDomUpdater() {
 
         if (nextUpElement.innerText.length > 0) {
             const slide = newSlide ? newSlide : oldSlide
-            const lastSlide = slideElements[slideElements.length - 1]
-            const isLastSlide = slide === lastSlide
-
             const lastGroup = groupElements[groupElements.length -1]
-            const isLastGroupAndNotEmpty = slide && lastGroup === slide.parentElement &&
-                !lastGroup.classList.contains('emptyGroup')
-            const showNextUp = isLastSlide || isLastGroupAndNotEmpty
-            nextUpContainerElement.style.display = showNextUp ? 'inherit' : 'none'
+            const isLastGroup = slide && lastGroup === slide.parentElement
+            nextUpContainerElement.style.display = isLastGroup ? 'inherit' : 'none'
         } else {
             nextUpContainerElement.style.display = 'none'
         }
@@ -266,29 +270,22 @@ function PresentationDomUpdater() {
 
         const availableHeight = presentationContainerElement.clientHeight
         const isFirstSlideInGroup = groupElement.querySelector('.slide') === slideElement
-
+        const isLastSlideOfPresentation = slideElement === slideElements[slideElements.length - 1]
         let scrollDeltaY = undefined
 
+        const groupTop = groupElement.getBoundingClientRect().top
         if (isFirstSlideInGroup || groupElement.scrollHeight < (availableHeight * 0.8)) {
             // Whole group is fits on the screen or this is the first slide
-            scrollDeltaY = groupElement.getBoundingClientRect().top
+            scrollDeltaY = groupTop
         } else {
             const slideTop = slideElement.getBoundingClientRect().top
             const slideHeight = slideElement.scrollHeight
-            const currentSlideIndex = Array.prototype.indexOf.call(slideElements, slideElement)
-            const prevSlideHeight = slideElements[currentSlideIndex - 1].scrollHeight
-            if (prevSlideHeight + slideHeight * 0.5 < availableHeight * 0.5) {
-                // Enough screen available for prev slide and next slide on the screen
-                const groupTop = groupElement.getBoundingClientRect().top
-                const prevSlideTop = slideTop - prevSlideHeight
-                scrollDeltaY = Math.max(groupTop, prevSlideTop)
+            if (isLastSlideOfPresentation || slideHeight > (availableHeight * 0.8)) {
+                scrollDeltaY = Math.max(slideTop, groupTop)
             } else {
-                if (slideHeight < availableHeight * 0.7) {
-                    scrollDeltaY = slideTop - (availableHeight - slideHeight) * 0.3
-                } else {
-                    // Not much space left, show slide at the top of the screen
-                    scrollDeltaY = slideTop
-                }
+                const remaining = availableHeight - slideHeight
+                scrollDeltaY = slideTop - (remaining * 0.33)
+                scrollDeltaY = Math.max(scrollDeltaY, groupTop)
             }
         }
 
