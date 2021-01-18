@@ -34,15 +34,14 @@
     display: block;
     text-align: left;
     margin-top: 4px;
-    margin-left: 14px;
+    margin-left: 8px;
     left: 12px;
     color: #ffde3b;
     font-size: 0.5em;
 }
 
 .emptyGroup {
-    animation: none;
-    opacity: 0;
+    visibility: hidden;
 }
 
 .groupWithLongText .slide .text, .slide.biblePassage .text {
