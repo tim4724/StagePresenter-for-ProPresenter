@@ -108,17 +108,22 @@
     margin-bottom: 3em;
 }
 
-#nextUpContainer {
+#nextUp:before {
+    content: "↳ ";
+}
+
+#nextUp {
     display: none;
     position: absolute;
     bottom: 4px;
     right: 0;
-    padding: 4px 16px;
+    max-width: 50%;
+    overflow: hidden;
     z-index: -1;
+    padding: 4px 16px;
     font-size: 3.5em;
     color: #909090;
     background: #000000;
-}
-
-#nextUp {
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }

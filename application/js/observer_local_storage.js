@@ -8,7 +8,7 @@ function LocalStorageObserver() {
 	}
 
 	const sidebarContainerElement = document.getElementById('sidebar')
-	const nextUpContainerElement = document.getElementById('nextUpContainer')
+	const nextUpElement = document.getElementById('nextUp')
 	const clockElement = document.getElementById('clock')
 
 	if (localStorage.alignLeftCharactersThreshold === undefined) {
@@ -37,7 +37,7 @@ function LocalStorageObserver() {
 
 		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
 			const clockWidth = clockElement.scrollWidth
-			nextUpContainerElement.style.right = clockWidth + 'px'
+			nextUpElement.style.right = clockWidth + 'px'
 			sidebarContainerElement.style.maxWidth = ''
 			sidebarContainerElement.style.maxHeight = ''
 		} else {

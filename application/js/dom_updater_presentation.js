@@ -1,7 +1,6 @@
 "use strict"
 
 function PresentationDomUpdater() {
-    const nextUpContainerElement = document.getElementById('nextUpContainer')
     const nextUpElement = document.getElementById('nextUp')
     const presentationContainerElement = document.getElementById('presentationContainer')
     const scroller = Scroller(presentationContainerElement)
@@ -35,7 +34,7 @@ function PresentationDomUpdater() {
     function displayPresentation(presentation, slideIndex, animate) {
         if (animate) {
             presentationContainerElement.style.opacity = 0
-            nextUpContainerElement.style.display = 'none'
+            nextUpElement.style.display = 'none'
             setTimeout(() => {
                 display()
                 presentationContainerElement.style.opacity = 1
@@ -45,7 +44,7 @@ function PresentationDomUpdater() {
                 }, 150)
             }, 300)
         } else {
-            nextUpContainerElement.style.display = 'none'
+            nextUpElement.style.display = 'none'
             display()
             presentationContainerElement.scrollTop = 0
             changeCurrentSlideAndScroll(slideIndex, false)
@@ -83,13 +82,12 @@ function PresentationDomUpdater() {
 
     function setNextPresentationTitle(nextTitle) {
         if(nextTitle && nextTitle.length > 0) {
-            if (nextTitle.length > 27) {
-                nextTitle = nextTitle.substring(0, 24) + '...'
-            }
+            // TODO: set max-width for nextTitle
+            // TODO: set nexttitle line overflow ellipsis
             nextUpElement.innerText = nextTitle
         } else {
             nextUpElement.innerText = ''
-            nextUpContainerElement.style.display = 'none'
+            nextUpElement.style.display = 'none'
         }
     }
 
@@ -127,8 +125,8 @@ function PresentationDomUpdater() {
     function fixSlidesTextSize() {
         const availableHeight = presentationContainerElement.clientHeight
 
-        const nextUpContainerElementStyleDisplay = nextUpContainer.style.display
-        nextUpContainer.style.display = 'block'
+        const nextUpElementStyleDisplay = nextUpElement.style.display
+        nextUpElement.style.display = 'block'
         for (const groupElement of groupElements) {
             const groupNameElement = groupElement.querySelector('.groupName')
 
@@ -141,14 +139,14 @@ function PresentationDomUpdater() {
                 }
                 if (i === slideElements.length - 1) {
                     // TODO: Use real border with instead of hardcoded 6
-                    maxHeight -= nextUpContainerElement.scrollHeight + 6
+                    maxHeight -= nextUpElement.scrollHeight + 6
                 }
 
                 slideElements[i].style.fontSize = '1em'
                 fontSizeReducer(slideElements[i], maxHeight)
             }
         }
-        nextUpContainer.style.display = nextUpContainerElementStyleDisplay
+        nextUpElement.style.display = nextUpElementStyleDisplay
     }
 
     function buildGroupElement(group) {
@@ -220,7 +218,7 @@ function PresentationDomUpdater() {
     function changeCurrentSlideAndScroll(slideIndex, animate = true) {
         if (!slideElements || slideElements.length === 0) {
             if (nextUpElement.innerText.length > 0) {
-                nextUpContainerElement.style.display = 'inherit'
+                nextUpElement.style.display = 'inherit'
             }
             return
         }
@@ -251,9 +249,9 @@ function PresentationDomUpdater() {
             const slide = newSlide ? newSlide : oldSlide
             const lastGroup = groupElements[groupElements.length -1]
             const isLastGroup = slide && lastGroup === slide.parentElement
-            nextUpContainerElement.style.display = isLastGroup ? 'inherit' : 'none'
+            nextUpElement.style.display = isLastGroup ? 'inherit' : 'none'
         } else {
-            nextUpContainerElement.style.display = 'none'
+            nextUpElement.style.display = 'none'
         }
     }
 
