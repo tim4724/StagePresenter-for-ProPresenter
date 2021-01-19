@@ -140,7 +140,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 
 .timer {
     font-size: 5em;
-    padding: 0 0.1em;
+    padding: 0 0.15em;
 }
 
 .showSidebarBottom #timerContainer .timer {
@@ -181,7 +181,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
     background: #ffffff;
     color: #000000;
     font-size: 1em;
-    padding: 0 0.1em;
+    padding: 0 0.75em;
 }
 
 .timerMode0 {
@@ -199,19 +199,18 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 .timerModeVideo {
     background: #69c0ff;
     color: #000000;
-    order: -1;
 }
 
 #clockHoursMinutes {
     font-size: 5em;
-    padding-left: 0.1em;
+    padding-left: 0em;
     padding-right: 0.1em;
-    background: inherit:
+    background: inherit;
 }
 
 #clockSeconds {
     padding-left: 0.1em;
-    padding-right: 0.1em;
+    padding-right: 0em;
     font-size: 3em;
     background: inherit;
 }
