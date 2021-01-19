@@ -96,6 +96,7 @@ function TimerDomUpdater() {
 
 	function forceShowVideo() {
 		lastKnownVideoTimerText = '99:99:99'
+		clearTimeout(timeouts['videoTimerlastKnownVideoTimerText'])
 		timeouts['videoTimerlastKnownVideoTimerText'] = setTimeout(() => {
 			// IF timer is not updated for some time
 			lastKnownVideoTimerText = '00:00:00'
