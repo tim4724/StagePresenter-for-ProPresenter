@@ -41,7 +41,7 @@ function LocalStorageObserver() {
 			sidebarContainerElement.style.maxWidth = ''
 			sidebarContainerElement.style.maxHeight = ''
 		} else {
-			nextUpContainerElement.style.right = ''
+			nextUpElement.style.right = ''
 
 			if (features.includes('showSidebarBottom')) {
 				sidebarContainerElement.style.maxWidth = ''

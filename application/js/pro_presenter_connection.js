@@ -114,11 +114,8 @@ function ProPresenter() {
                         if (!currentPlaylist || ev.data !== currentPlaylistDataCache) {
                             currentPlaylistDataCache = ev.data
                             onNewPlaylistAll(data)
-                        } else if (!undefinedToEmpty(currentPresentationPath).startsWith(currentPlaylist.location)) {
-                            const itemIndex = currentPlaylist.items.findIndex(item => item.location === currentPresentationPath)
-                            playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
-                            const nextItem = currentPlaylist.items[itemIndex + 1]
-                            presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
+                        } else {
+                            updateCurrentPlaylistItem()
                         }
                         break
                     case 'presentationCurrent':
@@ -272,12 +269,12 @@ function ProPresenter() {
         currentPlaylist = playlist
         if (playlist) {
             playlistDomUpdater.displayPlaylist(playlist, index)
-            const nextItem = playlist.items[index + 1]
-            presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
         } else {
             playlistDomUpdater.clear()
             presentationDomUpdater.clearNextPresentationTitle()
         }
+
+        updateCurrentPlaylistItem()
     }
 
     function onNewSlideIndex(data) {
@@ -457,16 +454,7 @@ function ProPresenter() {
                                 animate) {
         if (newPresentationPath !== currentPresentationPath) {
             currentPresentationPath = newPresentationPath
-            if (currentPlaylist && currentPlaylist.items && newPresentationPath.startsWith(currentPlaylist.location)) {
-                const itemIndex = currentPlaylist.items.findIndex(item => item.location === currentPresentationPath)
-                playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
-
-                const nextItem = currentPlaylist.items[itemIndex + 1]
-                presentationDomUpdater.setNextPresentationTitle(nextItem ? nextItem.text : undefined)
-            } else {
-                playlistDomUpdater.changeCurrentItemAndScroll(-1)
-                presentationDomUpdater.clearNextPresentationTitle()
-            }
+            updateCurrentPlaylistItem()
         }
         currentSlideIndex = newSlideIndex
         currentSlideCleared = newSlideCleared
@@ -487,6 +475,27 @@ function ProPresenter() {
             presentationDomUpdater.displayPresentation(newPresentation, newSlideIndex, animate)
         } else {
             presentationDomUpdater.changeCurrentSlideAndScroll(newSlideCleared ? -1 : newSlideIndex, animate)
+        }
+    }
+
+    function updateCurrentPlaylistItem() {
+        if (currentPlaylist &&
+            currentPlaylist.items &&
+            currentPresentationPath &&
+            currentPresentationPath.startsWith(currentPlaylist.location)) {
+
+            const items = currentPlaylist.items
+            const itemIndex = items.findIndex(i => i.location === currentPresentationPath)
+            playlistDomUpdater.changeCurrentItemAndScroll(itemIndex)
+
+            let nextItemText = undefined
+            if (itemIndex >= 0 && (itemIndex + 1) < items.length) {
+                nextItemText = items[itemIndex + 1].text
+            }
+            presentationDomUpdater.setNextPresentationTitle(nextItemText)
+        } else {
+            playlistDomUpdater.changeCurrentItemAndScroll(-1)
+            presentationDomUpdater.clearNextPresentationTitle()
         }
     }
 

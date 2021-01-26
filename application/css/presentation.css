@@ -108,7 +108,7 @@
     margin-bottom: 3em;
 }
 
-#nextUp:before {
+#nextUp::before {
     content: "↳ ";
 }
 
