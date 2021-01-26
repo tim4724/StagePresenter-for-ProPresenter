@@ -308,8 +308,11 @@ function ProPresenterParser() {
 
 					if (firstVerseNumber && !isNaN(firstVerseNumber)) {
 						const lastSlide = newSlides[newSlides.length - 1]
-						const lastIndex = lastSlide.bibleVerseNumbers.length - 1
-						let lastVerseNumber = lastSlide.bibleVerseNumbers[lastIndex]
+						let lastVerseNumber = undefined
+						if (lastSlide && lastSlide.bibleVerseNumbers) {
+							const lastIndex = lastSlide.bibleVerseNumbers.length - 1
+							lastVerseNumber = lastSlide.bibleVerseNumbers[lastIndex]
+						}
 	                    groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
 					}
 				}
