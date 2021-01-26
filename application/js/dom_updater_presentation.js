@@ -203,8 +203,10 @@ function PresentationDomUpdater() {
         if (group.containsBiblePassage) {
             groupElement.classList.add('groupWithBiblePassage')
         }
-        if (group.slides.length == 0 || 
-                group.slides.every(s => s.lines.every(l => l.length === 0))) {
+        if (group.slides.length == 0) {
+            // TODO: hide completely? (display none)
+            groupElement.classList.add('emptyGroup')
+        } else if (group.slides.every(s => s.lines.every(l => l.length === 0))) {
             groupElement.classList.add('emptyGroup')
         }
         return groupElement
@@ -245,10 +247,16 @@ function PresentationDomUpdater() {
             scrollToCurrentSlide(animate)
         }
 
-        if (nextUpElement.innerText.length > 0) {
-            const slide = newSlide ? newSlide : oldSlide
-            const lastGroup = groupElements[groupElements.length -1]
-            const isLastGroup = slide && lastGroup === slide.parentElement
+        const slide = newSlide ? newSlide : oldSlide
+        if (nextUpElement.innerText.length > 0 && slide) {
+            let lastNotEmptyGroup = undefined
+            for (let i = groupElements.length - 1; i >= 0; i--) {
+                if (!groupElements[i].classList.contains('emptyGroup')) {
+                    lastNotEmptyGroup = groupElements[i]
+                    break
+                }
+            }
+            const isLastGroup = lastNotEmptyGroup === slide.parentElement
             nextUpElement.style.display = isLastGroup ? 'inherit' : 'none'
         } else {
             nextUpElement.style.display = 'none'
@@ -282,7 +290,7 @@ function PresentationDomUpdater() {
                 scrollDeltaY = Math.max(slideTop, groupTop)
             } else {
                 const remaining = availableHeight - slideHeight
-                scrollDeltaY = slideTop - (remaining * 0.33)
+                scrollDeltaY = slideTop - (remaining * (1 / 3))
                 scrollDeltaY = Math.max(scrollDeltaY, groupTop)
             }
         }
