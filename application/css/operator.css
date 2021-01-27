@@ -1,0 +1,43 @@
+html {
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    text-align: center;
+    background: #000000;
+    color: #ffffff;
+    margin: 0;
+    user-select: none;
+    height: 100vh;
+    display: flex;
+}
+
+table {
+    width: 100%;
+}
+
+tr {
+    width: 100%;
+}
+
+.action {
+    width: 64px;
+}
+
+table button, table select {
+    width: 100%
+}
+
+#currentPresentation {
+
+}
+
+#currentSlide {
+
+}
