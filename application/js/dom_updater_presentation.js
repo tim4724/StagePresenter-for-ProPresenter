@@ -249,14 +249,17 @@ function PresentationDomUpdater() {
 
         const slide = newSlide ? newSlide : oldSlide
         if (nextUpElement.innerText.length > 0 && slide) {
-            let lastNotEmptyGroup = undefined
+            let isLastGroup = false
             for (let i = groupElements.length - 1; i >= 0; i--) {
+                if (groupElements[i] === slide.parentElement) {
+                    isLastGroup = true
+                    break
+                }
                 if (!groupElements[i].classList.contains('emptyGroup')) {
-                    lastNotEmptyGroup = groupElements[i]
                     break
                 }
             }
-            const isLastGroup = lastNotEmptyGroup === slide.parentElement
+
             nextUpElement.style.display = isLastGroup ? 'inherit' : 'none'
         } else {
             nextUpElement.style.display = 'none'
