@@ -56,25 +56,18 @@ function StageDisplaySlide(uid, text) {
 function ProPresenterParser() {
 	const onlyFirstTextInSlide = true
 
-	function parsePlaylistAndIndex(data, currentPresentationPath) {
-		let playlist = undefined
-		if (data.playlistAll.length === 1) {
-			playlist = data.playlistAll[0]
-		} else if (currentPresentationPath) {
-			const currentLocation = currentPresentationPath.split(':')[0]
-			playlist = data.playlistAll.find(p => p.playlistLocation === currentLocation)
+	function parsePlaylists(data) {
+		let newPlaylists = []
+		for (const playlist of data.playlistAll) {
+			const newItems = playlist.playlist.map(function (item) {
+				const isHeader = item.playlistItemType === 'playlistItemTypeHeader'
+				const name = parsePresentationName(item.playlistItemName, true)
+				return PlaylistItem(name, isHeader, item.playlistItemLocation)
+			})
+			const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
+			newPlaylists.push(newPlaylist)
 		}
-		if (!playlist) {
-			return [undefined, -1]
-		}
-		const newItems = playlist.playlist.map(function (item) {
-			const isHeader = item.playlistItemType === 'playlistItemTypeHeader'
-			const name = parsePresentationName(item.playlistItemName, true)
-			return PlaylistItem(name, isHeader, item.playlistItemLocation)
-		})
-		const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
-		const currentIndex = newItems.findIndex(item => item.location === currentPresentationPath)
-		return [newPlaylist, currentIndex]
+		return newPlaylists
 	}
 
 	function parseSlide(rawText, label, color, assumeIsBiblePassage = false) {
@@ -390,7 +383,7 @@ function ProPresenterParser() {
 	}
 
 	return {
-		parsePlaylistAndIndex: parsePlaylistAndIndex,
+		parsePlaylists: parsePlaylists,
 		parsePresentation: parsePresentation,
 		parseSlide: parseSlide,
 		parseGroupName: parseGroupName,
