@@ -94,7 +94,7 @@ function LocalStorageObserver() {
 		if (parsingFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
 				|| customCSS !== localStorage.customCSS) {
-			proPresenter.reloadCurrentPresentation()
+			ProPresenter().reloadCurrentPresentation()
 		}
 
 		oldFeatures = document.body.className.split(' ')

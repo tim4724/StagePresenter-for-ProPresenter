@@ -3,15 +3,21 @@ const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu } = require('elec
 
 const dockMenu = Menu.buildFromTemplate([
     {
-        label: 'Settings',
+        label: 'Open Settings',
         click () { createSettingsWindow() }
+    },
+    {
+        label: 'Open Controller',
+        click () { createOperatorWindow() }
     }
 ])
 
+let tray = undefined
 let dummyWindow = undefined
 let waitingForDisplay = undefined
 let stageMonitorWindow = undefined
 let settingsWindow = undefined
+let operatorWindow = undefined
 
 if (!app.isPackaged) {
     // Enable live reload for Electron too
@@ -20,6 +26,10 @@ if (!app.isPackaged) {
         electron: require(`${__dirname}/node_modules/electron`)
     })
 }
+
+app.setAboutPanelOptions({
+    authors: ['Tim Vogel']
+})
 
 ipcMain.on('displaySelected', (event, arg) => {
     if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
@@ -47,8 +57,9 @@ function createStageMonitorWindow(bounds) {
         fullscreen: true,
         backgroundColor: '#000000',
         darkTheme: true,
-        frame: !app.isPackaged,
+        frame: false,
         title: 'Stagemonitor',
+        show: false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -56,6 +67,11 @@ function createStageMonitorWindow(bounds) {
             nativeWindowOpen: true
         }
     })
+
+    // When showing the operator window, this line is important to keep the
+    // stageMonitorWindow always in fullscreen always on top on mac os
+    stageMonitorWindow.setAlwaysOnTop(true, "pop-up-menu")
+
     stageMonitorWindow.loadFile(`${__dirname}/application/stagemonitor.html`)
     function newWindow(event, url, frameName, disposition, options, additionalFeatures) {
         event.preventDefault()
@@ -76,10 +92,20 @@ function createStageMonitorWindow(bounds) {
             stageMonitorWindow.webContents.removeListener('new-window', newWindow)
             stageMonitorWindow.removeListener('move', move)
             stageMonitorWindow = undefined
+            if (operatorWindow != undefined && !operatorWindow.isDestroyed()) {
+                operatorWindow.close()
+            }
         }
     })
     stageMonitorWindow.once('closed', function (ev) {
         checkIfShouldQuit()
+    })
+    stageMonitorWindow.show()
+
+    localStorageGet("showOperatorWindow").then(showOperatorWindow => {
+        if (showOperatorWindow === 'true') {
+            createOperatorWindow()
+        }
     })
 }
 
@@ -103,15 +129,91 @@ function createSettingsWindow () {
         },
     })
     settingsWindow.loadFile(`${__dirname}/application/settings.html`)
-    settingsWindow.once('close', function (ev) {
-        if (ev === settingsWindow) {
-            settingsWindow = undefined
-            if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
-                stageMonitorWindow.webContents.endFrameSubscription()
-            }
+    settingsWindow.once('closed', function (ev) {
+        checkIfShouldQuit()
+    })
+}
+
+async function createOperatorWindow () {
+    if (operatorWindow && !operatorWindow.isDestroyed()) {
+        operatorWindow.close()
+    }
+
+    const boundsValue = await localStorageGet("operatorWindowBounds")
+
+    let bounds = {x: undefined, y: undefined, width: 384, height: 128}
+    if (boundsValue != undefined && boundsValue.length > 0) {
+        const v = boundsValue.split(';')
+        const b = {x: parseInt(v[0]), y: parseInt(v[1]),
+            width: parseInt(v[2]), height: parseInt(v[3])}
+        const display = screen.getDisplayMatching(b)
+        const intersectAmount = rectIntersectionAmount(display.bounds, b)
+        if (intersectAmount / (b.width * b.height) > 0.5) {
+            bounds = b
+        }
+    }
+    operatorWindow = new BrowserWindow({
+        backgroundColor: '#000000',
+        opacity: 0.7,
+        darkTheme: true,
+        title: 'Stagemonitor Controller',
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        show: false, // Important!
+        alwaysOnTop: true,
+        fullscreen: false,
+        maximizable: false,
+    })
+    // Important to set visible on all workspaces with visibleOnFullScreen
+    operatorWindow.setVisibleOnAllWorkspaces(true, {visibleOnFullScreen: true})
+    operatorWindow.loadFile(`${__dirname}/application/operator.html`)
+
+    // Show window after setting things up
+    operatorWindow.show()
+    localStorageSet("showOperatorWindow", true)
+
+    // Set initial position to the bottom right
+    if (bounds.x == undefined || bounds.y == undefined) {
+        const pos = operatorWindow.getPosition()
+        const display = screen.getDisplayNearestPoint({x: pos[0], y: pos[1]})
+        bounds.x = display.bounds.x + display.bounds.width - bounds.width
+        bounds.y = display.bounds.y + display.bounds.height - bounds.height
+    }
+    // Always set the position explicitly, because mac is reluctant sometimes
+    operatorWindow.setPosition(bounds.x, bounds.y, true)
+
+    // Gets automatically hidden for any reason, therefore show dock again
+    app.dock.show()
+
+    function focus() {
+        operatorWindow.setOpacity(1.0)
+    }
+    operatorWindow.on('focus', focus)
+    function blur() {
+        operatorWindow.setOpacity(0.7)
+    }
+    operatorWindow.on('blur', blur)
+
+    operatorWindow.once('close', function (ev) {
+        if (ev.sender === operatorWindow) {
+            const b = operatorWindow.getBounds()
+            const value = b.x + ";" + b.y + ";" + b.width + ";" + b.height
+            localStorageSet("operatorWindowBounds", value)
+            operatorWindow = undefined
+            setTimeout(function() {
+                if (stageMonitorWindow != undefined && !stageMonitorWindow.isDestroyed()) {
+                    console.log("showOperatorWindow -> false")
+                    // StageMonitorWindow window has not been destroyed
+                    // This means only the operator window was closed
+                    // Therefore do not show it automatically, next time
+                    localStorageSet("showOperatorWindow", false)
+                }
+            }, 0)
         }
     })
-    settingsWindow.once('closed', function (ev) {
+    operatorWindow.once('closed', function (ev) {
         checkIfShouldQuit()
     })
 }
@@ -208,10 +310,26 @@ function checkIfShouldQuit() {
 }
 
 function localStorageGet(key) {
-    return dummyWindow.webContents.executeJavaScript('localStorage.' + key);
+    return dummyWindow.webContents.executeJavaScript('localStorage.' + key)
+}
+
+function localStorageSet(key, value) {
+    if (dummyWindow != undefined && !dummyWindow.isDestroyed()) {
+        const script = 'localStorage.' + key + ' = "' + value + '"'
+        dummyWindow.webContents.executeJavaScript(script)
+    } else {
+        console.log("localStorageSet failed; Dummy window is undefined or destroyed...")
+    }
 }
 
 function getDisplayById(id) {
     // Do not use '===' !
     return screen.getAllDisplays().find(d => d.id == id)
+}
+
+function rectIntersectionAmount(a, b) {
+    const max = Math.max
+    const min = Math.min
+    return max(0, max(a.x + a.width, b.x + b.width) - min(a.x, b.x)) *
+        max(0, max(a.y + a.height, b.y + b.height) - min(a.y, b.y));
 }

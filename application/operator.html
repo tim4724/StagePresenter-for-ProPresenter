@@ -3,57 +3,44 @@
 
 <head>
     <meta charset='utf-8'>
-    <title>Stage Monitor Operator</title>
+    <title>Stagemonitor Controller</title>
     <link rel='stylesheet' href='css/operator.css'>
+    <script src='js/operator.js'></script>
 </head>
 
-<body onload='' class="">
+<body onload='operator = Operator(); operator.requestState()'>
 
     <table>
         <tr>
-            <td id="currentPresentation">
-                <select name="playlist" id="playlist">
-                    <optgroup label="Lobpreis">
-                      <option value="volvo">One thing remains</option>
-                      <option value="saab">Deine Nähe</option>
-                    </optgroup>
-                    <optgroup label="Predigt">
-                      <option value="mercedes">Mark 1:4-8</option>
-                      <option value="audi">Matthäus 1:4-8</option>
-                    </optgroup>
-                </select>
-            </td>
-            <td class="action"><button id="previousPresentation">Previous</button></td>
-            <td class="action"><button id="nextPresentation">Next</button></td>
-            <td class="action"><button id="clearPresentation">Clear</button></td>
+            <td id="currentPlaylist"><select id="playlists"></select></td>
         </tr>
 
         <tr>
-            <td id="currentSlide">
-                <select name="slides" id="slides">
-                    <optgroup label="Verse">
-                      <option value="volvo">Slide 1</option>
-                      <option value="saab">Slide 2</option>
-                      <option value="volvo">Slide 3</option>
-                      <option value="saab">Slide 4</option>
-                    </optgroup>
-                    <optgroup label="Chorus" style="background: #ff00ff;">
-                      <option value="mercedes" style="background: #ff00ff;">Slide 5</option>
-                      <option value="audi">Slide 6</option>
-                      <option value="mercedes">Slide 7</option>
-                      <option value="audi">Slide 8</option>
-                    </optgroup>
-                    <optgroup label="Bridge">
-                      <option value="mercedes">Slide 9</option>
-                      <option value="audi">Slide 10</option>
-                      <option value="mercedes">Slide 1</option>
-                      <option value="audi">Slide 12</option>
-                    </optgroup>
-                </select>
+            <td id="currentPresentation"><select id="presentations"></select></td>
+            <td class="action">
+                <button id="previousPresentation" onclick="operator.prevPresentation()">
+                    Previous
+                </button>
+                </td>
+            <td class="action">
+                <button id="nextPresentation" onclick="operator.nextPresentation()">
+                    Next
+                </button>
+                </td>
+            <td class="action">
+                <button id="clearPresentation" onclick="operator.clearPresentation()">
+                    Clear
+                </button>
             </td>
-            <td class="action"><button id="slideUp" >Up</button></td>
-            <td class="action"><button id="slideDown">Down</button></td>
-            <td class="action"><button id="slideClear">Clear</button></td>
+        </tr>
+        <tr>
+            <td id="currentSlide"><select id="slides"></select></td>
+            <td class="action">
+                <button id="slideUp" onclick="operator.prevSlide()">Up</button>
+            </td>
+            <td class="action">
+                <button id="slideDown" onclick="operator.nextSlide()">Down</button>
+            </td>
         </tr>
     </table>
 

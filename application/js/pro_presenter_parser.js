@@ -20,7 +20,6 @@ function Presentation(name, groups) {
 	return {
 		name: name,
 		groups: groups,
-		hasText: () => groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
 	}
 }
 

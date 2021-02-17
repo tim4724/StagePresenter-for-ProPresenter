@@ -12,11 +12,62 @@ function WebSocketConnectionState(isConnected = false,
     }
 }
 
+const stateBroadcastChannel = BroadcastChannel ? new BroadcastChannel('state') : undefined
+if (stateBroadcastChannel !== undefined) {
+    stateBroadcastChannel.onmessage = (ev) => {
+        const action = ev.data.action
+        const value = ev.data.value
+        switch (action) {
+            case 'updateRequest':
+                if (stateManagerInstance !== undefined) {
+                    const state = stateManagerInstance.getState()
+                    stateBroadcastChannel.postMessage({
+                        action: 'stateUpdate',
+                        value: state
+                    })
+                }
+                break
+
+            case 'playlistIndexAndItemIndex':
+                if (stateManagerInstance !== undefined &&
+                        proPresenterInstance !== undefined) {
+                    const playlistIndex = value.playlistIndex
+                    const playlist = stateManagerInstance.getPlaylist(playlistIndex)
+                    if (playlist !== undefined) {
+                        const item = playlist.items[value.playlistItemIndex]
+                        const presentationPath = item.location
+                        stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
+                        proPresenterInstance.loadPresentation(presentationPath)
+                    }
+                }
+                break
+
+            case 'presentationAndSlideIndex':
+                stateManagerInstance.onNewSlideIndex('', value.slideIndex, true)
+                stateManagerInstance.onNewPresentation(value.presentation, '', true)
+                stateManagerInstance.clearPreview()
+                break
+
+            case 'slideIndex':
+                if (stateManagerInstance !== undefined) {
+                    const presentationPath = stateManagerInstance.getCurrentPresentationPath()
+                    stateManagerInstance.onNewSlideIndex(presentationPath, value, true)
+                    stateManagerInstance.clearPreview()
+                }
+                break
+        }
+    }
+}
+
+let stateManagerInstance = undefined
 function StagemonitorStateManager() {
+    if (stateManagerInstance !== undefined) {
+        return stateManagerInstance
+    }
+
     const presentationDomUpdater = PresentationDomUpdater()
     const playlistDomUpdater = PlaylistDomUpdater()
     const previewDomUpdater = PreviewDomUpdater()
-    const stateUpdateBroadcast = BroadcastChannel ? new BroadcastChannel('stateUpdate') : undefined
 
     let currentPlaylists = []
     let currentPlaylistIndex = -1
@@ -28,8 +79,22 @@ function StagemonitorStateManager() {
     let currentSlideIndex = -1
     let currentSlideCleared = false
 
-    let currentSlideUid = undefined
-    let message = undefined
+    let currentSlideUid = undefined // TODO: what about next slide uid?
+    let message = undefined // TODO: fix
+
+    function getState() {
+        return {
+            currentPlaylists: currentPlaylists,
+            currentPlaylistIndex: currentPlaylistIndex,
+            currentPlaylistItemIndex: currentPlaylistItemIndex,
+            currentPresentation: currentPresentation,
+            currentPresentationPath: currentPresentationPath,
+            currentSlideIndex: currentSlideIndex,
+            currentSlideCleared: currentSlideCleared,
+            currentSlideUid: currentSlideUid,
+            message: message,
+        }
+    }
 
     function getPlaylist(playlistIndex) {
         if (currentPlaylists.length === 1) {
@@ -70,6 +135,18 @@ function StagemonitorStateManager() {
                 currentPlaylistItemIndex = playlistItemIndex
             }
         }
+
+        stateBroadcastChannel.postMessage({
+            action: 'playlistIndexAndItemIndex',
+            value: {
+                playlistIndex: currentPlaylistIndex,
+                playlistItemIndex: currentPlaylistItemIndex
+            }
+        })
+    }
+
+    function hasText(presentation) {
+        return presentation.groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
     }
 
     function onNewPreview(slideUid, nextSlideUid) {
@@ -85,6 +162,9 @@ function StagemonitorStateManager() {
         let playlistIndex = currentPlaylistIndex
         currentPlaylists = playlists
         currentPlaylistIndex = -1
+
+        stateBroadcastChannel.postMessage({action: 'playlists', value: playlists})
+
         updatePlaylistAndNextTitle(playlistIndex)
     }
 
@@ -93,10 +173,10 @@ function StagemonitorStateManager() {
         currentPresentationPath = path
 
         const playlistIndex = currentPlaylists.findIndex(p => path.startsWith(p.location))
-        updatePlaylistAndNextTitle(playlistIndex)
+        updatePlaylistAndNextTitle(playlistIndex >= 0 ? playlistIndex : currentPlaylistIndex)
 
         // Update preview Dom Updater
-        if (presentation.hasText()) {
+        if (hasText(presentation)) {
             previewDomUpdater.hideLargePreview()
         } else {
             previewDomUpdater.showLargePreview()
@@ -104,9 +184,13 @@ function StagemonitorStateManager() {
 
         // Update presentation
         presentationDomUpdater.displayPresentation(presentation, currentSlideIndex, animate)
+        stateBroadcastChannel.postMessage({action: 'presentationAndSlideIndex', value: {
+            presentation: presentation,
+            slideIndex: currentSlideIndex
+        }})
     }
 
-    function onNewMediaPresentation(presentation, timerDomUpdater) {
+    function onNewMediaPresentation(presentation, forceShow=false) {
         const name = presentation.name
         let presentationPath = ''
 
@@ -118,13 +202,15 @@ function StagemonitorStateManager() {
             }
         }
 
-        if (presentationPath.length > 0 || 
-                !currentPresentation ||
-                !currentPresentation.hasText()) {
+        if (forceShow ||
+            presentationPath.length > 0 || 
+            !currentPresentation ||
+            !hasText(currentPresentation)) {
            onNewPresentation(presentation, presentationPath, true)
            previewDomUpdater.clearPreview(name)
-           timerDomUpdater.forceShowVideo()
+           return true
         }
+        return false
     }
 
     function onNewSlideIndex(presentationPath, index, animate = true) {
@@ -133,6 +219,7 @@ function StagemonitorStateManager() {
 
         if (currentPresentationPath === presentationPath) {
             presentationDomUpdater.changeCurrentSlideAndScroll(index, animate)
+            stateBroadcastChannel.postMessage({action: 'slideIndex', value: index})
         } else {
             // Wait till presentation is loaded...
             console.log("Do not change current slide, first load presentation")
@@ -140,27 +227,38 @@ function StagemonitorStateManager() {
     }
 
     function clearSlideIndex(animate = true) {
+        stateBroadcastChannel.postMessage({action: 'clearSlideIndex', value: undefined})
         currentSlideCleared = true
         presentationDomUpdater.changeCurrentSlideAndScroll(-1, animate)
     }
 
-    return {
+    stateManagerInstance = {
         onNewPreview: onNewPreview,
         clearPreview: clearPreview,
         onNewPlaylists: onNewPlaylists,
         onNewPresentation: onNewPresentation,
-        onMediaPresentation: onNewMediaPresentation,
+        onNewMediaPresentation: onNewMediaPresentation,
         onNewSlideIndex: onNewSlideIndex,
         clearSlideIndex: clearSlideIndex,
-        getPresentationPath: () => currentPresentationPath
+        getPlaylist: getPlaylist,
+        getCurrentPresentationPath: () => currentPresentationPath,
+        getState: getState
     }
+    return stateManagerInstance
 }
 
+let proPresenterInstance = undefined
 function ProPresenter() {
-    const proPresenterParser = ProPresenterParser()
+    if (proPresenterInstance !== undefined) {
+        return proPresenterInstance
+    }
+
     const state = StagemonitorStateManager()
-    const errorDomUpdater = ErrorDomUpdater()
+    const proPresenterParser = ProPresenterParser()
+
+    // TODO: move to statemanager?
     const messageDomUpdater = MessageDomUpdater()
+    const errorDomUpdater = ErrorDomUpdater()
     const timerDomUpdater = TimerDomUpdater()
 
     let remoteWebsocketConnectionState = WebSocketConnectionState()
@@ -362,7 +460,10 @@ function ProPresenter() {
 
                     const presentationPath = data.presentationPath
                     const presentation = proPresenterParser.parsePresentation(data)
-                    const animate = currentPresentationDataCache === undefined || presentation.hasText()
+                    function hasText(presentation) {
+                        return presentation.groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
+                    }
+                    const animate = currentPresentationDataCache === undefined || hasText(presentation)
                     state.onNewPresentation(presentation, presentationPath, animate)
 
                     // TODO: Better send playlistRequestAll in a fix interval?
@@ -384,7 +485,10 @@ function ProPresenter() {
                 remoteWebSocket.send(Actions.presentationRequest(presentationPath))
                 break
             case 'audioTriggered':
-                state.onMediaPresentation(Presentation(data.audioName, []), timerDomUpdater)
+                const mediaPresentationDisplayed = state.onNewMediaPresentation(Presentation(data.audioName, []))
+                if (mediaPresentationDisplayed) {
+                    timerDomUpdater.forceShowVideo()
+                }
                 break
             case 'clearAudio':
                 // No use for that information at the moment
@@ -440,16 +544,20 @@ function ProPresenter() {
         // TODO
     }
 
-    function reloadCurrentPresentation() {
+    function loadPresentation(presentationPath) {
         currentPresentationDataCache = undefined
-        let presentationPath = state.getPresentationPath()
-        remoteWebSocket.send(Actions.presentationRequest(presentationPath))
+        if (remoteWebSocket !== undefined) {
+            remoteWebSocket.send(Actions.presentationRequest(presentationPath))
+        }
     }
 
-    return {
+    proPresenterInstance = {
         connect: connect,
         exportState: exportState,
         importState: importState,
-        reloadCurrentPresentation: reloadCurrentPresentation
+        loadPresentation: loadPresentation,
+        // TODO: test reloadCurrentPresentation
+        reloadCurrentPresentation: () => loadPresentation(state.getCurrentPresentationPath())
     }
+    return proPresenterInstance
 }
