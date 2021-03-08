@@ -35,9 +35,8 @@ if (stateBroadcastChannel !== undefined) {
                     const playlist = stateManagerInstance.getPlaylist(playlistIndex)
                     if (playlist !== undefined) {
                         const item = playlist.items[value.playlistItemIndex]
-                        const presentationPath = item.location
-
                         if (item.type == 'playlistItemTypePresentation') {
+                            const presentationPath = item.location
                             stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
                             proPresenterInstance.loadPresentation(presentationPath)
                         } else {
@@ -77,6 +76,7 @@ function StagemonitorStateManager() {
     const presentationDomUpdater = PresentationDomUpdater()
     const playlistDomUpdater = PlaylistDomUpdater()
     const previewDomUpdater = PreviewDomUpdater()
+    const messageDomUpdater = MessageDomUpdater()
 
     let currentPlaylists = []
     let currentPlaylistIndex = -1
@@ -89,7 +89,7 @@ function StagemonitorStateManager() {
     let currentSlideCleared = false
 
     let currentSlideUid = undefined // TODO: what about next slide uid?
-    let message = undefined // TODO: fix
+    let stageMessage = undefined
 
     function getState() {
         return {
@@ -244,6 +244,11 @@ function StagemonitorStateManager() {
         presentationDomUpdater.changeCurrentSlideAndScroll(-1, animate)
     }
 
+    function onNewMessage(text) {
+        stageMessage = text
+        messageDomUpdater.updateMessage(stageMessage)
+    }
+
     stateManagerInstance = {
         onNewPreview: onNewPreview,
         clearPreview: clearPreview,
@@ -252,9 +257,12 @@ function StagemonitorStateManager() {
         onNewMediaPresentation: onNewMediaPresentation,
         onNewSlideIndex: onNewSlideIndex,
         clearSlideIndex: clearSlideIndex,
+        onNewMessage: onNewMessage,
         getPlaylist: getPlaylist,
         getCurrentPresentationPath: () => currentPresentationPath,
-        getState: getState
+        getCurrentPresentation: () => currentPresentation,
+        getCurrentSlideIndex: () => currentSlideIndex,
+        getState: getState,
     }
     return stateManagerInstance
 }
@@ -265,11 +273,10 @@ function ProPresenter() {
         return proPresenterInstance
     }
 
-    const state = StagemonitorStateManager()
+    const stateManager = StagemonitorStateManager()
     const proPresenterParser = ProPresenterParser()
 
     // TODO: move to statemanager?
-    const messageDomUpdater = MessageDomUpdater()
     const errorDomUpdater = ErrorDomUpdater()
     const timerDomUpdater = TimerDomUpdater()
 
@@ -283,6 +290,8 @@ function ProPresenter() {
 
     let currentPlaylistDataCache = undefined
     let currentPresentationDataCache = undefined
+
+    let displaySlidesFromStageDisplayTimeout = undefined
 
     const Actions = {
         playlistRequestAll: JSON.stringify({action: 'playlistRequestAll'}),
@@ -438,7 +447,7 @@ function ProPresenter() {
                 timerDomUpdater.updateVideo(data.uid, data.txt)
                 break
             case 'msg':
-                messageDomUpdater.updateMessage(data.txt)
+                stateManager.onNewMessage(data.txt)
                 break
             default:
                 console.log('Unknown action', data.acn)
@@ -462,7 +471,7 @@ function ProPresenter() {
             case 'playlistRequestAll':
                 if (data_string !== currentPlaylistDataCache) {
                     currentPlaylistDataCache = data_string
-                    state.onNewPlaylists(proPresenterParser.parsePlaylists(data))
+                    stateManager.onNewPlaylists(proPresenterParser.parsePlaylists(data))
                 }
                 break
             case 'presentationCurrent':
@@ -476,7 +485,7 @@ function ProPresenter() {
                         return presentation.groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
                     }
                     const animate = currentPresentationDataCache === undefined || hasText(presentation)
-                    state.onNewPresentation(presentation, presentationPath, animate)
+                    stateManager.onNewPresentation(presentation, presentationPath, animate)
 
                     // TODO: Better send playlistRequestAll in a fix interval?
                     remoteWebSocket.send(Actions.playlistRequestAll)
@@ -485,10 +494,15 @@ function ProPresenter() {
 
             case 'presentationSlideIndex':
                 // This action only will be received, when queried first, which does not happen at the moment.
-            case 'presentationTriggerIndex': // Slide was clicked in pro presenter...
+            case 'presentationTriggerIndex':
+                // Slide of a presentation was clicked in pro presenter...
+
+                // Avoid that a presentation from stagedisplayApi is displayed
+                clearTimeout(displaySlidesFromStageDisplayTimeout)
+
                 const presentationPath = data.presentationPath
                 const index = parseInt(data.slideIndex)
-                state.onNewSlideIndex(presentationPath, index, true)
+                stateManager.onNewSlideIndex(presentationPath, index, true)
 
                 // Reload presentation in case something changed
                 // Instead of requesting current presentation,
@@ -498,7 +512,7 @@ function ProPresenter() {
                 break
             case 'audioTriggered':
                 const mediaPresentation = Presentation(data.audioName, [])
-                const mediaPresentationDisplayed = state.onNewMediaPresentation(mediaPresentation)
+                const mediaPresentationDisplayed = stateManager.onNewMediaPresentation(mediaPresentation)
                 if (mediaPresentationDisplayed) {
                     timerDomUpdater.forceShowVideo()
                 }
@@ -511,7 +525,7 @@ function ProPresenter() {
                 // stageWebSocketwill be recieved, this will hide any text
 
                 // Clear the preview because nothing is displayed at the moment
-                state.clearPreview()
+                stateManager.clearPreview()
                 break
             default:
                 console.log('Unknown action', data.action)
@@ -530,15 +544,133 @@ function ProPresenter() {
 
         const currentSlideUid = cs.uid
         const nextSlideUid = ns ? ns.uid : undefined
-        state.onNewPreview(currentSlideUid, nextSlideUid)
+        stateManager.onNewPreview(currentSlideUid, nextSlideUid)
 
         // Current slide with uid 0000...0000 means clear :)
         if (cs.uid === '00000000-0000-0000-0000-000000000000') {
-            state.clearSlideIndex()
+            stateManager.clearSlideIndex()
             return
         }
 
-        // TODO: Create presentation and display if necessary
+        const currentPresentationPath = stateManager.getCurrentPresentationPath()
+        const currentPresentation = stateManager.getCurrentPresentation()
+
+        if (currentPresentationPath !== 'stageDisplayApiPresentation') {
+            const currentSlideIndex = stateManager.getCurrentSlideIndex()
+            if (currentPresentation != undefined && currentSlideIndex != undefined) {
+                const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
+                const currentSlide = allPresentationSlides[currentSlideIndex]
+                const nextSlide = allPresentationSlides[currentSlideIndex + 1]
+                if (currentSlide != undefined && currentSlideIndex.rawText === cs.text &&
+                    (nextSlide === ns.text === undefined ||
+                        (nextSlide != undefined && nextSlide.rawText === ns.text)) ) {
+                    // TODO: Test this code path
+                    // This text is already currently as a normal presentation displayed
+                    // Code not reached in pro presenter 7.3.1
+                    // Just to be sure, an active presentation will never be replaced by stagedisplay texts
+                    return
+                }
+            }
+        }
+
+        function displaySlides() {
+            currentPresentationDataCache = undefined
+
+            let currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text, undefined, undefined, true)
+            currentStageDisplaySlide.stageDisplayApiPresentationUid = cs.uid
+
+            let nextStageDisplaySlide
+            if (ns && ns.uid === '00000000-0000-0000-0000-000000000000'
+                    && undefinedToEmpty(ns.text).length === 0) {
+                nextStageDisplaySlide = undefined
+            } else {
+                nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text, undefined, undefined, true)
+                nextStageDisplaySlide.stageDisplayApiPresentationUid = ns.uid
+            }
+
+            const currentPresentation = stateManager.getCurrentPresentation()
+            function fixPresentationName(presentation) {
+                const groupNames = presentation.groups.map(g => g.name)
+                presentation.name = 'Presentation'
+                if (groupNames.length === 0) {
+                    return
+                } else if (groupNames.length === 1) {
+                    presentation.name = groupNames[0]
+                } else {
+                    // Dirty and ugly code to get a presentation name...
+                    // TODO: Improve?
+
+                    const l = Math.min(...groupNames.map(n => n.length))
+                    name = ''
+                    for (let i = 0; i < l; i++) {
+                        const char = groupNames[0][i]
+                        if ((name.length <= 3 ||char.match(/[A-Za-z\s]/)) && groupNames.map(n => n[i]).every(c => c == char)) {
+                            name += char
+                        } else {
+                            break
+                        }
+                    }
+                    if (name.length >= 3) {
+                        presentation.name = name
+                    }
+                }
+            }
+
+            // Change current presentation
+            if (currentPresentationPath === 'stageDisplayApiPresentation' && currentPresentation != undefined) {
+                const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
+                if (allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
+                    const presentation = currentPresentation
+                    const name = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
+                    const newGroup = Group(name, '', [currentStageDisplaySlide])
+                    presentation.groups.splice(0, 0, newGroup)
+                    fixPresentationName(presentation)
+                    stateManager.onNewSlideIndex('stageDisplayApiPresentation', 1, false)
+                    stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
+                    stateManager.onNewSlideIndex('stageDisplayApiPresentation', 0, true)
+                    return
+                } else if (allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid) {
+                    if (nextStageDisplaySlide !== undefined) {
+                        const presentation = currentPresentation
+                        const name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
+                        const newGroup = Group(name, '', [nextStageDisplaySlide])
+                        presentation.groups.push(newGroup)
+                        fixPresentationName(presentation)
+                        const index = presentation.groups.length - 2
+                        stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
+                        stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
+                    }
+                    return
+                } else {
+                    const index = allPresentationSlides.findIndex(s => s.stageDisplayApiPresentationUid === cs.uid)
+                    if (index >= 0) {
+                        stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
+                        return
+                    }
+                }
+            }
+
+            // Display a new presentation
+            const currentName = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
+            let groups = [Group(currentName, '', [currentStageDisplaySlide])]
+            if (nextStageDisplaySlide) {
+                const nextName = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
+                groups.push(Group(nextName, '', [nextStageDisplaySlide]))
+            }
+            const presentation = Presentation(undefined, groups)
+            fixPresentationName(presentation)
+            // First set slide index, then load presentation!
+            stateManager.onNewSlideIndex('stageDisplayApiPresentation', 0)
+            stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', true)
+        }
+
+        if (currentPresentationPath === 'stageDisplayApiPresentation' || currentPresentation === undefined) {
+            displaySlides()
+        } else {
+            clearTimeout(displaySlidesFromStageDisplayTimeout)
+            // The timeout will be cancelled if these texts are part of a real presentation
+            displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, 500)
+        }
     }
 
     function updateConnectionErrors() {
@@ -553,10 +685,6 @@ function ProPresenter() {
         // TODO
     }
 
-    function importState() {
-        // TODO
-    }
-
     function loadPresentation(presentationPath) {
         currentPresentationDataCache = undefined
         if (remoteWebSocket !== undefined) {
@@ -567,10 +695,9 @@ function ProPresenter() {
     proPresenterInstance = {
         connect: connect,
         exportState: exportState,
-        importState: importState,
         loadPresentation: loadPresentation,
         // TODO: test reloadCurrentPresentation
-        reloadCurrentPresentation: () => loadPresentation(state.getCurrentPresentationPath())
+        reloadCurrentPresentation: () => loadPresentation(stateManager.getCurrentPresentationPath())
     }
     return proPresenterInstance
 }
