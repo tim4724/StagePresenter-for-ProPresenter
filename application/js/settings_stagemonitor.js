@@ -1,7 +1,7 @@
 "use strict"
 
 function StageMonitorSettings() {
-    const previewIframe = document.getElementById('previewIframe')
+    // const previewIframe = document.getElementById('previewIframe')
     const settingsGroupElement = document.getElementById('stagemonitorSettingsGroup')
     const zoomInput = document.getElementById('zoom')
     const showSidebar = document.getElementById('showSidebar')
@@ -31,8 +31,8 @@ function StageMonitorSettings() {
         const stagemonitorWindow = wins.find(w => w.title === 'Stage Monitor')
         if (stagemonitorWindow && stagemonitorWindow.webContents) {
             webContents = stagemonitorWindow.webContents
-            webContents.executeJavaScript('proPresenter.exportState()').then((p) => {
-                previewIframe.contentWindow.window.proPresenter.importState(p)
+            webContents.executeJavaScript('proPresenterInstance.exportState()').then((p) => {
+                // previewIframe.contentWindow.window.proPresenter.importState(p)
             })
 
             stagemonitorWindow.once('close', () => {
@@ -43,7 +43,7 @@ function StageMonitorSettings() {
             function getZoomValue() {
                 zoomInput.value = 0 | (webContents.zoomFactor * 100)
                 zoomValue = webContents.zoomFactor
-                updateZoomPreviewIFrame()
+                // updateZoomPreviewIFrame()
             }
             const getZoomValueInterval = setInterval(getZoomValue, 1000)
 
@@ -108,7 +108,7 @@ function StageMonitorSettings() {
         if (webContents) {
             webContents.setZoomFactor(zoomValue)
         }
-        updateZoomPreviewIFrame()
+        // updateZoomPreviewIFrame()
     }
 
     function checkBoxChanged(element) {
@@ -166,6 +166,7 @@ function StageMonitorSettings() {
         localStorage.minimumVideoLengthForTimer = minimumVideoLength
     }
 
+    /*
     function updateZoomPreviewIFrame() {
         const previewIFrameWidth = previewIframe.clientWidth
         previewIframe.height = previewIFrameWidth * height / width
@@ -178,7 +179,7 @@ function StageMonitorSettings() {
             body.style.zoom = scale
             body.style.height = 1 / scale * 100 + 'vh'
         }
-    }
+    }*/
 
     function inputChanged(element) {
         localStorage[element.id] = element.value
@@ -188,7 +189,7 @@ function StageMonitorSettings() {
         listenToZoomChanges()
     }
     initInputs()
-    updateZoomPreviewIFrame()
+    // updateZoomPreviewIFrame()
     return {
         zoomChanged: zoomInputChanged,
         checkBoxChanged: checkBoxChanged,
