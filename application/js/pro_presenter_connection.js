@@ -33,20 +33,22 @@ if (stateBroadcastChannel !== undefined) {
                         proPresenterInstance !== undefined) {
                     const playlistIndex = value.playlistIndex
                     const playlist = stateManagerInstance.getPlaylist(playlistIndex)
-                    if (playlist !== undefined) {
-                        const item = playlist.items[value.playlistItemIndex]
-                        if (item.type == 'playlistItemTypePresentation') {
-                            const presentationPath = item.location
-                            stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
-                            proPresenterInstance.loadPresentation(presentationPath)
-                        } else {
-                            // Only other known item type is
-                            // playlistItemTypeVideo (also for images)
-                            // Therefore show a media presentation
-                            const presentation = Presentation(item.text, [])
-                            stateManagerInstance.onNewMediaPresentation(presentation, playlistIndex, true)
-                        }
+                    if (playlist === undefined) {
+                        break
                     }
+                    const item = playlist.items[value.playlistItemIndex]
+                    if (item.type == 'playlistItemTypePresentation') {
+                        const presentationPath = item.location
+                        stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
+                        proPresenterInstance.loadPresentation(presentationPath)
+                    } else {
+                        // Only other known item type is
+                        // playlistItemTypeVideo (also for images)
+                        // Therefore show a media presentation
+                        const presentation = Presentation(item.text, [])
+                        stateManagerInstance.onNewMediaPresentation(presentation, playlistIndex, true)
+                    }
+                    stateManagerInstance.clearPreview()
                 }
                 break
 
@@ -88,7 +90,8 @@ function StagemonitorStateManager() {
     let currentSlideIndex = -1
     let currentSlideCleared = false
 
-    let currentSlideUid = undefined // TODO: what about next slide uid?
+    let currentSlideUid = undefined
+    let nextSlideUid = undefined
     let stageMessage = undefined
 
     function getState() {
@@ -101,6 +104,7 @@ function StagemonitorStateManager() {
             currentSlideIndex: currentSlideIndex,
             currentSlideCleared: currentSlideCleared,
             currentSlideUid: currentSlideUid,
+            nextSlideUid: nextSlideUid,
             message: message,
         }
     }
@@ -158,9 +162,10 @@ function StagemonitorStateManager() {
         return presentation.groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
     }
 
-    function onNewPreview(slideUid, nextSlideUid) {
+    function onNewPreview(slideUid, nsUid) {
         currentSlideUid = slideUid
-        previewDomUpdater.changePreview(slideUid, nextSlideUid)
+        nextSlideUid = nsUid
+        previewDomUpdater.changePreview(slideUid, nsUid)
     }
 
     function clearPreview() {
