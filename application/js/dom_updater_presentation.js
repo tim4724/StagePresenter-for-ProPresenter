@@ -32,9 +32,9 @@ function PresentationDomUpdater() {
     }
 
     function displayPresentation(presentation, slideIndex, animate) {
+        nextUpElement.style.display = 'none'
         if (animate) {
             presentationContainerElement.style.opacity = 0
-            nextUpElement.style.display = 'none'
             setTimeout(() => {
                 display()
                 presentationContainerElement.style.opacity = 1
@@ -44,7 +44,6 @@ function PresentationDomUpdater() {
                 }, 150)
             }, 300)
         } else {
-            nextUpElement.style.display = 'none'
             display()
             presentationContainerElement.scrollTop = 0
             changeCurrentSlideAndScroll(slideIndex, false)
@@ -88,24 +87,6 @@ function PresentationDomUpdater() {
         } else {
             nextUpElement.innerText = ''
             nextUpElement.style.display = 'none'
-        }
-    }
-
-    function insertGroupToPresentation(group, index = 0) {
-        const groupElement = buildGroupElement(group)
-        const insertedBeforeCurrent = index <= getCurrentSlideIndex()
-
-        if (index < groupElements.length) {
-            const elementBefore = groupElements[index]
-            presentationContainerElement.insertBefore(groupElement, elementBefore)
-        } else {
-            presentationContainerElement.appendChild(groupElement)
-        }
-
-        fixGroupNameElementPosition()
-        fixSlidesTextSize()
-        if (insertedBeforeCurrent) {
-            scrollToCurrentSlide(false)
         }
     }
 
@@ -335,7 +316,6 @@ function PresentationDomUpdater() {
         displayPresentation: displayPresentation,
         setNextPresentationTitle: setNextPresentationTitle,
         clearNextPresentationTitle: () => setNextPresentationTitle(undefined),
-        insertGroupToPresentation: insertGroupToPresentation,
         changeCurrentSlideAndScroll: changeCurrentSlideAndScroll
     }
 }

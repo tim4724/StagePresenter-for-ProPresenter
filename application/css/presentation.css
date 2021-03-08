@@ -6,11 +6,6 @@
     font-size: 5em;
 }
 
-@keyframes fadeInAnimation {
-    0%   {opacity: 0;}
-    100% {opacity: 1;}
-}
-
 #title {
     margin: 0;
     padding-top: 8px;
@@ -26,7 +21,6 @@
     border-style: solid;
     border-color: #ffde3b;
     font-size: 1em;
-    animation: fadeInAnimation 1s normal forwards;
     background: #000000;
 }
 
