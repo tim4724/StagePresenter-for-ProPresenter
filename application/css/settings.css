@@ -92,13 +92,13 @@ select {
 
 #stagemonitorSettings {
     flex-grow: 1;
-    margin-right: 16px;
 }
 
 #previewIframe {
     border: 0;
     flex-grow: 1;
     pointer-events: none;
+    margin-left: 16px;
 }
 
 .disabled {
