@@ -54,10 +54,10 @@ function createStageMonitorWindow(bounds) {
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
-        fullscreen: true,
+        fullscreen: app.isPackaged,
         backgroundColor: '#000000',
         darkTheme: true,
-        frame: false,
+        frame: !app.isPackaged,
         title: 'Stagemonitor',
         show: false,
         webPreferences: {
@@ -154,7 +154,7 @@ async function createOperatorWindow () {
     }
     operatorWindow = new BrowserWindow({
         backgroundColor: '#000000',
-        opacity: 0.7,
+        opacity: 0.5,
         darkTheme: true,
         title: 'Stagemonitor Controller',
         x: bounds.x,
@@ -192,7 +192,7 @@ async function createOperatorWindow () {
     }
     operatorWindow.on('focus', focus)
     function blur() {
-        operatorWindow.setOpacity(0.7)
+        operatorWindow.setOpacity(0.5)
     }
     operatorWindow.on('blur', blur)
 

@@ -36,8 +36,17 @@ if (stateBroadcastChannel !== undefined) {
                     if (playlist !== undefined) {
                         const item = playlist.items[value.playlistItemIndex]
                         const presentationPath = item.location
-                        stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
-                        proPresenterInstance.loadPresentation(presentationPath)
+
+                        if (item.type == 'playlistItemTypePresentation') {
+                            stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
+                            proPresenterInstance.loadPresentation(presentationPath)
+                        } else {
+                            // Only other known item type is
+                            // playlistItemTypeVideo (also for images)
+                            // Therefore show a media presentation
+                            const presentation = Presentation(item.text, [])
+                            stateManagerInstance.onNewMediaPresentation(presentation, playlistIndex, true)
+                        }
                     }
                 }
                 break
@@ -190,11 +199,14 @@ function StagemonitorStateManager() {
         }})
     }
 
-    function onNewMediaPresentation(presentation, forceShow=false) {
+    function onNewMediaPresentation(presentation, playlistIndex=undefined, forceShow=false) {
         const name = presentation.name
         let presentationPath = ''
 
-        let playlist = getPlaylist(currentPlaylistIndex)
+        if (playlistIndex == undefined) {
+            playlistIndex = currentPlaylistIndex
+        }
+        let playlist = getPlaylist(playlistIndex)
         if (playlist !== undefined) {
             const playlistItemIndex = playlist.items.findIndex(i => i.text === name)
             if (playlistItemIndex >= 0) {
@@ -274,7 +286,7 @@ function ProPresenter() {
 
     const Actions = {
         playlistRequestAll: JSON.stringify({action: 'playlistRequestAll'}),
-        authenticate: (p) => JSON.stringify({action: 'authenticate', protocol: '700', password: p}),
+        authenticate: (p) => JSON.stringify({action: 'authenticate', protocol: '740', password: p}),
         ath: (p) => JSON.stringify({ acn: 'ath', pwd: p, ptl: 610 }),
         presentationRequest: (path) => JSON.stringify({
             action: 'presentationRequest',
@@ -485,7 +497,8 @@ function ProPresenter() {
                 remoteWebSocket.send(Actions.presentationRequest(presentationPath))
                 break
             case 'audioTriggered':
-                const mediaPresentationDisplayed = state.onNewMediaPresentation(Presentation(data.audioName, []))
+                const mediaPresentation = Presentation(data.audioName, [])
+                const mediaPresentationDisplayed = state.onNewMediaPresentation(mediaPresentation)
                 if (mediaPresentationDisplayed) {
                     timerDomUpdater.forceShowVideo()
                 }
