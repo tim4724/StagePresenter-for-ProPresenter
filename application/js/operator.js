@@ -57,7 +57,7 @@ function Operator() {
         if (playlist != undefined && playlist.items != undefined) {
             for (let i = 0; i < playlist.items.length; i++) {
                 const item = playlist.items[i]
-                if (item.isHeader) {
+                if (item.type == 'playlistItemTypeHeader') {
                     currentOptGroupElement = document.createElement('optgroup')
                     currentOptGroupElement.label = item.text
                     presentationSelect.appendChild(currentOptGroupElement)

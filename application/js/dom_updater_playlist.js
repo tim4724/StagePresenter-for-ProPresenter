@@ -38,7 +38,7 @@ function PlaylistDomUpdater() {
 
 			const itemElement = document.createElement("span")
 			itemElement.classList.add('playlistItem')
-			if (item.isHeader) {
+			if (item.type === 'playlistItemTypeHeader') {
 				itemForHeaderCounter = 0
 				itemElement.classList.add('playlistHeader')
 				itemElement.innerText = item.text
@@ -47,7 +47,7 @@ function PlaylistDomUpdater() {
 
 				const nextItem = playlist.items[i + 1]
 				// Check if multipleElements are under header
-				if (itemForHeaderCounter > 1 || (nextItem !== undefined && !nextItem.isHeader)) {
+				if (itemForHeaderCounter > 1 || (nextItem !== undefined && nextItem.type != 'playlistItemTypeHeader')) {
 					const itemIndexElement = document.createElement("span")
 					itemIndexElement.innerText = itemForHeaderCounter
 					itemIndexElement.classList.add('playlistItemIndex')

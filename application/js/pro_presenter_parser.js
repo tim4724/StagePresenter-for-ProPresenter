@@ -8,10 +8,10 @@ function Playlist(name, items, location) {
 	}
 }
 
-function PlaylistItem(text, isHeader, location) {
+function PlaylistItem(text, type, location) {
 	return {
 		text: text,
-		isHeader: isHeader,
+		type: type,
 		location: location
 	}
 }
@@ -59,9 +59,8 @@ function ProPresenterParser() {
 		let newPlaylists = []
 		for (const playlist of data.playlistAll) {
 			const newItems = playlist.playlist.map(function (item) {
-				const isHeader = item.playlistItemType === 'playlistItemTypeHeader'
 				const name = parsePresentationName(item.playlistItemName, true)
-				return PlaylistItem(name, isHeader, item.playlistItemLocation)
+				return PlaylistItem(name, item.playlistItemType, item.playlistItemLocation)
 			})
 			const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
 			newPlaylists.push(newPlaylist)
