@@ -65,7 +65,6 @@ function PresentationDomUpdater() {
             }
 
             if(presentation.groups.length > 0) {
-                // TODO: Also update this if new group inserted at index 0
                 // Hide the first group if it only contains empty slides
                 const firstGroupSlides = presentation.groups[0].slides
                 if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
@@ -81,8 +80,6 @@ function PresentationDomUpdater() {
 
     function setNextPresentationTitle(nextTitle) {
         if(nextTitle && nextTitle.length > 0) {
-            // TODO: set max-width for nextTitle
-            // TODO: set nexttitle line overflow ellipsis
             nextUpElement.innerText = nextTitle
         } else {
             nextUpElement.innerText = ''

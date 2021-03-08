@@ -151,36 +151,40 @@ function ProPresenterParser() {
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i]
 
-					let matches = [...line.matchAll(verseRegex)]
-
-					let verseNumbersAndIndices = []
-					let previousVerseNumber = undefined
-					for (let i = 0; i < matches.length; i++) {
-						const match = matches[i]
-						const verseNumber = parseInt(match[2])
-						if(verseNumber > 176) {
-							// 176 is the highest verse number in the bible
-							continue
-						}
-						if (!previousVerseNumber
-								|| previousVerseNumber + 1 === verseNumber
-								|| previousVerseNumber === verseNumber) {
-							previousVerseNumber = verseNumber
-							verseNumbersAndIndices.push([verseNumber, match.index])
-						}
-					}
-
 					let previousIndex = 0
-					if(verseNumbersAndIndices.length >= minMatches) {
-						for (let i = 0; i < verseNumbersAndIndices.length; i++) {
-							const verseNumber = verseNumbersAndIndices[i][0]
-							const index = verseNumbersAndIndices[i][1]
-							if (index > 0) {
-								newLines.push(line.substring(previousIndex, index).trim())
+
+					if (!bibleReferenceRegex.test(line)) {
+						let matches = [...line.matchAll(verseRegex)]
+
+						let verseNumbersAndIndices = []
+						let previousVerseNumber = undefined
+						for (let i = 0; i < matches.length; i++) {
+							const match = matches[i]
+							const verseNumber = parseInt(match[2])
+							if(verseNumber > 176) {
+								// 176 is the highest verse number in the bible
+								continue
 							}
-							previousIndex = index
+							if (!previousVerseNumber
+									|| previousVerseNumber + 1 === verseNumber
+									|| previousVerseNumber === verseNumber) {
+								previousVerseNumber = verseNumber
+								verseNumbersAndIndices.push([verseNumber, match.index])
+							}
+						}
+
+						if(verseNumbersAndIndices.length >= minMatches) {
+							for (let i = 0; i < verseNumbersAndIndices.length; i++) {
+								const verseNumber = verseNumbersAndIndices[i][0]
+								const index = verseNumbersAndIndices[i][1]
+								if (index > 0) {
+									newLines.push(line.substring(previousIndex, index).trim())
+								}
+								previousIndex = index
+							}
 						}
 					}
+
 					newLines.push(line.substring(previousIndex, line.length).trim())
 				}
 
@@ -196,6 +200,10 @@ function ProPresenterParser() {
 			if (lines.some(l => verseNumberRegex.test(l))) {
 				bibleVerseNumbers = []
 				for (let i = 0; i < lines.length; i++) {
+					if (bibleReferenceRegex.test(lines[i])) {
+						bibleVerseNumbers.push('')
+						continue
+					}
 					const match = lines[i].match(verseNumberRegex)
 					if (match) {
 						const verseNumber = parseInt(match[1])
