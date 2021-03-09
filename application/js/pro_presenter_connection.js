@@ -41,6 +41,7 @@ if (stateBroadcastChannel !== undefined) {
                         const presentationPath = item.location
                         stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
                         proPresenterInstance.loadPresentation(presentationPath)
+                        stateManagerInstance.clearPreview()
                     } else {
                         // Only other known item type is
                         // playlistItemTypeVideo (also for images)
@@ -48,7 +49,6 @@ if (stateBroadcastChannel !== undefined) {
                         const presentation = Presentation(item.text, [])
                         stateManagerInstance.onNewMediaPresentation(presentation, playlistIndex, true)
                     }
-                    stateManagerInstance.clearPreview()
                 }
                 break
 
