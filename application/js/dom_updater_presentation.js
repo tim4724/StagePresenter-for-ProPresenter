@@ -67,7 +67,7 @@ function PresentationDomUpdater() {
             if(presentation.groups.length > 0) {
                 // Hide the first group if it only contains empty slides
                 const firstGroupSlides = presentation.groups[0].slides
-                if (!firstGroupSlides || !firstGroupSlides.every(s => s.lines.some(l => l.length > 0))) {
+                if (!firstGroupSlides || !firstGroupSlides.some(s => s.lines.some(l => l.length > 0))) {
                     groupElements[0].style.display = 'none'
                 }
                 // TODO: Remove empty groups at the end?
