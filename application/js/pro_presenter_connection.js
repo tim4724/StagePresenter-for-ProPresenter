@@ -481,16 +481,16 @@ function ProPresenter() {
                 break
             case 'presentationCurrent':
             case 'presentationRequest':
-                if (currentPresentationDataCache !== data_string) {
+                if (currentPresentationDataCache !== data_string ||
+                        stateManager.getCurrentPresentationPath() != data.presentationPath) {
                     currentPresentationDataCache = data_string
 
-                    const presentationPath = data.presentationPath
                     const presentation = proPresenterParser.parsePresentation(data)
                     function hasText(presentation) {
                         return presentation.groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
                     }
                     const animate = currentPresentationDataCache === undefined || hasText(presentation)
-                    stateManager.onNewPresentation(presentation, presentationPath, animate)
+                    stateManager.onNewPresentation(presentation,  data.presentationPath, animate)
 
                     // TODO: Better send playlistRequestAll in a fix interval?
                     remoteWebSocket.send(Actions.playlistRequestAll)
