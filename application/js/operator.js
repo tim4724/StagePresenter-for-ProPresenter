@@ -8,9 +8,14 @@ function Operator() {
     let currentPlaylists = []
 
     playlistSelect.onchange = function(ev) {
+        const currentPresentationOption = presentationSelect.querySelector('option:checked')
+
         const playlistIndex = parseInt(ev.target.value)
         const playlist = currentPlaylists[playlistIndex]
         setupPresentationSelect(playlist, -1)
+
+        const noneOptionElement = presentationSelect.querySelector('[value="-1"]')
+        noneOptionElement.innerText = currentPresentationOption.innerText
     }
     presentationSelect.onchange = function(ev) {
         changePlaylistItemIndex(parseInt(ev.target.value))
@@ -104,6 +109,8 @@ function Operator() {
         }
     }
 
+    let latestConfirmedPlaylistIndex = undefined
+    let latestConfirmedPlaylistItemIndex = undefined
     broadcastChannel.onmessage = (ev) => {
         const action = ev.data.action
         const value = ev.data.value
@@ -113,19 +120,24 @@ function Operator() {
                 const state = value
                 // Unpack state
                 currentPlaylists = state.currentPlaylists
+                latestConfirmedPlaylistIndex = state.currentPlaylistIndex
                 setupPlaylistSelect(currentPlaylists, state.currentPlaylistIndex)
                 const playlist = currentPlaylists[state.currentPlaylistIndex]
+                latestConfirmedPlaylistItemIndex = state.currentPlaylistItemIndex
                 setupPresentationSelect(playlist, state.currentPlaylistItemIndex)
                 setupSlideSelect(state.currentPresentation, state.currentSlideIndex)
                 break
 
             case 'playlists':
                 currentPlaylists = value
+                latestConfirmedPlaylistItemIndex = -1
                 setupPlaylistSelect(currentPlaylists, -1)
                 break
 
             case 'playlistIndexAndItemIndex':
+                latestConfirmedPlaylistItemIndex = value.playlistItemIndex
                 if (parseInt(playlistSelect.value) !== value.playlistIndex) {
+                    latestConfirmedPlaylistIndex = value.playlistIndex
                     changeOption(playlistSelect, value.playlistIndex)
                     const playlist = currentPlaylists[value.playlistIndex]
                     setupPresentationSelect(playlist, value.playlistItemIndex)
@@ -141,6 +153,11 @@ function Operator() {
                 break
 
             case 'slideIndex':
+                if (playlistSelect.value != latestConfirmedPlaylistIndex) {
+                    changeOption(playlistSelect, latestConfirmedPlaylistIndex)
+                    const playlist = currentPlaylists[latestConfirmedPlaylistIndex]
+                    setupPresentationSelect(playlist, latestConfirmedPlaylistItemIndex)
+                }
                 changeOption(slideSelect, value)
                 break
         }
