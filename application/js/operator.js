@@ -81,19 +81,28 @@ function Operator() {
         initSelect(slideSelect)
         slideSelect.style.borderColor = ''
 
+        function toOptionElement(i) {
+            const name = "Slide " + (i + 1)
+            return buildOptionElement(name, i, i === slideIndex)
+        }
+
         if (presentation != undefined) {
             let i = 0;
             for (const group of presentation.groups) {
-                const optGroupElement = document.createElement('optgroup')
-                optGroupElement.label = group.name
-                for (const slide of group.slides) {
-                    const selected = i === slideIndex
-                    const name = "Slide " + (i + 1)
-                    const optionElement = buildOptionElement(name, i, selected)
-                    optGroupElement.appendChild(optionElement)
-                    i++;
+                if (group.name.length > 0) {
+                    const optGroupElement = document.createElement('optgroup')
+                    optGroupElement.label = group.name
+                    for (const slide of group.slides) {
+                        optGroupElement.appendChild(toOptionElement(i))
+                        i++;
+                    }
+                    slideSelect.appendChild(optGroupElement)
+                } else {
+                    for (const slide of group.slides) {
+                        slideSelect.appendChild(toOptionElement(i))
+                        i++;
+                    }
                 }
-                slideSelect.appendChild(optGroupElement)
             }
         }
     }
