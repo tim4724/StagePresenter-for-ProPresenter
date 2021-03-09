@@ -58,12 +58,17 @@ function ProPresenterParser() {
 	function parsePlaylists(data) {
 		let newPlaylists = []
 		for (const playlist of data.playlistAll) {
-			const newItems = playlist.playlist.map(function (item) {
-				const name = parsePresentationName(item.playlistItemName, true)
-				return PlaylistItem(name, item.playlistItemType, item.playlistItemLocation)
-			})
-			const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
-			newPlaylists.push(newPlaylist)
+			if (playlist.playlistType == "playlistTypeGroup") {
+				const playlistsInGroup = {playlistAll: playlist.playlist}
+				newPlaylists = newPlaylists.concat(parsePlaylists(playlistsInGroup))
+			} else {
+				const newItems = playlist.playlist.map(function (item) {
+					const name = parsePresentationName(item.playlistItemName, true)
+					return PlaylistItem(name, item.playlistItemType, item.playlistItemLocation)
+				})
+				const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
+				newPlaylists.push(newPlaylist)
+			}
 		}
 		return newPlaylists
 	}
