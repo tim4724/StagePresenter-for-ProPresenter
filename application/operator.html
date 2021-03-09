@@ -13,33 +13,33 @@
     <table>
         <tr>
             <td id="currentPlaylist"><select id="playlists"></select></td>
+            <td class="action" colspan="2">
+                <button id="clearPresentation" onclick="operator.clearPresentation()">
+                    Clear Presentation
+                </button>
+            </td>
         </tr>
 
         <tr>
             <td id="currentPresentation"><select id="presentations"></select></td>
             <td class="action">
                 <button id="previousPresentation" onclick="operator.prevPresentation()">
-                    Previous
+                    <<
                 </button>
                 </td>
             <td class="action">
                 <button id="nextPresentation" onclick="operator.nextPresentation()">
-                    Next
+                    >>
                 </button>
                 </td>
-            <td class="action">
-                <button id="clearPresentation" onclick="operator.clearPresentation()">
-                    Clear
-                </button>
-            </td>
         </tr>
         <tr>
             <td id="currentSlide"><select id="slides"></select></td>
             <td class="action">
-                <button id="slideUp" onclick="operator.prevSlide()">Up</button>
+                <button id="slideUp" onclick="operator.prevSlide()">▲</button>
             </td>
             <td class="action">
-                <button id="slideDown" onclick="operator.nextSlide()">Down</button>
+                <button id="slideDown" onclick="operator.nextSlide()">▼</button>
             </td>
         </tr>
     </table>

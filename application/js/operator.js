@@ -74,6 +74,7 @@ function Operator() {
     function setupSlideSelect(presentation, slideIndex) {
         slideSelect.innerHTML = ''
         initSelect(slideSelect)
+        slideSelect.style.borderColor = ''
 
         if (presentation != undefined) {
             let i = 0;
