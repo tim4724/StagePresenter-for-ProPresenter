@@ -105,7 +105,7 @@ function StagemonitorStateManager() {
             currentSlideCleared: currentSlideCleared,
             currentSlideUid: currentSlideUid,
             nextSlideUid: nextSlideUid,
-            message: message,
+            stageMessage: stageMessage,
         }
     }
 
