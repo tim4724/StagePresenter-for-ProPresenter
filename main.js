@@ -141,7 +141,7 @@ async function createOperatorWindow () {
 
     const boundsValue = await localStorageGet("operatorWindowBounds")
 
-    let bounds = {x: undefined, y: undefined, width: 384, height: 128}
+    let bounds = {x: undefined, y: undefined, width: 350, height: 108}
     if (boundsValue != undefined && boundsValue.length > 0) {
         const v = boundsValue.split(';')
         const b = {x: parseInt(v[0]), y: parseInt(v[1]),
@@ -154,7 +154,7 @@ async function createOperatorWindow () {
     }
     operatorWindow = new BrowserWindow({
         backgroundColor: '#000000',
-        opacity: 0.5,
+        opacity: 0.7,
         darkTheme: true,
         title: 'Stagemonitor Controller',
         x: bounds.x,
@@ -192,7 +192,7 @@ async function createOperatorWindow () {
     }
     operatorWindow.on('focus', focus)
     function blur() {
-        operatorWindow.setOpacity(0.5)
+        operatorWindow.setOpacity(0.7)
     }
     operatorWindow.on('blur', blur)
 

@@ -77,9 +77,6 @@ function PreviewDomUpdater() {
 		renderPreviewImage('', width, height).then((blob) => {
 			URL.revokeObjectURL(placeholderImageURL)
 			placeholderImageURL = URL.createObjectURL(blob)
-			if (currentUrl === undefined && nextUrl === undefined) {
-				showCurrentAndNext()
-			}
 		})
 	}
 	renderPlaceholderImage()
