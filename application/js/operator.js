@@ -1,21 +1,87 @@
 "use strict"
 
 function Operator() {
+    const emptyPresentation = {
+        name: "No Presentation selected",
+        groups: [],
+    }
     const broadcastChannel = new BroadcastChannel('state')
     const playlistSelect = document.getElementById('playlists')
     const presentationSelect = document.getElementById('presentations')
     const slideSelect = document.getElementById('slides')
+
+    const clearPresentationButton = document.getElementById('clearPresentation')
+    const prevPresentationButton = document.getElementById('previousPresentation')
+    const nextPresentationButton = document.getElementById('nextPresentation')
+    const slideUpButton = document.getElementById('slideUp')
+    const slideDownButton = document.getElementById('slideDown')
+
     let currentPlaylists = []
+    let latestConfirmedPlaylistIndex = undefined
+    let latestConfirmedPlaylistItemIndex = undefined
+
+    function updateButtonsAndTooltips() {
+        const currentPresentationOption = presentationSelect.querySelector('option:checked')
+        clearPresentationButton.disabled = presentationSelect.value == "-1"
+            && currentPresentationOption.innerText == emptyPresentation.name
+
+        const selectedPresentationIndex = presentationSelect.selectedIndex
+        const presentationSelectCount = presentationSelect.options.length
+        prevPresentationButton.disabled = selectedPresentationIndex <= 1
+        nextPresentationButton.disabled = currentPresentationOption.innerText == emptyPresentation.name
+            || selectedPresentationIndex >= presentationSelectCount - 1
+
+        const selectedSlideIndex = slideSelect.selectedIndex
+        const slideSelectCount = slideSelect.options.length
+        slideUpButton.disabled = selectedSlideIndex <= 1
+        slideDownButton.disabled = selectedSlideIndex >= slideSelectCount -1
+
+        if (slideUpButton.disabled == false) {
+            const prevSlideOption = slideSelect.options[selectedSlideIndex - 1]
+            slideUpButton.style.color = prevSlideOption.getAttribute("color")
+        } else {
+            slideUpButton.style.color = ""
+        }
+        if (slideDownButton.disabled == false) {
+            const nextSlideOption = slideSelect.options[selectedSlideIndex + 1]
+            slideDownButton.style.color = nextSlideOption.getAttribute("color")
+        } else {
+            slideDownButton.style.color = ""
+        }
+        const prevPrsentationTooltip = prevPresentationButton.querySelector('.tooltiptext')
+        if (prevPresentationButton.disabled == false) {
+            const index = selectedPresentationIndex - 1
+            const prevPresentationName = presentationSelect.options[index].innerText
+            prevPrsentationTooltip.innerText = prevPresentationName
+            prevPrsentationTooltip.style.display = ""
+        } else {
+            prevPrsentationTooltip.style.display = "none"
+        }
+        const nextPresentationTooltip = nextPresentationButton.querySelector('.tooltiptext')
+        if (nextPresentationButton.disabled == false) {
+            const index = selectedPresentationIndex + 1
+            const nextPresentationName = presentationSelect.options[index].innerText
+            nextPresentationTooltip.innerText = nextPresentationName
+            nextPresentationTooltip.style.display = ""
+        } else {
+            nextPresentationTooltip.style.display = "none"
+        }
+    }
 
     playlistSelect.onchange = function(ev) {
-        const currentPresentationOption = presentationSelect.querySelector('option:checked')
-
         const playlistIndex = parseInt(ev.target.value)
         const playlist = currentPlaylists[playlistIndex]
-        setupPresentationSelect(playlist, -1)
 
-        const noneOptionElement = presentationSelect.querySelector('[value="-1"]')
-        noneOptionElement.innerText = currentPresentationOption.innerText
+        const currentPresentationName = presentationSelect.querySelector('option:checked').innerText
+
+        if (playlistIndex == latestConfirmedPlaylistIndex) {
+            setupPresentationSelect(playlist, latestConfirmedPlaylistItemIndex)
+        } else {
+            setupPresentationSelect(playlist, -1)
+            const noneOptionElement = presentationSelect.querySelector('[value="-1"]')
+            noneOptionElement.innerText = currentPresentationName
+        }
+        updateButtonsAndTooltips()
     }
     presentationSelect.onchange = function(ev) {
         changePlaylistItemIndex(parseInt(ev.target.value))
@@ -26,7 +92,7 @@ function Operator() {
 
     function buildOptionElement(text, value, selected) {
         const optionElement = document.createElement('option')
-        optionElement.innerText = text
+        optionElement.innerHTML = text
         optionElement.value = value
         optionElement.selected = selected
         return optionElement
@@ -82,18 +148,19 @@ function Operator() {
         slideSelect.style.borderColor = ''
 
         function toOptionElement(i) {
-            const name = "Slide " + (i + 1)
-            return buildOptionElement(name, i, i === slideIndex)
+            return buildOptionElement("Slide " + (i + 1), i, i === slideIndex)
         }
 
         if (presentation != undefined) {
             let i = 0;
             for (const group of presentation.groups) {
-                if (group.name.length > 0) {
+                if (group.name.length > 0 && presentation.groups.length > 1) {
                     const optGroupElement = document.createElement('optgroup')
                     optGroupElement.label = group.name
                     for (const slide of group.slides) {
-                        optGroupElement.appendChild(toOptionElement(i))
+                        const optionElement = toOptionElement(i)
+                        optionElement.setAttribute('color', group.color);
+                        optGroupElement.appendChild(optionElement)
                         i++;
                     }
                     slideSelect.appendChild(optGroupElement)
@@ -118,12 +185,10 @@ function Operator() {
         }
     }
 
-    let latestConfirmedPlaylistIndex = undefined
-    let latestConfirmedPlaylistItemIndex = undefined
     broadcastChannel.onmessage = (ev) => {
         const action = ev.data.action
         const value = ev.data.value
-
+        console.log("onmessage", ev.data)
         switch (action) {
             case 'stateUpdate':
                 const state = value
@@ -131,9 +196,9 @@ function Operator() {
                 currentPlaylists = state.currentPlaylists
                 latestConfirmedPlaylistIndex = state.currentPlaylistIndex
                 setupPlaylistSelect(currentPlaylists, state.currentPlaylistIndex)
-                const playlist = currentPlaylists[state.currentPlaylistIndex]
+                const pl = currentPlaylists[state.currentPlaylistIndex]
                 latestConfirmedPlaylistItemIndex = state.currentPlaylistItemIndex
-                setupPresentationSelect(playlist, state.currentPlaylistItemIndex)
+                setupPresentationSelect(pl, state.currentPlaylistItemIndex)
                 setupSlideSelect(state.currentPresentation, state.currentSlideIndex)
                 break
 
@@ -144,11 +209,12 @@ function Operator() {
                 break
 
             case 'playlistIndexAndItemIndex':
+                const playlist = currentPlaylists[value.playlistIndex]
+
                 latestConfirmedPlaylistItemIndex = value.playlistItemIndex
+                latestConfirmedPlaylistIndex = value.playlistIndex
                 if (parseInt(playlistSelect.value) !== value.playlistIndex) {
-                    latestConfirmedPlaylistIndex = value.playlistIndex
                     changeOption(playlistSelect, value.playlistIndex)
-                    const playlist = currentPlaylists[value.playlistIndex]
                     setupPresentationSelect(playlist, value.playlistItemIndex)
                 } else {
                     changeOption(presentationSelect, value.playlistItemIndex)
@@ -162,14 +228,15 @@ function Operator() {
                 break
 
             case 'slideIndex':
+                const plist2 = currentPlaylists[latestConfirmedPlaylistIndex]
                 if (playlistSelect.value != latestConfirmedPlaylistIndex) {
                     changeOption(playlistSelect, latestConfirmedPlaylistIndex)
-                    const playlist = currentPlaylists[latestConfirmedPlaylistIndex]
-                    setupPresentationSelect(playlist, latestConfirmedPlaylistItemIndex)
+                    setupPresentationSelect(plist2, latestConfirmedPlaylistItemIndex)
                 }
                 changeOption(slideSelect, value)
                 break
         }
+        updateButtonsAndTooltips()
     }
 
     function changeSlideIndex(slideIndex) {
@@ -221,13 +288,7 @@ function Operator() {
         clearPresentation: () => {
             broadcastChannel.postMessage({
                 action: 'presentationAndSlideIndex',
-                value: {
-                    presentation: {
-                		name: "No Presentation selected",
-                		groups: [],
-                	},
-                    slideIndex: -1
-                }
+                value: { presentation: emptyPresentation, slideIndex: -1 }
             })
         }
     }

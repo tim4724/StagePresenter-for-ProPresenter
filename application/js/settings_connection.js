@@ -95,7 +95,7 @@ function ConnectionSettings() {
 			localStorage.ipAddress = ipAddress
 			localStorage.port = port
 			const action0 = { acn: 'ath', ptl: 610, pwd: password}
-			const action1 = { action: 'authenticate', protocol: '700', password: password }
+			const action1 = { action: 'authenticate', protocol: '740', password: password }
 			webSocket.send(JSON.stringify(action0))
 			webSocket.send(JSON.stringify(action1))
 		}

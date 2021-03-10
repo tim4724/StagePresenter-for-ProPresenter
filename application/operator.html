@@ -12,34 +12,46 @@
 
     <table>
         <tr>
-            <td id="currentPlaylist"><select id="playlists"></select></td>
+            <td id="currentPlaylist">
+                <select id="playlists"></select>
+            </td>
             <td class="action" colspan="2">
-                <button id="clearPresentation" onclick="operator.clearPresentation()">
-                    Clear Presentation
+                <button id="clearPresentation" disabled onclick="operator.clearPresentation()">
+                    Clear
                 </button>
             </td>
         </tr>
 
         <tr>
-            <td id="currentPresentation"><select id="presentations"></select></td>
+            <td id="currentPresentation">
+                <select id="presentations"></select>
+            </td>
             <td class="action">
-                <button id="previousPresentation" onclick="operator.prevPresentation()">
+                <button id="previousPresentation" class="tooltip" disabled onclick="operator.prevPresentation()">
                     <<
+                    <span class="tooltiptext">D</span>
                 </button>
                 </td>
             <td class="action">
-                <button id="nextPresentation" onclick="operator.nextPresentation()">
+                <button id="nextPresentation" class="tooltip" disabled onclick="operator.nextPresentation()">
                     >>
+                    <span class="tooltiptext">C</span>
                 </button>
                 </td>
         </tr>
         <tr>
-            <td id="currentSlide"><select id="slides"></select></td>
-            <td class="action">
-                <button id="slideUp" onclick="operator.prevSlide()">▲</button>
+            <td id="currentSlide">
+                <select id="slides"></select>
             </td>
             <td class="action">
-                <button id="slideDown" onclick="operator.nextSlide()">▼</button>
+                <button id="slideUp" class="tooltip" disabled onclick="operator.prevSlide()">
+                    ▲
+                </button>
+            </td>
+            <td class="action">
+                <button id="slideDown" class="tooltip" disabled onclick="operator.nextSlide()">
+                    ▼
+                </button>
             </td>
         </tr>
     </table>

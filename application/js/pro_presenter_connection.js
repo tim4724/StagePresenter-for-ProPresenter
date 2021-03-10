@@ -37,6 +37,9 @@ if (stateBroadcastChannel !== undefined) {
                         break
                     }
                     const item = playlist.items[value.playlistItemIndex]
+                    if (item == undefined) {
+                        break
+                    }
                     if (item.type == 'playlistItemTypePresentation') {
                         const presentationPath = item.location
                         stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
@@ -268,6 +271,11 @@ function StagemonitorStateManager() {
         getCurrentPresentation: () => currentPresentation,
         getCurrentSlideIndex: () => currentSlideIndex,
         getState: getState,
+    }
+
+    if (stateManagerInstance !== undefined) {
+        const state = stateManagerInstance.getState()
+        stateBroadcastChannel.postMessage({ action: 'stateUpdate', value: state })
     }
     return stateManagerInstance
 }
@@ -599,7 +607,7 @@ function ProPresenter() {
                 presentation.name = 'Presentation'
                 if (groupNames.length === 0) {
                     return
-                } else if (groupNames.length === 1) {
+                } else if (groupNames.length === 1 && groupNames[0].length > 0) {
                     presentation.name = groupNames[0]
                 } else {
                     // Dirty and ugly code to get a presentation name...
