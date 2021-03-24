@@ -20,14 +20,21 @@ body {
 
 table {
     width: 100%;
+    overflow: hidden;
 }
 
 tr {
     width: 100%;
 }
 
+@media screen and (max-width: 240px) {
+    #currentPlaylist, #currentPresentation, #currentSlide {
+        display: none;
+    }
+}
+
 .action {
-    width: 64px;
+    width: 56px;
 }
 
 table button, table select {
