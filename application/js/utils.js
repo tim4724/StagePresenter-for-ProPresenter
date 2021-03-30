@@ -28,6 +28,9 @@ function fontSizeReducer(element, maxHeight) {
         for (let i = 0; i < steps.length; i++) {
             while (element.offsetHeight > maxHeight) {
                 fontSize -= steps[i]
+                if (fontSize < 0) {
+                    return
+                }
                 element.style.fontSize = fontSize + 'em'
             }
             if (i + 1 < steps.length) {
@@ -98,4 +101,41 @@ function Scroller(container) {
         scroll: scroll,
         scrollTo: scrollTo
     }
+}
+
+function renderPreviewImage(title, text, width, height, callback) {
+	const canvas = new OffscreenCanvas(width, height)
+	const context = canvas.getContext('2d')
+
+	context.rect(0, 0, width, height)
+	context.fillStyle = "#111111"
+	context.fill()
+	if (text && text.length > 0) {
+		if (text.length > 22) {
+			text = text.substr(0, 20) + '...'
+		}
+		const fontArgs = context.font.split(' ')
+
+		context.fillStyle = "#ffffff"
+		context.textAlign = "center"
+		context.font = width / 8 + 'px ' + fontArgs[1]
+		context.fillText(title, width / 2, height / 3)
+
+		context.fillStyle = "#69c0ff"
+		context.textAlign = "center"
+		context.font = width / 14 + 'px ' + fontArgs[1]
+		context.fillText(text, width / 2, height * 2 / 3)
+	}
+
+    canvas.convertToBlob({ type: "image/jpeg", quality: 0.9 })
+    .then((blob) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(blob)
+        reader.onloadend = function() {
+            const b64text = reader.result
+            callback(b64text.substr(b64text.indexOf(',') + 1))
+        }
+    }).catch(() => {
+        callback(undefined)
+    })
 }
