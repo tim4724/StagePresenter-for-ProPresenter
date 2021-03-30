@@ -86,7 +86,9 @@ function createStageMonitorWindow(bounds) {
         stageMonitorWindow = undefined
         screenConfigChanged()
     }
-    stageMonitorWindow.on('move', move)
+    if (app.isPackaged) {
+        stageMonitorWindow.on('move', move)
+    }
     stageMonitorWindow.once('close', function (ev) {
         if (ev.sender === stageMonitorWindow) {
             stageMonitorWindow.webContents.removeListener('new-window', newWindow)

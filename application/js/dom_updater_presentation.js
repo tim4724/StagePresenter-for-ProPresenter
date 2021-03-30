@@ -7,6 +7,11 @@ function PresentationDomUpdater() {
     const titleElement = presentationContainerElement.querySelector('#title')
     const slideElements = presentationContainerElement.getElementsByClassName('slide')
     const groupElements = presentationContainerElement.getElementsByClassName('group')
+    const previewElement = document.getElementById('preview')
+    let slideImagesCache = []
+    let scrollTimeout = undefined
+    let displayPresentationTimeout = undefined
+    let displayPresentationTimeoutEndTime = 0
 
     if (ResizeObserver) {
         new ResizeObserver(entries => {
@@ -33,28 +38,56 @@ function PresentationDomUpdater() {
 
     function displayPresentation(presentation, slideIndex, animate) {
         nextUpElement.style.display = 'none'
-        if (animate) {
-            presentationContainerElement.style.opacity = 0
-            setTimeout(() => {
+        previewElement.src = 'black16x9.png'
+        slideImagesCache = presentation.groups.map(g => g.slides.map(s => s.previewImage)).flat()
+
+        function displayDelayed(duration) {
+            return setTimeout(() => {
                 display()
                 presentationContainerElement.style.opacity = 1
                 presentationContainerElement.scrollTop = 0
-                setTimeout(() => {
+                clearTimeout(scrollTimeout)
+                scrollTimeout = setTimeout(() => {
                     changeCurrentSlideAndScroll(slideIndex, true)
                 }, 150)
             }, 300)
+        }
+
+        clearTimeout(scrollTimeout)
+        clearTimeout(displayPresentationTimeout)
+        if (animate) {
+            presentationContainerElement.style.opacity = 0
+            displayPresentationTimeout = displayDelayed(300)
+            displayPresentationTimeoutEndTime = Date.now() + 300
         } else {
-            display()
-            presentationContainerElement.scrollTop = 0
-            changeCurrentSlideAndScroll(slideIndex, false)
+            const now = Date.now()
+            const dif = displayPresentationTimeoutEndTime - now
+            if (dif > 0) {
+                displayPresentationTimeout = displayDelayed(dif)
+            } else {
+                display()
+                presentationContainerElement.style.opacity = 1
+                presentationContainerElement.scrollTop = 0
+                changeCurrentSlideAndScroll(slideIndex, false)
+                // Just to be sure, because of a rare bug?
+                scrollTimeout = setTimeout(() => {
+                    changeCurrentSlideAndScroll(slideIndex, false)
+                }, 32)
+            }
         }
 
         function display() {
             while(groupElements.length > 0) {
-                groupElements[0].remove();
+                groupElements[0].remove()
             }
+            const hasText = presentation.groups.some(g => g.slides.some(s => s.lines.length > 0))
 
             // Update elements
+            if (hasText == false) {
+                presentationContainerElement.classList.add('noText')
+            } else {
+                presentationContainerElement.classList.remove('noText')
+            }
             titleElement.innerHTML = presentation.name
             titleElement.style.display = presentation.name ? 'block' : 'none'
 
@@ -62,15 +95,6 @@ function PresentationDomUpdater() {
             for (const group of presentation.groups) {
                 const groupElement = buildGroupElement(group)
                 presentationContainerElement.append(groupElement)
-            }
-
-            if(presentation.groups.length > 0) {
-                // Hide the first group if it only contains empty slides
-                const firstGroupSlides = presentation.groups[0].slides
-                if (!firstGroupSlides || !firstGroupSlides.some(s => s.lines.some(l => l.length > 0))) {
-                    groupElements[0].style.display = 'none'
-                }
-                // TODO: Remove empty groups at the end?
             }
 
             fixGroupNameElementPosition()
@@ -110,6 +134,9 @@ function PresentationDomUpdater() {
 
             const slideElements = groupElement.querySelectorAll('.slide')
             for (let i = 0; i < slideElements.length; i++) {
+                if (slideElements[i].querySelector('.line') == undefined) {
+                    continue
+                }
                 let maxHeight = availableHeight
                 if (i === 0) {
                     // TODO: Use real border with instead of hardcoded 6
@@ -175,17 +202,23 @@ function PresentationDomUpdater() {
                 }
             }
 
+            if (slide.lines.length <= 0 && slide.previewImage != undefined
+                && slide.previewImage.length > 0) {
+                const image = new Image()
+                image.src = 'data:image/jpeg;base64,' + slide.previewImage
+                slideElement.appendChild(image)
+                image.onload = function() {
+                    console.log("buildGroupElement Image Height", image.naturalHeight)
+                }
+                // TODO: Group Color black?
+            }
             groupElement.appendChild(slideElement)
         }
-
+        if (group.slides.length <= 0) {
+            groupElement.classList.add('emptyGroup')
+        }
         if (group.containsBiblePassage) {
             groupElement.classList.add('groupWithBiblePassage')
-        }
-        if (group.slides.length == 0) {
-            // TODO: hide completely? (display none)
-            groupElement.classList.add('emptyGroup')
-        } else if (group.slides.every(s => s.lines.every(l => l.length === 0))) {
-            groupElement.classList.add('emptyGroup')
         }
         return groupElement
     }
@@ -196,6 +229,17 @@ function PresentationDomUpdater() {
     }
 
     function changeCurrentSlideAndScroll(slideIndex, animate = true) {
+        if (previewElement.offsetParent !== null) {
+            const previewImage = slideImagesCache[slideIndex]
+            if (previewImage != undefined && previewImage.length > 0) {
+                previewElement.src = 'data:image/jpeg;base64,' + previewImage
+            } else {
+                previewElement.src = 'black16x9.png'
+            }
+        } else {
+            previewElement.src = 'black16x9.png'
+        }
+
         if (!slideElements || slideElements.length === 0) {
             if (nextUpElement.innerText.length > 0) {
                 nextUpElement.style.display = 'inherit'
@@ -237,7 +281,12 @@ function PresentationDomUpdater() {
                     break
                 }
             }
-
+            if (slideElements[slideElements.length - 1] === newSlide) {
+                // Last slide
+                nextUpElement.style.zIndex = '100'
+            } else {
+                nextUpElement.style.zIndex = '-2'
+            }
             nextUpElement.style.display = isLastGroup ? 'inherit' : 'none'
         } else {
             nextUpElement.style.display = 'none'
@@ -245,10 +294,8 @@ function PresentationDomUpdater() {
     }
 
     function scrollToCurrentSlide(animate = true) {
-        if (Array.prototype.every.call(groupElements, g => g.classList.contains('emptyGroup'))) {
-            // Only empty groups that are not visible, do not scroll
-            return
-        }
+        const slideElements = presentationContainerElement.querySelectorAll('.slide')
+        const slideCount = slideElements.length
         const slideElement = presentationContainerElement.querySelector('.currentSlide')
         if (!slideElement) {
             return
@@ -262,8 +309,12 @@ function PresentationDomUpdater() {
 
         const groupTop = groupElement.getBoundingClientRect().top
         if (isFirstSlideInGroup || groupElement.scrollHeight < (availableHeight * 0.8)) {
-            // Whole group is fits on the screen or this is the first slide
-            scrollDeltaY = groupTop
+            if (slideElements[0] === slideElement && slideElement.scrollHeight < (availableHeight * 0.5)) {
+                scrollDeltaY = titleElement.getBoundingClientRect().top
+            } else {
+                // Whole group is fits on the screen or this is the first slide
+                scrollDeltaY = groupTop
+            }
         } else {
             const slideTop = slideElement.getBoundingClientRect().top
             const slideHeight = slideElement.scrollHeight

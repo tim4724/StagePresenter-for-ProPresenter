@@ -11,7 +11,6 @@
     <script src='js/dom_updater_timer.js'></script>
     <script src='js/dom_updater_presentation.js'></script>
     <script src='js/dom_updater_message.js'></script>
-    <script src='js/dom_updater_preview.js'></script>
     <script src='js/pro_presenter_parser.js'></script>
     <script src='js/pro_presenter_connection.js'></script>
 
@@ -49,12 +48,15 @@
     </section>
 
     <main>
-        <div id="presentationContainer">
+        <div id="presentationContainer" class="noText">
             <h1 id='title'></h1>
+            <section class="group currentGroup" style="border-style: none">
+                <div class="groupName">
+                <img src="bg.png" style="opacity: 1">
+            </section>
         </div>
 
         <span id='nextUp'></span>
-        <img id='largePreview' src='bg.png'/>
         <span id='message'></span>
     </main>
 

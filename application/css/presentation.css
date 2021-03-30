@@ -19,9 +19,13 @@
     color: #909090;
     border-width: 6px;
     border-style: solid;
-    border-color: #ffde3b;
+    border-color: #555555;
     font-size: 1em;
     background: #000000;
+}
+
+.emptyGroup {
+    visibility: hidden;
 }
 
 .groupName {
@@ -35,8 +39,23 @@
     margin-bottom: -0.1em;
 }
 
-.emptyGroup {
-    visibility: hidden;
+.group img {
+    height: 240px;
+    opacity: 0.25;
+}
+
+.currentGroup .currentSlide img {
+    opacity: 1;
+}
+
+#presentationContainer.noText .group img {
+    width: 100%;
+    height: auto;
+    max-height: 100vh;
+}
+
+#presentationContainer.noText .currentSlide, #presentationContainer.noText .group {
+    border-width: 0;
 }
 
 .groupWithLongText .slide .text, .slide.biblePassage .text {

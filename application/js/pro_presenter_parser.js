@@ -34,10 +34,11 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(lines, rawText, label, color, isBiblePassage, bibleVerseNumbers) {
+function Slide(rawText, previewImage, lines, label, color, isBiblePassage, bibleVerseNumbers) {
 	return {
-		lines: lines,
 		rawText: rawText,
+		previewImage: previewImage,
+		lines: lines,
 		label: label,
 		color: color,
 		isBiblePassage: isBiblePassage,
@@ -73,7 +74,8 @@ function ProPresenterParser() {
 		return newPlaylists
 	}
 
-	function parseSlide(rawText, label, color, assumeIsBiblePassage = false) {
+	function parseSlide(rawText, label, color, previewImage = undefined,
+						assumeIsBiblePassage = false) {
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
@@ -113,8 +115,10 @@ function ProPresenterParser() {
 			return strings
 		}
 
-		let textBoxes = rawText.split('\r')
-
+		let textBoxes = []
+		if (rawText.length > 0) {
+			textBoxes = rawText.split('\r')
+		}
 		const features = localStorage.features.split(' ')
 		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
 		const improveBiblePassages = features.includes('improveBiblePassages')
@@ -133,7 +137,7 @@ function ProPresenterParser() {
 			}
 		}
 
-		if (improveBiblePassages) {
+		if (improveBiblePassages && textBoxes.length > 0) {
 			let lines
 			if (onlyFirstTextInSlide) {
 				if (isBiblePassage) {
@@ -226,14 +230,17 @@ function ProPresenterParser() {
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(lines, rawText, label, color, isBiblePassage, bibleVerseNumbers)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, bibleVerseNumbers)
 		} else {
-			let text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
-			let lines = text.trim().split('\n')
-			for (let i = 0; i < lines.length; i++) {
-				lines[i] = lines[i].trim()
+			let lines = []
+			if (textBoxes.length > 0) {
+				const text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
+				lines = text.trim().split('\n')
+				for (let i = 0; i < lines.length; i++) {
+					lines[i] = lines[i].trim()
+				}
 			}
-			return Slide(lines, rawText, label, color, isBiblePassage, undefined)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined)
 		}
 	}
 
@@ -256,7 +263,11 @@ function ProPresenterParser() {
 
 	function parsePresentation(data) {
 		function asCSSColor(color) {
-			return 'rgba(' + color.split(' ').map(c => c * 255).join(', ') + ')'
+			if (color === undefined || color.length === 0) {
+				return ''
+			} else {
+				return 'rgba(' + color.split(' ').map(c => c * 255).join(', ') + ')'
+			}
 		}
 
 		const presentation = data.presentation
@@ -285,6 +296,7 @@ function ProPresenterParser() {
 					slide.slideText,
 					slide.slideLabel,
 					asCSSColor(slide.slideColor),
+					slide.slideImage,
 					isBiblePresentation || isBibleGroup
 				)
 

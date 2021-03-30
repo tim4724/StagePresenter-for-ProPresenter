@@ -69,17 +69,6 @@ main {
     padding: 0 8px;
 }
 
-#largePreview {
-    display: block;
-    position: absolute;
-    top: 0;
-    margin: 6em 6em auto auto;
-    width: 100%;
-    max-height: calc(100% - 12em);
-    object-fit: contain;
-    z-index: -2;
-}
-
 #error {
     position: absolute;
     bottom: 100px;
