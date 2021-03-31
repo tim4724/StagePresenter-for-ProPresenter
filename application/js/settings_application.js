@@ -30,7 +30,6 @@ function ApplicationSettings() {
         displaySelectElement.appendChild(displayNoneOptionElement)
 
         const showOnDisplay = localStorage.showOnDisplay || -1
-        console.log('showOnDisplay', showOnDisplay)
 
         const displays = screen.getAllDisplays()
         const primaryDisplayId = screen.getPrimaryDisplay().id
