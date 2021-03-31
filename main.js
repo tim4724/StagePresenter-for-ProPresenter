@@ -73,11 +73,6 @@ function createStageMonitorWindow(bounds) {
     stageMonitorWindow.setAlwaysOnTop(true, "pop-up-menu")
 
     stageMonitorWindow.loadFile(`${__dirname}/application/stagemonitor.html`)
-    function newWindow(event, url, frameName, disposition, options, additionalFeatures) {
-        event.preventDefault()
-        createSettingsWindow()
-    }
-    stageMonitorWindow.webContents.on('new-window', newWindow)
     function move(ev) {
         waitingForDisplay = true
         stageMonitorWindow.webContents.removeListener('new-window', newWindow)

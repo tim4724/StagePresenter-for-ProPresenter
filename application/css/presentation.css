@@ -118,6 +118,10 @@
     color: #ffffff;
 }
 
+.onlyGroup {
+    border-style: none;
+}
+
 .group:last-of-type {
     margin-bottom: 3em;
 }
@@ -137,7 +141,6 @@
     padding: 4px 16px;
     font-size: 3.5em;
     color: #909090;
-    background: #000000;
     white-space: nowrap;
     text-overflow: ellipsis;
 }

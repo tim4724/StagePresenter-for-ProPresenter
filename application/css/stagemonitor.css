@@ -58,14 +58,14 @@ main {
 #message {
     display: none;
     position: absolute;
-    bottom: 0;
-    left: 5%;
-    width: 90%;
-    right: 5%;
+    bottom: 1.25em;
+    left: 0;
+    width: 100%;
+    right: 0;
     color: #000000;
-    border: 6px solid #cf008a;
     font-size: 5em;
     background: #ffffff;
+    opacity: 0.8;
     padding: 0 8px;
 }
 

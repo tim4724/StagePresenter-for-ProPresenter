@@ -18,15 +18,11 @@
     <link rel='stylesheet' href='css/presentation.css'>
     <link rel='stylesheet' href='css/sidebar.css'>
 
-    <title>Stage Monitor</title>
+    <title>StagePresenter</title>
 </head>
 
 <body onload='LocalStorageObserver(); ProPresenter().connect();'
       class="showSidebarBottom showPlaylist showPreview">
-    <button id='settingsButton' onclick='window.open("settings.html", "popup")'>
-        Settings
-    </button>
-
     <button id='closeButton' onclick='window.close()'>
         Close
     </button>
@@ -51,7 +47,7 @@
         <div id="presentationContainer" class="noText">
             <h1 id='title'></h1>
             <section class="group currentGroup" style="border-style: none">
-                <div class="groupName">
+                <div class="groupName"></div>
                 <img src="bg.png" style="opacity: 1">
             </section>
         </div>

@@ -32,24 +32,25 @@ if (stateBroadcastChannel !== undefined) {
                 if (stateManagerInstance !== undefined &&
                         proPresenterInstance !== undefined) {
                     const playlistIndex = value.playlistIndex
+                    const playlistItemIndex = value.playlistItemIndex
                     const playlist = stateManagerInstance.getPlaylist(playlistIndex)
                     if (playlist === undefined) {
                         break
                     }
-                    const item = playlist.items[value.playlistItemIndex]
+                    const item = playlist.items[playlistItemIndex]
                     if (item == undefined) {
                         break
                     }
+                    const presentationPath = item.location
                     if (item.type == 'playlistItemTypePresentation') {
-                        const presentationPath = item.location
                         stateManagerInstance.onNewSlideIndex(presentationPath, -1, true)
                         proPresenterInstance.loadPresentation(presentationPath)
                     } else {
                         // Only other known item type is
                         // playlistItemTypeVideo (also for images)
                         // Therefore show a media presentation
-                        const presentation = Presentation(item.text, [])
-                        stateManagerInstance.onNewMediaPresentation(presentation, playlistIndex, true)
+                        const name = item.text
+                        stateManagerInstance.onNewMediaPresentation(name, presentationPath)
                     }
                 }
                 break
@@ -182,33 +183,13 @@ function StagemonitorStateManager() {
         }})
     }
 
-    // TODO: fix
-    function onNewMediaPresentation(name, playlistIndex=undefined, playlistItemIndex = undefined, forceShow=false) {
+    function onNewMediaPresentation(name, presentationPath) {
         renderPreviewImage('Media', name, 1920, 1080, (previewImage => {
-            let presentationPath = name
-            const slide = proPresenterParser.parseSlide('', '', undefined, previewImage)
+            const slide = Slide('', previewImage, [], undefined, undefined, false, [])
             const group = Group('', '', [slide])
-            const mediaPresentation = Presentation('', [group])
-
-            if (playlistIndex == undefined) {
-                playlistIndex = currentPlaylistIndex
-            }
-            let playlist = getPlaylist(playlistIndex)
-            if (playlist !== undefined) {
-                const playlistItemIndex = playlist.items.findIndex(i => i.text === name)
-                if (playlistItemIndex >= 0) {
-                    presentationPath = playlist.items[playlistItemIndex].location
-                }
-            }
-
-            if (forceShow || presentationPath != name || !currentPresentation) {
-                const animate = currentPresentation == undefined || currentPresentation.name !== name
-                currentSlideIndex = 0
-                presentation.name = ''
-                onNewPresentation(presentation, presentationPath, animate)
-                return true
-            }
-            return false
+            const animate = currentPresentation == undefined || currentPresentation.name !== name
+            currentSlideIndex = 0
+            onNewPresentation(Presentation('', [group]), presentationPath, animate)
         }))
     }
 
@@ -244,6 +225,8 @@ function StagemonitorStateManager() {
         clearSlideIndex: clearSlideIndex,
         onNewMessage: onNewMessage,
         getPlaylist: getPlaylist,
+        getCurrentPlaylistIndex: () => currentPlaylistIndex,
+        getCurrentPlaylistItemIndex: () => currentPlaylistItemIndex,
         getCurrentPresentationPath: () => currentPresentationPath,
         getCurrentPresentation: () => currentPresentation,
         getCurrentSlideIndex: () => currentSlideIndex,
@@ -491,13 +474,11 @@ function ProPresenter() {
                     const presentation = proPresenterParser.parsePresentation(data)
 
                     firstSlideWidth(presentation, (width) => {
-                        console.log('Received Presentation with Image Width: ' + width + ' ' + Date.now())
                         if (width == undefined || width <= lowResolutionImageWidth) {
                             currentPresentationDataCache = data_string
                             stateManager.onNewPresentation(presentation, data.presentationPath, true)
                             // TODO: Better send playlistRequestAll in a fix interval?
                             remoteWebSocket.send(Actions.playlistRequestAll)
-
                             if (width <= lowResolutionImageWidth) {
                                 remoteWebSocket.send(
                                     Actions.presentationRequest(data.presentationPath, middleResolutionImageWidth)
@@ -537,7 +518,20 @@ function ProPresenter() {
                 remoteWebSocket.send(Actions.presentationRequest(presentationPath))
                 break
             case 'audioTriggered':
-
+            const name = data.audioName
+                const playlistIndex = stateManager.getCurrentPlaylistIndex()
+                const playlist = stateManager.getPlaylist(playlistIndex)
+                if (playlist != undefined) {
+                    const playlistItem = playlist.items.find(i => i.type === "playlistItemTypeVideo" && i.text === name)
+                    if (playlistItem != undefined) {
+                        const presentationPath = playlistItem.location
+                        stateManager.onNewMediaPresentation(name, presentationPath)
+                        timerDomUpdater.forceShowVideo()
+                    }
+                } else {
+                    stateManager.onNewMediaPresentation(name, '')
+                    timerDomUpdater.forceShowVideo()
+                }
                 break
             case 'clearAudio':
                 // No use for that information at the moment
@@ -625,9 +619,12 @@ function ProPresenter() {
                         const name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
                         const newGroup = Group(name, '', [nextStageDisplaySlide])
                         presentation.groups.push(newGroup)
-                        const index = presentation.groups.length - 2
+                        const index = allPresentationSlides.length - 2
                         stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
                         stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
+                    } else {
+                        const index = allPresentationSlides.length - 1
+                        stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
                     }
                     return
                 } else {

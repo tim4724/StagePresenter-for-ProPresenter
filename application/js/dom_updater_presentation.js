@@ -94,6 +94,9 @@ function PresentationDomUpdater() {
             // Insert new elements
             for (const group of presentation.groups) {
                 const groupElement = buildGroupElement(group)
+                if (presentation.groups.length == 1) {
+                    groupElement.classList.add('onlyGroup')
+                }
                 presentationContainerElement.append(groupElement)
             }
 
@@ -172,9 +175,7 @@ function PresentationDomUpdater() {
             const slideElement = document.createElement('div')
             slideElement.classList.add('slide')
 
-            if (slide.isBiblePassage) {
-                slideElement.classList.add('biblePassage')
-            }
+
             for (let i = 0; i < slide.lines.length; i++) {
                 const line = slide.lines[i]
 
@@ -207,18 +208,14 @@ function PresentationDomUpdater() {
                 const image = new Image()
                 image.src = 'data:image/jpeg;base64,' + slide.previewImage
                 slideElement.appendChild(image)
-                image.onload = function() {
-                    console.log("buildGroupElement Image Height", image.naturalHeight)
-                }
-                // TODO: Group Color black?
+            }
+            if (slide.lines.length > 0 && slide.isBiblePassage) {
+                slideElement.classList.add('biblePassage')
             }
             groupElement.appendChild(slideElement)
         }
         if (group.slides.length <= 0) {
             groupElement.classList.add('emptyGroup')
-        }
-        if (group.containsBiblePassage) {
-            groupElement.classList.add('groupWithBiblePassage')
         }
         return groupElement
     }
@@ -284,7 +281,7 @@ function PresentationDomUpdater() {
             if (slideElements[slideElements.length - 1] === newSlide) {
                 // Last slide
                 nextUpElement.style.zIndex = '100'
-            } else {
+            } else if (newSlide != undefined){
                 nextUpElement.style.zIndex = '-2'
             }
             nextUpElement.style.display = isLastGroup ? 'inherit' : 'none'
