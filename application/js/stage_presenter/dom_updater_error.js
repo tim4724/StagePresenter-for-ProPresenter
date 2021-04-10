@@ -31,9 +31,10 @@ function ErrorDomUpdater() {
 		checkState(remoteWebsocketConnectionState, 'Remote App Interface')
 		checkState(stageWebSocketConnectionState, 'Stage App Interface')
 		if (errorMessages.length > 0) {
-			errorElement.style.display = 'block'
 			errorMessageElement.innerText = errorMessages.join('\n')
+			errorElement.style.display = 'block'
 		} else {
+			errorMessageElement.innerText = ''
 			errorElement.style.display = 'none'
 		}
 	}
