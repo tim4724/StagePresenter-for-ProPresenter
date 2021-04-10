@@ -2,58 +2,58 @@
 <html>
 
 <head>
-    <meta charset='utf-8'>
-    <title>StagePresenter Controller</title>
-    <link rel='stylesheet' href='css/operator.css'>
-    <script src='js/operator.js'></script>
+	<meta charset='utf-8'>
+	<title>StagePresenter Controller</title>
+	<link rel='stylesheet' href='css/operator.css'>
+	<script src='js/operator/operator.js'></script>
 </head>
 
 <body onload='operator = Operator(); operator.requestState()'>
-    <table>
-        <tr>
-            <td id="currentPlaylist">
-                <select id="playlists"></select>
-            </td>
-            <td class="action" colspan="2">
-                <button id="clearPresentation" disabled onclick="operator.clearPresentation()">
-                    Clear
-                </button>
-            </td>
-        </tr>
+	<table>
+		<tr>
+			<td id="currentPlaylist">
+				<select id="playlists"></select>
+			</td>
+			<td class="action" colspan="2">
+				<button id="clearPresentation" disabled onclick="operator.clearPresentation()">
+					Clear
+				</button>
+			</td>
+		</tr>
 
-        <tr>
-            <td id="currentPresentation">
-                <select id="presentations"></select>
-            </td>
-            <td class="action">
-                <button id="previousPresentation" class="tooltip" disabled onclick="operator.prevPresentation()">
-                    <<
-                    <span class="tooltiptext">D</span>
-                </button>
-                </td>
-            <td class="action">
-                <button id="nextPresentation" class="tooltip" disabled onclick="operator.nextPresentation()">
-                    >>
-                    <span class="tooltiptext">C</span>
-                </button>
-                </td>
-        </tr>
-        <tr>
-            <td id="currentSlide">
-                <select id="slides"></select>
-            </td>
-            <td class="action">
-                <button id="slideUp" class="tooltip" disabled onclick="operator.prevSlide()">
-                    ▲
-                </button>
-            </td>
-            <td class="action">
-                <button id="slideDown" class="tooltip" disabled onclick="operator.nextSlide()">
-                    ▼
-                </button>
-            </td>
-        </tr>
-    </table>
+		<tr>
+			<td id="currentPresentation">
+				<select id="presentations"></select>
+			</td>
+			<td class="action">
+				<button id="previousPresentation" class="tooltip" disabled onclick="operator.prevPresentation()">
+					<<
+					<span class="tooltiptext">D</span>
+				</button>
+				</td>
+			<td class="action">
+				<button id="nextPresentation" class="tooltip" disabled onclick="operator.nextPresentation()">
+					>>
+					<span class="tooltiptext">C</span>
+				</button>
+				</td>
+		</tr>
+		<tr>
+			<td id="currentSlide">
+				<select id="slides"></select>
+			</td>
+			<td class="action">
+				<button id="slideUp" class="tooltip" disabled onclick="operator.prevSlide()">
+					▲
+				</button>
+			</td>
+			<td class="action">
+				<button id="slideDown" class="tooltip" disabled onclick="operator.nextSlide()">
+					▼
+				</button>
+			</td>
+		</tr>
+	</table>
 
 </body>
 </html>

@@ -1,6 +1,6 @@
 "use strict"
 
-function LocalStorageObserver() {
+function LocalStorageObserver(proPresenterConnection) {
 	if (window.addEventListener) {
 		window.addEventListener("storage", update, false)
 	} else {
@@ -25,7 +25,7 @@ function LocalStorageObserver() {
 	function update() {
 		if (localStorage.features === undefined) {
 			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
-        }
+		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150
 		}
@@ -94,7 +94,7 @@ function LocalStorageObserver() {
 		if (parsingFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
 				|| customCSS !== localStorage.customCSS) {
-			ProPresenter().reloadCurrentPresentation()
+			proPresenterConnection.reloadCurrentPresentation()
 		}
 
 		oldFeatures = document.body.className.split(' ')
