@@ -1,114 +1,114 @@
 html {
-    font-size: 16px;
+	font-size: 16px;
 }
 
 body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    text-align: center;
-    background: #000;
-    color: white;
-    font-size: 1.2em;
-    user-select: none;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	text-align: center;
+	background: #000;
+	color: white;
+	font-size: 1.2em;
+	user-select: none;
 }
 
 span, div, h1  {
-    cursor: default;
+	cursor: default;
 }
 
 #title {
-    color: #ff7c00;
-    font-weight: normal;
-    margin: 0.1em;
-    text-align: center;
+	color: #ff7c00;
+	font-weight: normal;
+	margin: 0.1em;
+	text-align: center;
 }
 
 .settingGroupTitle {
-    margin-bottom: 1em;
-    font-size: 0.7em;
+	margin-bottom: 1em;
+	font-size: 0.7em;
 }
 
 main {
-    display: inline-block;
-    width: 90%;
-    max-width: 1000px;
-    padding: 0 1.5em 0 1.5em;
-    background: #181818;
-    border-radius: 0.25em;
-    text-align: left;
-    border: 0.375em solid #181818;
+	display: inline-block;
+	width: 90%;
+	max-width: 1000px;
+	padding: 0 1.5em 0 1.5em;
+	background: #181818;
+	border-radius: 0.25em;
+	text-align: left;
+	border: 0.375em solid #181818;
 }
 
 .settingGroup {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    background: #111111;
-    padding: 0.75em 1.5em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	background: #111111;
+	padding: 0.75em 1.5em;
 }
 
 .setting {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    overflow: hidden;
-    min-height: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	overflow: hidden;
+	min-height: 2em;
 }
 
 .settingSpacer {
-    height: 16px;
+	height: 16px;
 }
 
 .right {
-    float: right;
+	float: right;
 }
 
 .warning {
-    color: #b98b00;
+	color: #b98b00;
 }
 
 .errorResult {
-    color: #ff0000;
+	color: #ff0000;
 }
 
 .successResult {
-    color: #00ff00;
+	color: #00ff00;
 }
 
 #proPresenterVersion, #remoteAppConnectionResult, #stageAppConnectionResult {
-    display: inline-block;
-    min-width: 240px
+	display: inline-block;
+	min-width: 240px
 }
 
 #doneButton {
-    float: right;
+	float: right;
 }
 
 select {
-    float: right;
+	float: right;
 }
 
 #stagemonitorSettingsContainer {
-    display: flex;
-    justify-content: space-between;
+	display: flex;
+	justify-content: space-between;
 }
 
 #stagemonitorSettings {
-    flex-grow: 1;
+	flex-grow: 1;
 }
 
 #previewIframe {
-    border: 0;
-    flex-grow: 1;
-    pointer-events: none;
-    margin-left: 16px;
+	border: 0;
+	flex-grow: 1;
+	pointer-events: none;
+	margin-left: 16px;
 }
 
 .disabled {
-    opacity: 0.5;
+	opacity: 0.5;
 }
 
 input[type="text"], input[type="number"] {
-    padding: 0.375em 0.75em;
+	padding: 0.375em 0.75em;
 }
 
 textarea {
-    resize: vertical;
+	resize: vertical;
 }

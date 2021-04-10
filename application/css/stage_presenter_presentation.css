@@ -1,0 +1,146 @@
+#presentationContainer {
+	overflow: hidden;
+	transition: opacity 0.3s ease-in-out;
+	position: relative;
+	height: 100%;
+	font-size: 5em;
+}
+
+#title {
+	margin: 0;
+	padding-top: 8px;
+	color: #ff7c00;
+	font-weight: normal;
+	font-size: 0.8em;
+}
+
+.group {
+	margin: 8px auto 12px;
+	color: #909090;
+	border-width: 6px;
+	border-style: solid;
+	border-color: #555555;
+	font-size: 1em;
+	background: #000000;
+}
+
+.emptyGroup {
+	visibility: hidden;
+}
+
+.groupName {
+	display: block;
+	text-align: left;
+	margin-top: 4px;
+	margin-left: 8px;
+	left: 12px;
+	color: #ffde3b;
+	font-size: 0.5em;
+	margin-bottom: -0.1em;
+}
+
+.group img {
+	height: 240px;
+	opacity: 0.25;
+}
+
+.currentGroup .currentSlide img {
+	opacity: 1;
+}
+
+#presentationContainer.noText .group img {
+	width: 100%;
+	height: auto;
+	max-height: 100vh;
+}
+
+#presentationContainer.noText .currentSlide, #presentationContainer.noText .group {
+	border-width: 0;
+}
+
+.groupWithLongText .slide .text, .slide.biblePassage .text {
+	padding: 8px 0;
+}
+
+.groupWithLongText, .slide.biblePassage {
+	text-align: start;
+}
+
+.slide {
+	border-left: 8px solid;
+	border-right: 8px solid;
+	border-color: #000000;
+	padding: 8px 4px;
+	min-height: 1em;
+}
+
+.groupWithLongText .slide .line, .slide.biblePassage .line {
+	margin-top: 0.125em;
+	margin-bottom: 0.125em;
+}
+
+.slide .line {
+	/* Average space width is 0.25em http://jkorpela.fi/styles/spaces.html */
+	margin-left: 0.125em;
+	margin-right: 0.125em;
+	display: block;
+}
+
+.slide .line:first-of-type {
+	display: inline-block;
+}
+
+.flexibleSlides .line {
+	display: inline-block;
+}
+
+.flexibleSlides .slide.biblePassage .line,
+.flexibleSlides .groupWithLongText .slide .line {
+	display: block;
+}
+
+.bibleVerseNumber {
+	color: #ffde3b;
+	margin-right: 0.25em;
+	font-size: 0.8em;
+}
+
+.currentGroup {
+	color: #efefef;
+}
+
+.currentSlide {
+	border-color: #ffffff;
+	background: #111111;
+}
+
+.currentGroup .currentSlide {
+	color: #ffffff;
+}
+
+.onlyGroup {
+	border-style: none;
+}
+
+.group:last-of-type {
+	margin-bottom: 3em;
+}
+
+#nextUp::before {
+	content: "↳ ";
+}
+
+#nextUp {
+	display: none;
+	position: absolute;
+	bottom: 4px;
+	right: 0;
+	max-width: 50%;
+	overflow: hidden;
+	z-index: -1;
+	padding: 4px 16px;
+	font-size: 3.5em;
+	color: #909090;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}

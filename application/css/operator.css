@@ -1,81 +1,81 @@
 html {
-    box-sizing: border-box;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 16px;
+	box-sizing: border-box;
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 16px;
 }
 
 *, *:before, *:after {
-    box-sizing: inherit;
+	box-sizing: inherit;
 }
 
 body {
-    text-align: center;
-    background: #000000;
-    color: #ffffff;
-    margin: 0;
-    user-select: none;
-    height: 100vh;
-    display: flex;
+	text-align: center;
+	background: #000000;
+	color: #ffffff;
+	margin: 0;
+	user-select: none;
+	height: 100vh;
+	display: flex;
 }
 
 table {
-    width: 100%;
-    overflow: hidden;
+	width: 100%;
+	overflow: hidden;
 }
 
 tr {
-    width: 100%;
+	width: 100%;
 }
 
 @media screen and (max-width: 240px) {
-    #currentPlaylist, #currentPresentation, #currentSlide {
-        display: none;
-    }
+	#currentPlaylist, #currentPresentation, #currentSlide {
+		display: none;
+	}
 }
 
 .action {
-    width: 56px;
+	width: 56px;
 }
 
 table button, table select {
-    width: 100%;
+	width: 100%;
 }
 
 /* Tooltip container */
 .tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+	position: relative;
+	display: inline-block;
+	border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
 }
 
 /* Tooltip text */
 .tooltip .tooltiptext {
-    visibility: hidden;
-    width: 140px;
-    background-color: #414141;
-    color: #fff;
-    text-align: center;
-    padding: 5px 5px;
-    border-radius: 6px;
+	visibility: hidden;
+	width: 140px;
+	background-color: #414141;
+	color: #fff;
+	text-align: center;
+	padding: 5px 5px;
+	border-radius: 6px;
 
-    /* Position the tooltip text */
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 0%;
-    margin-left: -80px;
+	/* Position the tooltip text */
+	position: absolute;
+	z-index: 1;
+	bottom: 125%;
+	left: 0%;
+	margin-left: -80px;
 
-    /* Fade in tooltip */
-    opacity: 0;
-    transition: opacity 0.3s;
+	/* Fade in tooltip */
+	opacity: 0;
+	transition: opacity 0.3s;
 
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 0.85;
+	visibility: visible;
+	opacity: 0.85;
 }

@@ -329,7 +329,7 @@ function ProPresenterParser() {
 							const lastIndex = lastSlide.bibleVerseNumbers.length - 1
 							lastVerseNumber = lastSlide.bibleVerseNumbers[lastIndex]
 						}
-	                    groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
+						groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
 					}
 				}
 				newGroups.push(Group(groupName, groupColor, newSlides))

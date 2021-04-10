@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset='utf-8'>
+
+	<script src='js/utils.js'></script>
+
+	<script src='js/stage_presenter/dom_updater_error.js'></script>
+	<script src='js/stage_presenter/dom_updater_playlist.js'></script>
+	<script src='js/stage_presenter/dom_updater_timer.js'></script>
+	<script src='js/stage_presenter/dom_updater_presentation.js'></script>
+	<script src='js/stage_presenter/dom_updater_message.js'></script>
+
+	<script src='js/stage_presenter/pro_presenter_parser.js'></script>
+	<script src='js/stage_presenter/pro_presenter_connection.js'></script>
+	<script src='js/stage_presenter/observer_local_storage.js'></script>
+	<script src='js/stage_presenter/state_manager.js'></script>
+
+	<script src='js/stage_presenter/stage_presenter.js'></script>
+
+	<link rel='stylesheet' href='css/stage_presenter.css'>
+	<link rel='stylesheet' href='css/stage_presenter_presentation.css'>
+	<link rel='stylesheet' href='css/stage_presenter_sidebar.css'>
+
+	<title>StagePresenter</title>
+</head>
+
+<body onload='StagePresenter()'
+	  class="showSidebarBottom showPlaylist showPreview">
+
+	<button id='closeButton' onclick='window.close()'>
+		Close
+	</button>
+
+	<section id='sidebar'>
+		<div id='playlist'>
+			<div id='playlistName'></div>
+		</div>
+
+		<img id='preview' src='img/black16x9.png' alt='Failed to load image'/>
+
+		<div id='timerContainer'></div>
+
+		<span class="spacer"></span>
+
+		<span id='clock'>
+			<span id='clockHoursMinutes'>00:00</span><span id='clockSeconds'>00</span>
+		</span>
+	</section>
+
+	<main>
+		<div id="presentationContainer" class="noText">
+			<h1 id='title'></h1>
+			<section class="group currentGroup" style="border-style: none">
+				<div class="groupName"></div>
+				<img src="img/bg.png" style="opacity: 1">
+			</section>
+		</div>
+
+		<span id='nextUp'></span>
+		<span id='message'></span>
+	</main>
+
+	<div id='error' style='display: none;'>
+		<div id='errorLabel'>Error</div>
+		<div id='errorMessage'></div>
+	</div>
+
+	</body>
+</html>
