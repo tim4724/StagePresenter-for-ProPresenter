@@ -2,6 +2,8 @@ function StateManager(stateBroadcastChannel) {
 	const presentationDomUpdater = PresentationDomUpdater()
 	const playlistDomUpdater = PlaylistDomUpdater()
 	const messageDomUpdater = MessageDomUpdater()
+	const timerDomUpdater = TimerDomUpdater()
+	const errorDomUpdater = ErrorDomUpdater()
 
 	let currentPlaylists = []
 	let currentPlaylistIndex = -1
@@ -13,8 +15,6 @@ function StateManager(stateBroadcastChannel) {
 	let currentSlideIndex = -1
 	let currentSlideCleared = false
 
-	let stageMessage = undefined
-
 	function getState() {
 		return {
 			currentPlaylists: currentPlaylists,
@@ -24,7 +24,6 @@ function StateManager(stateBroadcastChannel) {
 			currentPresentationPath: currentPresentationPath,
 			currentSlideIndex: currentSlideIndex,
 			currentSlideCleared: currentSlideCleared,
-			stageMessage: stageMessage,
 		}
 	}
 
@@ -79,10 +78,6 @@ function StateManager(stateBroadcastChannel) {
 		}
 	}
 
-	function hasText(presentation) {
-		return presentation.groups.some(g => g.slides.some(s => s.lines.some(l => l.length > 0)))
-	}
-
 	function onNewPlaylists(playlists) {
 		let playlistIndex = currentPlaylistIndex
 		currentPlaylists = playlists
@@ -120,6 +115,7 @@ function StateManager(stateBroadcastChannel) {
 			currentSlideIndex = 0
 			onNewPresentation(Presentation('', [group]), presentationPath, animate)
 		}))
+		timerDomUpdater.forceShowVideo()
 	}
 
 	function onNewSlideIndex(presentationPath, index, animate = true) {
@@ -146,8 +142,33 @@ function StateManager(stateBroadcastChannel) {
 	}
 
 	function onNewMessage(text) {
-		stageMessage = text
-		messageDomUpdater.updateMessage(stageMessage)
+		// TODO: Cache values, when relevant for preview window
+		messageDomUpdater.updateMessage(text)
+	}
+
+	function onNewClock(seconds) {
+		// TODO: Cache values, when relevant for preview window
+		timerDomUpdater.updateClock(seconds)
+	}
+
+	function onNewTimer(uid, text, timerMode) {
+		// TODO: Cache values, when relevant for preview window
+		timerDomUpdater.updateTimer(uid, text, timerMode)
+	}
+
+	function onNewVideoCountdown(uid, text) {
+		// TODO: Cache values, when relevant for preview window
+		timerDomUpdater.updateVideo(uid, text)
+	}
+
+	function onNewConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState) {
+		// TODO: Cache values, when relevant for preview window
+		errorDomUpdater.updateConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
+	}
+
+	function clearConnectionErrors() {
+		// TODO: Cache 'clear', when relevant for preview window
+		errorDomUpdater.clearConnectionErrors()
 	}
 
 	if (stateBroadcastChannel !== undefined) {
@@ -162,6 +183,11 @@ function StateManager(stateBroadcastChannel) {
 		onNewSlideIndex: onNewSlideIndex,
 		clearSlideIndex: clearSlideIndex,
 		onNewMessage: onNewMessage,
+		onNewClock: onNewClock,
+		onNewTimer: onNewTimer,
+		onNewVideoCountdown: onNewVideoCountdown,
+		onNewConnectionErrors: onNewConnectionErrors,
+		clearConnectionErrors: clearConnectionErrors,
 		getPlaylist: getPlaylist,
 		getCurrentPlaylistIndex: () => currentPlaylistIndex,
 		getCurrentPlaylistItemIndex: () => currentPlaylistItemIndex,

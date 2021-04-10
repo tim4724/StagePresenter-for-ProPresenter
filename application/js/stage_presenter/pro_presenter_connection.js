@@ -15,10 +15,6 @@ function WebSocketConnectionState(isConnected = false,
 function ProPresenterConnection(stateManager) {
 	const proPresenterParser = ProPresenterParser()
 
-	// TODO: move to statemanager?
-	const errorDomUpdater = ErrorDomUpdater()
-	const timerDomUpdater = TimerDomUpdater()
-
 	const lowResolutionImageWidth = 57 // Image height 32px
 	const middleResolutionImageWidth = 426 // Image height 240px; Takes approx 10x as long to load compared to the low resolution inage
 	const highResolutionImageWidth = 1280 // Image Height 720px
@@ -185,15 +181,15 @@ function ProPresenterConnection(stateManager) {
 				onNewStageDisplayFrameValue(data)
 				break
 			case 'sys':
-				timerDomUpdater.updateClock(parseInt(data.txt))
+				stateManager.onNewClock(parseInt(data.txt))
 				break
 			case 'tmr':
 				// {acn: "tmr", uid: "51D80D93-6CCC-4B45-AA82-C28BAA0F7A2A", txt: "15:08:09", timerMode: 1}
-				timerDomUpdater.updateTimer(data.uid, data.txt, data.timerMode)
+				stateManager.onNewTimer(data.uid, data.txt, data.timerMode)
 				break
 			case 'vid':
 				// {acn: "vid", uid: "00000000-0000-0000-0000-000000000000", txt: "00:00:31"}
-				timerDomUpdater.updateVideo(data.uid, data.txt)
+				stateManager.onNewVideoCountdown(data.uid, data.txt)
 				break
 			case 'msg':
 				stateManager.onNewMessage(data.txt)
@@ -298,11 +294,9 @@ function ProPresenterConnection(stateManager) {
 					if (playlistItem != undefined) {
 						const presentationPath = playlistItem.location
 						stateManager.onNewMediaPresentation(name, presentationPath)
-						timerDomUpdater.forceShowVideo()
 					}
 				} else {
 					stateManager.onNewMediaPresentation(name, '')
-					timerDomUpdater.forceShowVideo()
 				}
 				break
 			case 'clearAudio':
@@ -431,11 +425,11 @@ function ProPresenterConnection(stateManager) {
 	}
 
 	function updateConnectionErrors() {
-		errorDomUpdater.updateConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
+		stateManager.onNewConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
 	}
 
 	function clearConnectionErrors() {
-		errorDomUpdater.clearConnectionErrors()
+		stateManager.clearConnectionErrors()
 	}
 
 	function exportState() {
