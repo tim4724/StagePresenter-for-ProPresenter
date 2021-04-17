@@ -12,7 +12,6 @@ const dockMenu = Menu.buildFromTemplate([
 	}
 ])
 
-let tray = undefined
 let dummyWindow = undefined
 let waitingForDisplay = undefined
 let stageMonitorWindow = undefined
@@ -57,7 +56,7 @@ function createStageMonitorWindow(bounds) {
 		fullscreen: app.isPackaged,
 		backgroundColor: '#000000',
 		darkTheme: true,
-		frame: !app.isPackaged,
+		frame: false,
 		title: 'Stagemonitor',
 		show: false,
 		webPreferences: {

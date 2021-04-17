@@ -221,50 +221,83 @@ function ProPresenterConnection(stateManager) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
+				// TODO: Better send playlistRequestAll in a fix interval?
+				remoteWebSocket.send(Actions.playlistRequestAll)
+
+				if (currentPresentationDataCache === data_string) {
+					// Nothing changed in the presentation...
+					break
+				}
+
 				function firstSlideWidth(presentation, callback) {
+					// TODO: better parser jpeg byte array?
 					const groups = presentation.groups
 					if (groups.length > 0 && groups[0].slides.length > 0) {
 						const image = new Image()
 						image.onload = function() {
 							callback(image.naturalWidth)
 						}
-						image.onerror = function() {
+						image.onerror = function(e) {
+							console.log("WARNING Slide width is undefined because of image error", e)
 							callback(undefined)
 						}
 						image.src = 'data:image/jpeg;base64,' + groups[0].slides[0].previewImage
 					} else {
+						// No slides
 						callback(undefined)
 					}
 				}
 
-				if (currentPresentationDataCache !== data_string ||
-						stateManager.getCurrentPresentationPath() != data.presentationPath) {
-					const presentation = proPresenterParser.parsePresentation(data)
+				function shouldAnimate(newPresentation) {
+					const oldPresentation = stateManager.getCurrentPresentation()
 
-					firstSlideWidth(presentation, (width) => {
-						if (width == undefined || width <= lowResolutionImageWidth) {
-							currentPresentationDataCache = data_string
-							stateManager.onNewPresentation(presentation, data.presentationPath, true)
-							// TODO: Better send playlistRequestAll in a fix interval?
-							remoteWebSocket.send(Actions.playlistRequestAll)
-							if (width <= lowResolutionImageWidth) {
-								remoteWebSocket.send(
-									Actions.presentationRequest(data.presentationPath, middleResolutionImageWidth)
-								)
-								const slides = presentation.groups.map(g => g.slides).flat()
-								const hasText = slides.some(s => s.lines.some(l => l.length > 0))
+					if (oldPresentation == undefined || 
+						oldPresentation.name !== newPresentation.name ||
+						oldPresentation.groups.length !== newPresentation.groups.length) {
+						return true
+					}
 
-								if (!hasText && slides.length < 16) {
-									// Load presentation with higher image resolutions
-									remoteWebSocket.send(Actions.presentationRequest(data.presentationPath, highResolutionImageWidth))
-								}
-							}
-						} else if (stateManager.getCurrentPresentationPath() == data.presentationPath) {
-							// The loaded presentation is just the presentation with higher image resolution...
-							stateManager.onNewPresentation(presentation, data.presentationPath, false)
+					for (let i = 0; i < newPresentation.groups.length; i++) {
+						const newGroup = newPresentation.groups[i]
+						const oldGroup = oldPresentation.groups[i]
+						if (oldGroup.slides.length !== newGroup.slides.length) {
+							return true
 						}
-					})
+						for (let j = 0; j < newGroup.slides.length; j++) {
+							const newSlide = newGroup.slides[j]
+							const oldSlide = oldGroup.slides[j]
+							if (newSlide.rawText !== newSlide.rawText) {
+								return true
+							}
+						}
+					}
+					// Presentation name and text is identical
+					return false
 				}
+
+				const presentation = proPresenterParser.parsePresentation(data)
+				firstSlideWidth(presentation, (width) => {
+					const presentationPath = data.presentationPath
+
+					if (width === undefined || width <= lowResolutionImageWidth) {
+						currentPresentationDataCache = data_string
+						stateManager.onNewPresentation(presentation, presentationPath, shouldAnimate(presentation))
+
+						if (width !== undefined) {
+							remoteWebSocket.send(Actions.presentationRequest(presentationPath, middleResolutionImageWidth))
+							const slides = presentation.groups.map(g => g.slides).flat()
+							if (slides.length < 16 && slides.every(s => s.rawText.length === 0)) {
+								// Load presentation with an even higher image resolution
+								remoteWebSocket.send(Actions.presentationRequest(presentationPath, highResolutionImageWidth))
+							}
+						}
+					} else if (stateManager.getCurrentPresentationPath() == presentationPath) {
+						// The loaded presentation is just the current presentation with higher image resolution...
+						stateManager.onNewPresentation(presentation, presentationPath, false)
+					} else {
+						// Not current presentation - ignore
+					}
+				})
 				break
 
 			case 'presentationSlideIndex':
