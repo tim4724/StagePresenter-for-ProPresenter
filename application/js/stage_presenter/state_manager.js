@@ -79,7 +79,12 @@ function StateManager(stateBroadcastChannel) {
 	}
 
 	function onNewPlaylists(playlists) {
-		let playlistIndex = currentPlaylistIndex
+		let playlistIndex = 0
+		if (playlists.length == 1) {
+			playlistIndex = 0
+		} else {
+			playlistIndex = currentPlaylistIndex
+		}
 		currentPlaylists = playlists
 		currentPlaylistIndex = -1
 
