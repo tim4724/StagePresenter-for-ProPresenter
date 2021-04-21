@@ -14,7 +14,7 @@ const dockMenu = Menu.buildFromTemplate([
 
 let dummyWindow = undefined
 let waitingForDisplay = undefined
-let stageMonitorWindow = undefined
+let stagePresenterWindow = undefined
 let settingsWindow = undefined
 let operatorWindow = undefined
 
@@ -31,24 +31,24 @@ app.setAboutPanelOptions({
 })
 
 ipcMain.on('displaySelected', (event, arg) => {
-	if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
-		stageMonitorWindow.close()
+	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed()) {
+		stagePresenterWindow.close()
 	}
 
 	localStorageGet('showOnDisplay').then(displayId => {
 		const display = getDisplayById(displayId)
 		if (display) {
-			createStageMonitorWindow(display.bounds)
+			createStagePresenterWindow(display.bounds)
 		}
 	})
 })
 
-function createStageMonitorWindow(bounds) {
-	if (stageMonitorWindow && !stageMonitorWindow.isDestroyed()) {
-		stageMonitorWindow.close()
+function createStagePresenterWindow(bounds) {
+	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed()) {
+		stagePresenterWindow.close()
 	}
 
-	stageMonitorWindow = new BrowserWindow({
+	stagePresenterWindow = new BrowserWindow({
 		x: bounds.x,
 		y: bounds.y,
 		width: bounds.width,
@@ -57,7 +57,7 @@ function createStageMonitorWindow(bounds) {
 		backgroundColor: '#000000',
 		darkTheme: true,
 		frame: false,
-		title: 'Stagemonitor',
+		title: 'StagePresenter',
 		show: false,
 		webPreferences: {
 			nodeIntegration: false,
@@ -68,33 +68,33 @@ function createStageMonitorWindow(bounds) {
 	})
 
 	// When showing the operator window, this line is important to keep the
-	// stageMonitorWindow always in fullscreen always on top on mac os
-	stageMonitorWindow.setAlwaysOnTop(true, "pop-up-menu")
+	// stagePresenterWindow always in fullscreen always on top on mac os
+	stagePresenterWindow.setAlwaysOnTop(true, "pop-up-menu")
 
-	stageMonitorWindow.loadFile(`${__dirname}/application/stagePresenter.html`)
+	stagePresenterWindow.loadFile(`${__dirname}/application/stagePresenter.html`)
 	function move(ev) {
 		waitingForDisplay = true
-		stageMonitorWindow.removeListener('move', move)
-		stageMonitorWindow.close()
-		stageMonitorWindow = undefined
+		stagePresenterWindow.removeListener('move', move)
+		stagePresenterWindow.close()
+		stagePresenterWindow = undefined
 		screenConfigChanged()
 	}
 	if (app.isPackaged) {
-		stageMonitorWindow.on('move', move)
+		stagePresenterWindow.on('move', move)
 	}
-	stageMonitorWindow.once('close', function (ev) {
-		if (ev.sender === stageMonitorWindow) {
-			stageMonitorWindow.removeListener('move', move)
-			stageMonitorWindow = undefined
+	stagePresenterWindow.once('close', function (ev) {
+		if (ev.sender === stagePresenterWindow) {
+			stagePresenterWindow.removeListener('move', move)
+			stagePresenterWindow = undefined
 			if (operatorWindow != undefined && !operatorWindow.isDestroyed()) {
 				operatorWindow.close()
 			}
 		}
 	})
-	stageMonitorWindow.once('closed', function (ev) {
+	stagePresenterWindow.once('closed', function (ev) {
 		checkIfShouldQuit()
 	})
-	stageMonitorWindow.show()
+	stagePresenterWindow.show()
 
 	localStorageGet("showOperatorWindow").then(showOperatorWindow => {
 		if (showOperatorWindow === 'true') {
@@ -200,9 +200,9 @@ async function createOperatorWindow () {
 			localStorageSet("operatorWindowBounds", value)
 			operatorWindow = undefined
 			setTimeout(function() {
-				if (stageMonitorWindow != undefined && !stageMonitorWindow.isDestroyed()) {
+				if (stagePresenterWindow != undefined && !stagePresenterWindow.isDestroyed()) {
 					console.log("showOperatorWindow -> false")
-					// StageMonitorWindow window has not been destroyed
+					// stagePresenterWindow window has not been destroyed
 					// This means only the operator window was closed
 					// Therefore do not show it automatically, next time
 					localStorageSet("showOperatorWindow", false)
@@ -228,7 +228,7 @@ function screenConfigChanged() {
 			const display = getDisplayById(displayId)
 			if (display) {
 				waitingForDisplay = false
-				createStageMonitorWindow(display.bounds)
+				createStagePresenterWindow(display.bounds)
 			} else {
 				console.log('Still waiting for display')
 			}
@@ -279,7 +279,7 @@ app.whenReady().then(async () => {
 		const display = getDisplayById(displayId)
 		if (display) {
 			waitingForDisplay = false
-			createStageMonitorWindow(display.bounds)
+			createStagePresenterWindow(display.bounds)
 		} else {
 			console.log('Waiting for Display', displayId)
 			waitingForDisplay = true

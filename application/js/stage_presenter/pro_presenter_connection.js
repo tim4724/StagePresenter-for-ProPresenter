@@ -319,7 +319,7 @@ function ProPresenterConnection(stateManager) {
 				remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 				break
 			case 'audioTriggered':
-			const name = data.audioName
+				const name = data.audioName
 				const playlistIndex = stateManager.getCurrentPlaylistIndex()
 				const playlist = stateManager.getPlaylist(playlistIndex)
 				if (playlist != undefined) {

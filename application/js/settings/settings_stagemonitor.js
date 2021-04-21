@@ -28,7 +28,7 @@ function StageMonitorSettings() {
 
 	function listenToZoomChanges() {
 		const wins = BrowserWindow.getAllWindows()
-		const stagemonitorWindow = wins.find(w => w.title === 'Stage Monitor')
+		const stagemonitorWindow = wins.find(w => w.title === 'StagePresenter')
 		if (stagemonitorWindow && stagemonitorWindow.webContents) {
 			webContents = stagemonitorWindow.webContents
 			webContents.executeJavaScript('proPresenterInstance.exportState()').then((p) => {
