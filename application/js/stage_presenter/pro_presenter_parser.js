@@ -54,8 +54,6 @@ function StageDisplaySlide(uid, text) {
 }
 
 function ProPresenterParser() {
-	const onlyFirstTextInSlide = true
-
 	function parsePlaylists(data) {
 		let newPlaylists = []
 		for (const playlist of data.playlistAll) {
