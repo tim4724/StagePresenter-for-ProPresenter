@@ -1,5 +1,7 @@
 # StagePresenter for ProPresenter
 
+<img src="https://github.com/tim4724/StagePresenter-for-ProPresenter/blob/main/icon.png width="64" height="64">
+
 A better Stage Display for ProPresenter 7.
 An electron application that automatically synchronizes with ProPresenter
 and displays Presentations, Playlists, Slide-Previews, Timers, Countdowns and Stage-Messages.
