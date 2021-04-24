@@ -31,9 +31,6 @@ function StageMonitorSettings() {
 		const stagemonitorWindow = wins.find(w => w.title === 'StagePresenter')
 		if (stagemonitorWindow && stagemonitorWindow.webContents) {
 			webContents = stagemonitorWindow.webContents
-			webContents.executeJavaScript('proPresenterInstance.exportState()').then((p) => {
-				// previewIframe.contentWindow.window.proPresenter.importState(p)
-			})
 
 			stagemonitorWindow.once('close', () => {
 				clearInterval(getZoomValue)
