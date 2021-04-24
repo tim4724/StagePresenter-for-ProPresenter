@@ -1,6 +1,4 @@
-# StagePresenter for ProPresenter
-
-<img src="https://github.com/tim4724/StagePresenter-for-ProPresenter/blob/main/icon.png width="64" height="64">
+# ![Icon](/icon64x64.png?raw=true) StagePresenter for ProPresenter
 
 A better Stage Display for ProPresenter 7.
 An electron application that automatically synchronizes with ProPresenter
