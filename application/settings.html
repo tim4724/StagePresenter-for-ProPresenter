@@ -96,201 +96,217 @@
 			</div>
 		</section>
 
-		<section class='settingGroup' id="stagemonitorSettingsGroup">
-			<div class='settingGroupTitle'>Stagemonitor</div>
+		<div id='stagePresenterSettings'>
+			<section class='settingGroup'>
+				<div class='settingGroupTitle'>StagePresenter</div>
 
-			<div id="stagemonitorSettingsContainer">
-				<div id="stagemonitorSettings">
+				<div id="stagemonitorSettingsContainer">
+					<div id="stagemonitorSettings">
 
-					<div class='setting' id="zoomSetting">
-						<span class='settingText'>
-							Window Zoom
-						</span>
-						<label class='right'>
-							<input id='zoom' type='number' min='10' max='500'
-									value="100"
-									oninput='stagemonitorSettings.zoomChanged()'>
-							%
-						</label>
+						<div class='setting' id="zoomSetting">
+							<span class='settingText'>
+								Window Zoom
+							</span>
+							<label class='right'>
+								<input id='zoom' type='number' min='10' max='500'
+										value="100"
+										oninput='stagemonitorSettings.zoomChanged()'>
+								%
+							</label>
+						</div>
+
+						<div class="settingSpacer"></div>
+
+						<div class='setting'>
+							Clock, Timers, Playlist, Preview Position
+							<select id='showSidebar' onchange='stagemonitorSettings.selectChanged(this)'>
+								<option value=''>None</option>
+								<option value='showSidebarLeft'>Left</option>
+								<option value='showSidebarBottom'>Bottom</option>
+						   </select>
+						</div>
+
+						<div class='setting'>
+							<span class='settingText'>
+								Show Playlist
+							</span>
+							<label class='switch right'>
+								<input id='showPlaylist' type='checkbox'
+									onchange='stagemonitorSettings.checkBoxChanged(this)'>
+								<span class='slider'></span>
+							</label>
+						</div>
+
+						<div class='setting'>
+							<span class='settingText'>
+								Show small Slide Preview
+							</span>
+							<label class='switch right'>
+								<input id='showSmallSlidePreview' type='checkbox'
+									onchange='stagemonitorSettings.checkBoxChanged(this)'>
+								<span class='slider'></span>
+							</label>
+						</div>
+
+						<div class='setting'>
+							<span class='settingText'>
+								Sidebar Maximum Size
+							</span>
+							<label class='right'>
+								<input id='sidebarMaxSize' type='number' min='30' max='1000'
+										value="150"
+										oninput='stagemonitorSettings.inputChanged(this)'>
+							</label>
+						</div>
+
 					</div>
 
-					<div class="settingSpacer"></div>
+					<!--<iframe src="stagemonitor.html" id="previewIframe">
+					</iframe>-->
+				</div>
+			</section>
 
-					<div class='setting'>
-						Clock, Timers, Playlist, Preview Position
-						<select id='showSidebar' onchange='stagemonitorSettings.selectChanged(this)'>
-							<option value=''>None</option>
-							<option value='showSidebarLeft'>Left</option>
-							<option value='showSidebarBottom'>Bottom</option>
-					   </select>
-					</div>
+			<section class='settingGroup'>
+				<div class='settingGroupTitle'>StagePresenter Advanced</div>
 
-					<div class='setting'>
-						<span class='settingText'>
-							Show Playlist
-						</span>
-						<label class='switch right'>
-							<input id='showPlaylist' type='checkbox'
-								onchange='stagemonitorSettings.checkBoxChanged(this)'>
-							<span class='slider'></span>
-						</label>
-					</div>
-
-					<div class='setting'>
-						<span class='settingText'>
-							Show small Slide Preview
-						</span>
-						<label class='switch right'>
-							<input id='showSmallSlidePreview' type='checkbox'
-								onchange='stagemonitorSettings.checkBoxChanged(this)'>
-							<span class='slider'></span>
-						</label>
-					</div>
-
-					<div class='setting'>
-						<span class='settingText'>
-							Sidebar Maximum Size
-						</span>
-						<label class='right'>
-							<input id='sidebarMaxSize' type='number' min='30' max='1000'
-									value="150"
-									oninput='stagemonitorSettings.inputChanged(this)'>
-						</label>
-					</div>
-
+				<div class='setting'>
+					<span class='settingText'>
+						Auto-Remove Linebreaks
+					</span>
+					<label class='switch right'>
+						<input id='flexibleSlides' type='checkbox'
+							onchange='stagemonitorSettings.checkBoxChanged(this)'>
+						<span class='slider'></span>
+					</label>
 				</div>
 
-				<!--<iframe src="stagemonitor.html" id="previewIframe">
-				</iframe>-->
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Improve layout of Bible Presentations
+					</span>
+					<label class='switch right'>
+						<input id='improveBiblePassages' type='checkbox'
+							onchange='stagemonitorSettings.checkBoxChanged(this)'>
+						<span class='slider'></span>
+					</label>
+				</div>
 
-			<div class="settingSpacer"></div>
+				<div class='setting'>
+					<span class='settingText'>
+						Only include the first Textbox of each Slide
+					</span>
+					<label class='switch right'>
+						<input id='onlyFirstTextInSlide' type='checkbox'
+							onchange='stagemonitorSettings.checkBoxChanged(this)'>
+						<span class='slider'></span>
+					</label>
+				</div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Auto-Remove Linebreaks
-				</span>
-				<label class='switch right'>
-					<input id='flexibleSlides' type='checkbox'
-						onchange='stagemonitorSettings.checkBoxChanged(this)'>
-					<span class='slider'></span>
-				</label>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Align text left if more than
+					<input id='alignLeftCharactersThreshold' type='number' min='10' max='1000'
+							value="60"
+							oninput='stagemonitorSettings.inputChanged(this)'>
+					characters in a line.
+					</span>
+				</div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Improve layout of Bible Presentations
-				</span>
-				<label class='switch right'>
-					<input id='improveBiblePassages' type='checkbox'
-						onchange='stagemonitorSettings.checkBoxChanged(this)'>
-					<span class='slider'></span>
-				</label>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Minimum Video length to show timer
+					</span>
+					<label class='right'>
+						<input id='minimumVideoLengthForTimer'
+								type='time'
+								min="00:00:00"
+								max="01:00:00"
+								step="1"
+								value="00:01:00"
+								oninput='stagemonitorSettings.minimumVideoLengthForTimerChanged()'>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Only include the first Textbox of each Slide
-				</span>
-				<label class='switch right'>
-					<input id='onlyFirstTextInSlide' type='checkbox'
-						onchange='stagemonitorSettings.checkBoxChanged(this)'>
-					<span class='slider'></span>
-				</label>
-			</div>
+					</label>
+				</div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Align text left if more than
-				<input id='alignLeftCharactersThreshold' type='number' min='10' max='1000'
-						value="60"
-						oninput='stagemonitorSettings.inputChanged(this)'>
-				characters in a line.
-				</span>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Controller: Skip Playlist-Items that are not a presentation
+					</span>
+					<label class='switch right'>
+						<input id='skipMediaPlaylistItems' type='checkbox'
+							onchange='stagemonitorSettings.checkBoxChanged(this)'>
+						<span class='slider'></span>
+					</label>
+				</div>
+			</section>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Minimum Video length to show timer
-				</span>
-				<label class='right'>
-					<input id='minimumVideoLengthForTimer'
-							type='time'
-							min="00:00:00"
-							max="01:00:00"
-							step="1"
-							value="00:01:00"
-							oninput='stagemonitorSettings.minimumVideoLengthForTimerChanged()'>
+			<section class='settingGroup'>
+				<div class='settingGroupTitle'>StagePresenter Font-Sizes and Style</div>
 
-				</label>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Normal Presentation Font-Size
+					</span>
+					<label class='right'>
+						<input id='presentationFontSize' type='number' min='1' max='1000'
+							value="100" oninput='stagemonitorSettings.inputChanged(this)'>
+						%
+					</label>
+				</div>
 
-			<div class="settingSpacer"></div>
+				<div class='setting'>
+					<span class='settingText'>
+						Presentation with long textlines (e.g. bible passages) maximum Font-Size
+					</span>
+					<label class='right'>
+						<input id='presentationLongTextFontSize' type='number' min='1' max='1000'
+							value="100" oninput='stagemonitorSettings.inputChanged(this)'>
+						%
+					</label>
+				</div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Normal Presentation Font-Size
-				</span>
-				<label class='right'>
-					<input id='presentationFontSize' type='number' min='1' max='1000'
-						value="100" oninput='stagemonitorSettings.inputChanged(this)'>
-					%
-				</label>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Timer and Clock Font-Size
+					</span>
+					<label class='right'>
+						<input id='timerFontSize' type='number' min='1' max='1000'
+							value="100" oninput='stagemonitorSettings.inputChanged(this)'>
+						%
+					</label>
+				</div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Presentation with long textlines (e.g. bible passages) maximum Font-Size
-				</span>
-				<label class='right'>
-					<input id='presentationLongTextFontSize' type='number' min='1' max='1000'
-						value="100" oninput='stagemonitorSettings.inputChanged(this)'>
-					%
-				</label>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Playlist Font-Size
+					</span>
+					<label class='right'>
+						<input id='playlistFontSize' type='number' min='1' max='1000'
+							value="100" oninput='stagemonitorSettings.inputChanged(this)'>
+						%
+					</label>
+				</div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Timer and Clock Font-Size
-				</span>
-				<label class='right'>
-					<input id='timerFontSize' type='number' min='1' max='1000'
-						value="100" oninput='stagemonitorSettings.inputChanged(this)'>
-					%
-				</label>
-			</div>
+				<div class='setting'>
+					<span class='settingText'>
+						Custom CSS
+					</span>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Playlist Font-Size
-				</span>
-				<label class='right'>
-					<input id='playlistFontSize' type='number' min='1' max='1000'
-						value="100" oninput='stagemonitorSettings.inputChanged(this)'>
-					%
-				</label>
-			</div>
-
-			<div class='setting'>
-				<span class='settingText'>
-					Custom CSS
-				</span>
-
-				<textarea id="customCSS" class="right" name="customCSS" rows="6" cols="60"
-					placeholder="/*For advanced layout customizing. E.g.*/
-.group {
-	border-radius: 8px;
-	border-color: #6b63e0;
-}
-.groupName { color: #6b63e0; }
-.bibleVerseNumber { color: #6b63e0; }
-#clock {
-	background: #ffffff;
-	color: #000000;
-}"
-					onchange='stagemonitorSettings.inputChanged(this)'></textarea>
-			</div>
-		</section>
+					<textarea id="customCSS" class="right" name="customCSS" rows="6" cols="60"
+						placeholder="/*For advanced layout customizing. E.g.*/
+	.group {
+		border-radius: 8px;
+	}
+	.groupName { color: #6b63e0; }
+	.bibleVerseNumber { color: #6b63e0; }
+	#clock {
+		background: #ffffff;
+		color: #000000;
+	}"
+						onchange='stagemonitorSettings.inputChanged(this)'></textarea>
+				</div>
+			</section>
+		</div>
 
 		<button id='doneButton' onclick='window.close()'>
 			Done

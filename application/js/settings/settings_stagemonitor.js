@@ -2,7 +2,7 @@
 
 function StageMonitorSettings() {
 	// const previewIframe = document.getElementById('previewIframe')
-	const settingsGroupElement = document.getElementById('stagemonitorSettingsGroup')
+	const stagePresenterSettings = document.getElementById('stagePresenterSettings')
 	const zoomInput = document.getElementById('zoom')
 	const showSidebar = document.getElementById('showSidebar')
 	const previewCheckboxInput = document.getElementById('showSmallSlidePreview')
@@ -10,7 +10,7 @@ function StageMonitorSettings() {
 	const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
 	const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
 	const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
-	const inputs = settingsGroupElement.querySelectorAll('input, textarea')
+	const inputs = stagePresenterSettings.querySelectorAll('input, textarea')
 
 	let zoomValue = 1
 
@@ -54,7 +54,7 @@ function StageMonitorSettings() {
 
 	function initInputs() {
 		if (localStorage.features === undefined) {
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide skipMediaPlaylistItems'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150

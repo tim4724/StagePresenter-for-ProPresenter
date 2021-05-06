@@ -471,6 +471,8 @@ function ProPresenterConnection(stateManager) {
 
 	function loadPresentation(presentationPath) {
 		currentPresentationDataCache = undefined
+		// For the next Presentation Title if skipMediaPlaylistItems has been changed
+		currentPlaylistDataCache = undefined
 		if (remoteWebSocket !== undefined) {
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}

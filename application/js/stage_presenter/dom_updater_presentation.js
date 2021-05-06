@@ -360,7 +360,6 @@ function PresentationDomUpdater() {
 	return {
 		displayPresentation: displayPresentation,
 		setNextPresentationTitle: setNextPresentationTitle,
-		clearNextPresentationTitle: () => setNextPresentationTitle(undefined),
 		changeCurrentSlideAndScroll: changeCurrentSlideAndScroll
 	}
 }
