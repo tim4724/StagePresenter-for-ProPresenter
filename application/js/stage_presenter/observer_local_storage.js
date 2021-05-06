@@ -24,7 +24,7 @@ function LocalStorageObserver(proPresenterConnection) {
 
 	function update() {
 		if (localStorage.features === undefined) {
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide skipMediaPlaylistItems'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150
@@ -90,8 +90,8 @@ function LocalStorageObserver(proPresenterConnection) {
 	function reloadPresentationIfNecessary() {
 		const features = localStorage.features.split(' ')
 
-		const parsingFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages']
-		if (parsingFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
+		const importantFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages', 'skipMediaPlaylistItems']
+		if (importantFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
 				|| customCSS !== localStorage.customCSS) {
 			proPresenterConnection.reloadCurrentPresentation()

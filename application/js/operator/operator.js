@@ -12,6 +12,15 @@ function Operator() {
 	}
 
 	const broadcastChannel = new BroadcastChannel('state')
+	function reload() {
+		broadcastChannel.postMessage({action: 'updateRequest'});
+	}
+	if (window.addEventListener) {
+		window.addEventListener("storage", reload, false)
+	} else {
+		window.attachEvent("onstorage", reload)
+	}
+
 	const playlistSelect = document.getElementById('playlists')
 	const presentationSelect = document.getElementById('presentations')
 	const slideSelect = document.getElementById('slides')
@@ -26,6 +35,25 @@ function Operator() {
 	let latestConfirmedPlaylistIndex = undefined
 	let latestConfirmedPlaylistItemIndex = undefined
 
+	function prevPresentationOption() {
+		for (let i = presentationSelect.selectedIndex - 1; i >= 0; i--) {
+			const prevPresOption = presentationSelect.options[i]
+			if (!prevPresOption.disabled && prevPresOption.style.display != 'None') {
+				return presentationSelect.options[i]
+			}
+		}
+		return undefined
+	}
+
+	function nextPresentationOption() {
+		for (let i = presentationSelect.selectedIndex + 1; i < presentationSelect.length; i++) {
+			if (!presentationSelect.options[i].disabled) {
+				return presentationSelect.options[i]
+			}
+		}
+		return undefined
+	}
+
 	function updateButtonsAndTooltips() {
 		const currentPresentationOption = presentationSelect.querySelector('option:checked')
 		clearPresentationButton.disabled = presentationSelect.value == "-1"
@@ -33,9 +61,10 @@ function Operator() {
 
 		const selectedPresentationIndex = presentationSelect.selectedIndex
 		const presentationSelectCount = presentationSelect.options.length
-		prevPresentationButton.disabled = selectedPresentationIndex <= 1
-		nextPresentationButton.disabled = currentPresentationOption.innerText == emptyPresentation.name
-			|| selectedPresentationIndex >= presentationSelectCount - 1
+		const prevPresOption = prevPresentationOption()
+		const nextPresOption = nextPresentationOption()
+		prevPresentationButton.disabled = prevPresOption == undefined
+		nextPresentationButton.disabled = nextPresOption == undefined
 
 		const selectedSlideIndex = slideSelect.selectedIndex
 		const slideSelectCount = slideSelect.options.length
@@ -55,18 +84,16 @@ function Operator() {
 			slideDownButton.style.color = ""
 		}
 		const prevPrsentationTooltip = prevPresentationButton.querySelector('.tooltiptext')
-		if (prevPresentationButton.disabled == false) {
-			const index = selectedPresentationIndex - 1
-			const prevPresentationName = presentationSelect.options[index].innerText
+		if (prevPresOption != undefined) {
+			const prevPresentationName = prevPresOption.innerText
 			prevPrsentationTooltip.innerText = prevPresentationName
 			prevPrsentationTooltip.style.display = ""
 		} else {
 			prevPrsentationTooltip.style.display = "none"
 		}
 		const nextPresentationTooltip = nextPresentationButton.querySelector('.tooltiptext')
-		if (nextPresentationButton.disabled == false) {
-			const index = selectedPresentationIndex + 1
-			const nextPresentationName = presentationSelect.options[index].innerText
+		if (nextPresOption != undefined) {
+			const nextPresentationName = nextPresOption.innerText
 			nextPresentationTooltip.innerText = nextPresentationName
 			nextPresentationTooltip.style.display = ""
 		} else {
@@ -107,6 +134,7 @@ function Operator() {
 	function initSelect(selectElement) {
 		const optionElement = buildOptionElement("None selected", "-1", false)
 		optionElement.style.display = "none"
+		// optionElement.disabled = true
 		selectElement.appendChild(optionElement)
 	}
 
@@ -132,6 +160,8 @@ function Operator() {
 
 		let currentOptGroupElement = undefined
 		if (playlist != undefined && playlist.items != undefined) {
+			const disableMediaItems = localStorage.features.split(' ').includes('skipMediaPlaylistItems')
+
 			for (let i = 0; i < playlist.items.length; i++) {
 				const item = playlist.items[i]
 				if (item.type == 'playlistItemTypeHeader') {
@@ -141,6 +171,9 @@ function Operator() {
 				} else {
 					const selected = i === playlistItemIndex
 					const optionElement = buildOptionElement(item.text, i, selected)
+					if(disableMediaItems && item.type == 'playlistItemTypeVideo') {
+						optionElement.disabled = true
+					}
 					const parent = currentOptGroupElement || presentationSelect
 					parent.appendChild(optionElement)
 				}
@@ -279,14 +312,14 @@ function Operator() {
 		},
 		prevPresentation: () => {
 			const presentationOptions = presentationSelect.querySelectorAll('option')
-			const prevOption = presentationOptions[presentationSelect.selectedIndex - 1]
+			const prevOption = prevPresentationOption()
 			if (prevOption != undefined) {
 				changePlaylistItemIndex(parseInt(prevOption.value))
 			}
 		},
 		nextPresentation: () => {
 			const presentationOptions = presentationSelect.querySelectorAll('option')
-			const nextOption = presentationOptions[presentationSelect.selectedIndex + 1]
+			const nextOption = nextPresentationOption()
 			if (nextOption != undefined) {
 				changePlaylistItemIndex(parseInt(nextOption.value))
 			}

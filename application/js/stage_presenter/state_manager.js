@@ -55,12 +55,16 @@ function StateManager(stateBroadcastChannel) {
 					playlistDomUpdater.changeCurrentItemAndScroll(playlistItemIndex)
 				}
 
-				if (playlistItemIndex >= 0 && playlistItemIndex + 1 < playlist.items.length) {
-					const nextItem = playlist.items[playlistItemIndex + 1]
-					presentationDomUpdater.setNextPresentationTitle(nextItem.text)
-				} else {
-					presentationDomUpdater.clearNextPresentationTitle()
+				let nextPresentationTitle = undefined
+				const disableMediaItems = localStorage.features.split(' ').includes('skipMediaPlaylistItems')
+				for (let i = playlistItemIndex + 1; i < playlist.items.length; i++) {
+					const nextItem = playlist.items[i]
+					if (nextItem.type != 'playlistItemTypeHeader' && (!disableMediaItems || nextItem.type != 'playlistItemTypeVideo')) {
+						nextPresentationTitle = nextItem.text
+						break
+					}
 				}
+				presentationDomUpdater.setNextPresentationTitle(nextPresentationTitle)
 
 				currentPlaylistIndex = playlistIndex
 				currentPlaylistItemIndex = playlistItemIndex
