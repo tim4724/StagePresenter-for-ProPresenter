@@ -31,6 +31,15 @@ function ApplicationSettings() {
 
 		const showOnDisplay = localStorage.showOnDisplay || -1
 
+		const windowOptionElement = displayNoneOptionElement.cloneNode()
+		windowOptionElement.id = "window"
+		windowOptionElement.value = "window"
+		windowOptionElement.innerText = "Window Mode"
+		if (showOnDisplay == '' + "window") {
+			windowOptionElement.selected = true
+		}
+		displaySelectElement.appendChild(windowOptionElement)
+
 		const displays = screen.getAllDisplays()
 		const primaryDisplayId = screen.getPrimaryDisplay().id
 		for (let i = 0; i < displays.length; i++) {

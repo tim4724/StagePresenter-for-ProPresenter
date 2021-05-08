@@ -40,55 +40,106 @@ ipcMain.on('displaySelected', (event, arg) => {
 	}
 
 	localStorageGet('showOnDisplay').then(displayId => {
-		const display = getDisplayById(displayId)
-		if (display) {
-			createStagePresenterWindow(display.bounds)
+		if (displayId == "window") {
+			createStagePresenterWindow(undefined)
+			waitingForDisplay = false
+		} else {
+			const display = getDisplayById(displayId)
+			if (display) {
+				createStagePresenterWindow(display.bounds)
+			}
 		}
 	})
 })
 
-function createStagePresenterWindow(bounds) {
+async function createStagePresenterWindow(displayBounds) {
 	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed()) {
 		stagePresenterWindow.close()
 	}
 
-	stagePresenterWindow = new BrowserWindow({
-		x: bounds.x,
-		y: bounds.y,
-		width: bounds.width,
-		height: bounds.height,
-		fullscreen: app.isPackaged,
-		backgroundColor: '#000000',
-		darkTheme: true,
-		frame: false,
-		title: 'StagePresenter',
-		show: false,
-		webPreferences: {
-			nodeIntegration: false,
-			contextIsolation: true,
-			enableRemoteModule: false,
-			nativeWindowOpen: true
+	if (displayBounds) {
+		stagePresenterWindow = new BrowserWindow({
+			x: displayBounds.x,
+			y: displayBounds.y,
+			width: displayBounds.width,
+			height: displayBounds.height,
+			fullscreen: true,
+			backgroundColor: '#000000',
+			darkTheme: true,
+			frame: false,
+			title: 'StagePresenter',
+			show: false,
+			webPreferences: {
+				nodeIntegration: false,
+				contextIsolation: true,
+				enableRemoteModule: false,
+				nativeWindowOpen: true
+			}
+		})
+	} else {
+		const boundsValue = await localStorageGet("stagePresenterWindowModeWindowBounds")
+
+		let bounds = {x: undefined, y: undefined, width: 4096, height: 2304}
+		if (boundsValue != undefined && boundsValue.length > 0) {
+			const v = boundsValue.split(';')
+			const b = {x: parseInt(v[0]), y: parseInt(v[1]),
+				width: parseInt(v[2]), height: parseInt(v[3])}
+			const display = screen.getDisplayMatching(b)
+			const intersectAmount = rectIntersectionAmount(display.bounds, b)
+			if (intersectAmount / (b.width * b.height) > 0.5) {
+				bounds = b
+			}
 		}
-	})
 
-	// When showing the operator window, this line is important to keep the
-	// stagePresenterWindow always in fullscreen always on top on mac os
-	stagePresenterWindow.setAlwaysOnTop(true, "pop-up-menu")
-
-	stagePresenterWindow.loadFile(`${__dirname}/application/stagePresenter.html`)
-	function move(ev) {
-		waitingForDisplay = true
-		stagePresenterWindow.removeListener('move', move)
-		stagePresenterWindow.close()
-		stagePresenterWindow = undefined
-		screenConfigChanged()
+		stagePresenterWindow = new BrowserWindow({
+			x: bounds.x,
+			y: bounds.y,
+			width: bounds.width,
+			height: bounds.height,
+			minWidth: 640,
+			minHeight: 360,
+			fullscreen: false,
+			backgroundColor: '#000000',
+			darkTheme: true,
+			frame: true,
+			title: 'StagePresenter',
+			show: false,
+			webPreferences: {
+				nodeIntegration: false,
+				contextIsolation: true,
+				enableRemoteModule: false,
+				nativeWindowOpen: true
+			}
+		})
 	}
-	if (app.isPackaged) {
+
+	if (displayBounds != undefined) {
+		// When showing the operator window, this line is important to keep the
+		// stagePresenterWindow always in fullscreen always on top on mac os
+		stagePresenterWindow.setAlwaysOnTop(true, "pop-up-menu")
+		function move(ev) {
+			waitingForDisplay = true
+			stagePresenterWindow.removeListener('move', move)
+			stagePresenterWindow.close()
+			stagePresenterWindow = undefined
+			screenConfigChanged()
+		}
 		stagePresenterWindow.on('move', move)
 	}
+
+	stagePresenterWindow.loadFile(`${__dirname}/application/stagePresenter.html`)
+
 	stagePresenterWindow.once('close', function (ev) {
 		if (ev.sender === stagePresenterWindow) {
-			stagePresenterWindow.removeListener('move', move)
+			if (displayBounds != undefined) {
+				stagePresenterWindow.removeListener('move', move)
+				localStorageSet("stagePresenterWindowModeWindowBounds", undefined)
+			} else {
+				const b = stagePresenterWindow.getBounds()
+				const value = b.x + ";" + b.y + ";" + b.width + ";" + b.height
+				localStorageSet("stagePresenterWindowModeWindowBounds", value)
+			}
+
 			stagePresenterWindow = undefined
 			if (operatorWindow != undefined && !operatorWindow.isDestroyed()) {
 				operatorWindow.close()
@@ -305,13 +356,17 @@ app.whenReady().then(async () => {
 
 	const displayId = await localStorageGet('showOnDisplay')
 	if (displayId !== undefined && displayId !== '-1') {
-		const display = getDisplayById(displayId)
-		if (display) {
-			waitingForDisplay = false
-			createStagePresenterWindow(display.bounds)
+		if (displayId == "window") {
+			createStagePresenterWindow(undefined)
 		} else {
-			console.log('Waiting for Display', displayId)
-			waitingForDisplay = true
+			const display = getDisplayById(displayId)
+			if (display) {
+				waitingForDisplay = false
+				createStagePresenterWindow(display.bounds)
+			} else {
+				console.log('Waiting for Display', displayId)
+				waitingForDisplay = true
+			}
 		}
 	} else {
 		waitingForDisplay = false
@@ -331,7 +386,9 @@ function checkIfShouldQuit() {
 	}
 	const wins = BrowserWindow.getAllWindows()
 	if (wins.length === 0 || wins.length === 1 && wins[0] === dummyWindow) {
-		app.quit()
+		// app.quit()
+		// Do not quit? I don't know...
+		return
 	}
 }
 
