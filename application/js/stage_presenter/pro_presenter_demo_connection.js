@@ -70,6 +70,7 @@ function ProPresenterDemoConnection(stateManager) {
 		],
 		'0'
 	)
+	const connectionStatusElement = document.getElementById("connectionStatus")
 
 	function loadPresentationJSONs(doneCallback) {
 		fetch('json/one_thing_remains.json').then(response => {
@@ -100,6 +101,7 @@ function ProPresenterDemoConnection(stateManager) {
 	}
 
 	function connect() {
+		connectionStatusElement.style.display = 'none'
 		setInterval(function() {
 			const seconds = 0 | (Date.now() / 1000)
 			stateManager.onNewClock(seconds)

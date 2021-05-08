@@ -13,6 +13,7 @@ function WebSocketConnectionState(isConnected = false,
 }
 
 function ProPresenterConnection(stateManager, host) {
+	const connectionStatusElement = document.getElementById("connectionStatus")
 	const proPresenterParser = ProPresenterParser()
 
 	const lowResolutionImageWidth = 57 // Image height 32px
@@ -87,6 +88,9 @@ function ProPresenterConnection(stateManager, host) {
 				// Also there are bugs in pro presenter 7.4 and this is wrong sometimes
 				// remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
 				// remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
+
+				connectionStatusElement.innerText = "Connected"
+				connectionStatusElement.classList.add('success')
 			}
 			remoteWebSocket.onmessage = function (ev) {
 				remoteWebSocketCloseCounter = 0
@@ -223,6 +227,12 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
+				if (connectionStatusElement.style.display != 'none') {
+					connectionStatusElement.innerText = 'Not Connected'
+					connectionStatusElement.classList.remove('success')
+					connectionStatusElement.style.display = 'none'
+				}
+
 				// TODO: Better send playlistRequestAll in a fix interval?
 				remoteWebSocket.send(Actions.playlistRequestAll)
 

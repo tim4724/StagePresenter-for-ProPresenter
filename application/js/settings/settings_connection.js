@@ -32,7 +32,7 @@ function ConnectionSettings() {
 		ipAddressElement.value = localStorage.ipAddress || 'localhost'
 		updateConnectionMode()
 
-		portElement.value = localStorage.port ||  '49303'
+		portElement.value = localStorage.port || ''
 		remoteAppPassElement.value = undefinedToEmpty(localStorage.remoteAppPass)
 		stageAppPassElement.value = undefinedToEmpty(localStorage.stageAppPass)
 		resetResults()

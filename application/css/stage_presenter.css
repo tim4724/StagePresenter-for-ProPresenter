@@ -97,6 +97,19 @@ main {
 	margin: 8px;
 }
 
+#connectionStatus {
+	position: absolute;
+	bottom: 15%;
+    left: 50%;
+	font-size: 2em;
+	padding: 16px;
+	transform: translate(-50%, 0);
+}
+
+#connectionStatus.success {
+	color: #00ff00;
+}
+
 #demoMode {
 	position: absolute;
 	bottom: 0;
