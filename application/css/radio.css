@@ -29,7 +29,7 @@
 }
 
 .radioLabel input:checked ~ .radio {
-	background-color: #2196F3;
+	background-color: #4497f8;
 }
 
 .radio:after {

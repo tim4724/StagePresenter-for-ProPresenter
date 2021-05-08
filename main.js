@@ -1,6 +1,9 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu } = require('electron')
 
+// App Icon color: #3478F6 - #53B6F9
+// App Icon middle color: #4497f8
+
 const dockMenu = Menu.buildFromTemplate([
 	{
 		label: 'Open Settings',

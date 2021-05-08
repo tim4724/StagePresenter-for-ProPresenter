@@ -117,7 +117,7 @@ function renderPreviewImage(title, text, width, height, callback) {
 		context.font = width / 8 + 'px ' + fontArgs[1]
 		context.fillText(title, width / 2, height / 3)
 
-		context.fillStyle = "#69c0ff"
+		context.fillStyle = "#53B6F9"
 		context.textAlign = "center"
 		context.font = width / 14 + 'px ' + fontArgs[1]
 		context.fillText(text, width / 2, height * 2 / 3)
