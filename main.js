@@ -77,18 +77,22 @@ async function createStagePresenterWindow(displayBounds) {
 			}
 		})
 	} else {
-		const boundsValue = await localStorageGet("stagePresenterWindowModeWindowBounds")
 
 		let bounds = {x: undefined, y: undefined, width: 4096, height: 2304}
-		if (boundsValue != undefined && boundsValue.length > 0) {
-			const v = boundsValue.split(';')
-			const b = {x: parseInt(v[0]), y: parseInt(v[1]),
-				width: parseInt(v[2]), height: parseInt(v[3])}
-			const display = screen.getDisplayMatching(b)
-			const intersectAmount = rectIntersectionAmount(display.bounds, b)
-			if (intersectAmount / (b.width * b.height) > 0.5) {
-				bounds = b
+		const boundsValue = await localStorageGet("stagePresenterWindowModeWindowBounds")
+		try {
+			if (boundsValue != undefined && boundsValue.length > 0) {
+				const v = boundsValue.split(';')
+				const b = {x: parseInt(v[0]), y: parseInt(v[1]),
+					width: parseInt(v[2]), height: parseInt(v[3])}
+				const display = screen.getDisplayMatching(b)
+				const intersectAmount = rectIntersectionAmount(display.bounds, b)
+				if (intersectAmount / (b.width * b.height) > 0.5) {
+					bounds = b
+				}
 			}
+		} catch (e) {
+			console.log("Error parsing stagePresenterWindowModeWindowBounds", e)
 		}
 
 		stagePresenterWindow = new BrowserWindow({

@@ -184,6 +184,11 @@ function ProPresenterConnection(stateManager, host) {
 				stageWebsocketConnectionState.error = data.err
 				break
 			case 'fv': // FrameValue
+				if (connectionStatusElement.style.display != 'none') {
+					connectionStatusElement.innerText = 'Not Connected'
+					connectionStatusElement.classList.remove('success')
+					connectionStatusElement.style.display = 'none'
+				}
 				onNewStageDisplayFrameValue(data)
 				break
 			case 'sys':
@@ -416,6 +421,7 @@ function ProPresenterConnection(stateManager, host) {
 			if (currentPresentationPath === 'stageDisplayApiPresentation' && currentPresentation != undefined) {
 				const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
 				if (allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
+					// Prepend at the start
 					const presentation = currentPresentation
 					const name = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
 					const newGroup = Group(name, '', [currentStageDisplaySlide])
@@ -426,19 +432,22 @@ function ProPresenterConnection(stateManager, host) {
 					return
 				} else if (allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid) {
 					if (nextStageDisplaySlide !== undefined) {
+						// Append at the end of presentation
 						const presentation = currentPresentation
 						const name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
 						const newGroup = Group(name, '', [nextStageDisplaySlide])
 						presentation.groups.push(newGroup)
-						const index = allPresentationSlides.length - 2
+						const index = allPresentationSlides.length - 1
 						stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
 						stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
 					} else {
+						// Just scroll
 						const index = allPresentationSlides.length - 1
 						stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
 					}
 					return
 				} else {
+					// Just scroll
 					const index = allPresentationSlides.findIndex(s => s.stageDisplayApiPresentationUid === cs.uid)
 					if (index >= 0) {
 						stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)

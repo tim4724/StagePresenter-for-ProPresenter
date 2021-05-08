@@ -56,12 +56,14 @@ function StateManager(stateBroadcastChannel) {
 				}
 
 				let nextPresentationTitle = undefined
-				const disableMediaItems = localStorage.features.split(' ').includes('skipMediaPlaylistItems')
-				for (let i = playlistItemIndex + 1; i < playlist.items.length; i++) {
-					const nextItem = playlist.items[i]
-					if (nextItem.type != 'playlistItemTypeHeader' && (!disableMediaItems || nextItem.type != 'playlistItemTypeVideo')) {
-						nextPresentationTitle = nextItem.text
-						break
+				if (playlistItemIndex >= 0) {
+					const disableMediaItems = localStorage.features.split(' ').includes('skipMediaPlaylistItems')
+					for (let i = playlistItemIndex + 1; i < playlist.items.length; i++) {
+						const nextItem = playlist.items[i]
+						if (nextItem.type != 'playlistItemTypeHeader' && (!disableMediaItems || nextItem.type != 'playlistItemTypeVideo')) {
+							nextPresentationTitle = nextItem.text
+							break
+						}
 					}
 				}
 				presentationDomUpdater.setNextPresentationTitle(nextPresentationTitle)

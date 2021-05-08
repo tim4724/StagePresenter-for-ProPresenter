@@ -71,7 +71,7 @@ function PresentationDomUpdater() {
 				changeCurrentSlideAndScroll(slideIndex, false)
 				// Just to be sure, because of a rare bug?
 				scrollTimeout = setTimeout(() => {
-					changeCurrentSlideAndScroll(slideIndex, false)
+					scrollToCurrentSlide(false)
 				}, 32)
 			}
 		}
@@ -226,6 +226,7 @@ function PresentationDomUpdater() {
 	}
 
 	function changeCurrentSlideAndScroll(slideIndex, animate = true) {
+		clearTimeout(scrollTimeout)
 		if (previewElement.offsetParent !== null) {
 			const previewImage = slideImagesCache[slideIndex]
 			if (previewImage != undefined && previewImage.length > 0) {
@@ -306,7 +307,7 @@ function PresentationDomUpdater() {
 
 		const groupTop = groupElement.getBoundingClientRect().top
 		if (isFirstSlideInGroup || groupElement.scrollHeight < (availableHeight * 0.8)) {
-			if (slideElements[0] === slideElement && slideElement.scrollHeight < (availableHeight * 0.5)) {
+			if (slideElements[0] === slideElement && titleElement.style.display != 'none' && slideElement.scrollHeight < (availableHeight * 0.5)) {
 				scrollDeltaY = titleElement.getBoundingClientRect().top
 			} else {
 				// Whole group is fits on the screen or this is the first slide
