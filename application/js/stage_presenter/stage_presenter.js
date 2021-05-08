@@ -1,11 +1,40 @@
 function StagePresenter() {
+	function getHost() {
+		if ((localStorage.demoMode || "true") == "true") {
+			return 'demo'
+		}
+		return (localStorage.ipAddress || 'localhost') + ':' + (localStorage.port || '63147')
+	}
+
+	let host = getHost()
 	let stateBroadcastChannel = undefined
 	if (window.BroadcastChannel) {
 		stateBroadcastChannel = new BroadcastChannel('state')
 	}
+
 	const stateManager = StateManager(stateBroadcastChannel)
-	const proPresenterConnection = ProPresenterConnection(stateManager)
-	const localStorageObserver = LocalStorageObserver(proPresenterConnection)
+
+	let proPresenterConnection = undefined
+	if (host == 'demo') {
+		document.getElementById('demoMode').style.display = "block"
+		proPresenterConnection = ProPresenterDemoConnection(stateManager)
+	} else {
+		document.getElementById('demoMode').style.display = "none"
+		proPresenterConnection = ProPresenterConnection(stateManager, host)
+	}
+
+	function issuePresentationReload() {
+		proPresenterConnection.reloadCurrentPresentation()
+	}
+
+	function localStorageChangedCallback() {
+		if (host != getHost()) {
+			location.reload()
+		}
+	}
+
+	const localStorageObserver = LocalStorageObserver(localStorageChangedCallback,
+													  issuePresentationReload)
 
 	if (stateBroadcastChannel !== undefined) {
 		stateBroadcastChannel.onmessage = (ev) => {

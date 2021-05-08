@@ -30,6 +30,10 @@ body:hover #settingsButton, body:hover #closeButton {
 	display: inline;
 }
 
+body:hover #demoMode {
+	opacity: 0.95;
+}
+
 #settingsButton, #closeButton {
 	display: none;
 	position: absolute;
@@ -91,4 +95,15 @@ main {
 #errorMessage {
 	font-size: 3em;
 	margin: 8px;
+}
+
+#demoMode {
+	position: absolute;
+	bottom: 0;
+    left: 50%;
+	transform: translate(-50%, 0);
+	padding: 16px;
+	opacity: 0.8;
+	background: #ff5050;
+	font-size: 2em;
 }

@@ -1,6 +1,7 @@
 "use strict"
 
-function LocalStorageObserver(proPresenterConnection) {
+function LocalStorageObserver(localStorageChanged,
+							  reloadPresentationCallback) {
 	if (window.addEventListener) {
 		window.addEventListener("storage", update, false)
 	} else {
@@ -18,6 +19,7 @@ function LocalStorageObserver(proPresenterConnection) {
 	let customCSS = undefined
 	let oldFeatures = []
 	let reloadPresentationTimeout = undefined
+	let localStorageChangedCallbackTimeout = undefined
 
 	const style = document.createElement("style");
 	document.head.appendChild(style);
@@ -85,6 +87,8 @@ function LocalStorageObserver(proPresenterConnection) {
 
 		clearTimeout(reloadPresentationTimeout)
 		reloadPresentationTimeout = setTimeout(reloadPresentationIfNecessary, 500)
+		clearTimeout(localStorageChangedCallbackTimeout)
+		localStorageChangedCallbackTimeout = setTimeout(localStorageChanged, 1000)
 	}
 
 	function reloadPresentationIfNecessary() {
@@ -94,7 +98,7 @@ function LocalStorageObserver(proPresenterConnection) {
 		if (importantFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
 				|| customCSS !== localStorage.customCSS) {
-			proPresenterConnection.reloadCurrentPresentation()
+			reloadPresentationCallback()
 		}
 
 		oldFeatures = document.body.className.split(' ')

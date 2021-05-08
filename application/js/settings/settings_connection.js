@@ -1,8 +1,10 @@
 "use strict"
 
 function ConnectionSettings() {
-	const hostIsLocalElement = document.getElementById('hostIsLocal')
-	const hostIsRemoteElement = document.getElementById('hostIsRemote')
+	const modeDemoElement = document.getElementById('demoMode')
+	const modeLocalElement = document.getElementById('localMode')
+	const modeRemoteElement = document.getElementById('remoteMode')
+
 	const ipAddressElement = document.getElementById('ipAddress')
 	const portElement = document.getElementById('port')
 	const remoteAppPassElement = document.getElementById('remoteAppPass')
@@ -12,6 +14,7 @@ function ConnectionSettings() {
 	const remoteConnectionResultElement = document.getElementById('remoteAppConnectionResult')
 	const stageConnectionResultElement = document.getElementById('stageAppConnectionResult')
 
+	const testConnectionButton = document.getElementById('connectButton')
 	const resetButton = document.getElementById('resetButton')
 
 	let connectTimeout = undefined
@@ -27,14 +30,44 @@ function ConnectionSettings() {
 
 	function initInputsFromStorage() {
 		ipAddressElement.value = localStorage.ipAddress || 'localhost'
-		updateHostIsLocal()
+		updateConnectionMode()
 
 		portElement.value = localStorage.port ||  '49303'
 		remoteAppPassElement.value = undefinedToEmpty(localStorage.remoteAppPass)
 		stageAppPassElement.value = undefinedToEmpty(localStorage.stageAppPass)
 		resetResults()
-		updateHostIsLocal()
+		updateConnectionMode()
 		updateResetButtonState()
+	}
+
+	function updateConnectionMode() {
+		if ((localStorage.demoMode || 'true') == 'true') {
+			modeDemoElement.checked = true
+			modeLocalElement.checked = false
+			modeRemoteElement.checked = false
+			ipAddressElement.disabled = true
+			portElement.disabled = true
+			testConnectionButton.disabled = true
+			remoteAppPassElement.disabled = true
+			stageAppPassElement.disabled = true
+		} else {
+			const ipAddress = ipAddressElement.value
+			if (ipAddress === 'localhost') {
+				modeDemoElement.checked = false
+				modeLocalElement.checked = true
+				modeRemoteElement.checked = false
+				ipAddressElement.disabled = true
+			} else {
+				modeDemoElement.checked = false
+				modeLocalElement.checked = false
+				modeRemoteElement.checked = true
+				ipAddressElement.disabled = false
+			}
+			portElement.disabled = false
+			remoteAppPassElement.disabled = false
+			stageAppPassElement.disabled = false
+			testConnectionButton.disabled = false
+		}
 	}
 
 	function resetResults() {
@@ -43,24 +76,33 @@ function ConnectionSettings() {
 		stageConnectionResultElement.innerText = ''
 	}
 
-	function hostIsLocalComputer() {
+	function selectModeDemo() {
+		localStorage.demoMode = true
+		updateConnectionMode()
+		resetResults()
+		updateResetButtonState()
+	}
+
+	function selectModeLocal() {
+		localStorage.demoMode = false
 		ipAddressElement.disabled = true
 		if (ipAddressElement.value !== 'localhost') {
 			ipAddressElement.value = 'localhost'
-			resetResults()
-			updateResetButtonState()
-			connect()
 		}
+		updateConnectionMode()
+		resetResults()
+		updateResetButtonState()
 	}
 
-	function hostIsRemoteComputer() {
+	function selectModeRemote() {
+		localStorage.demoMode = false
 		ipAddressElement.disabled = false
 		if (ipAddressElement.value === 'localhost') {
 			ipAddressElement.value = ''
-			resetResults()
-			updateResetButtonState()
-			connect()
 		}
+		updateConnectionMode()
+		resetResults()
+		updateResetButtonState()
 	}
 
 	function testWebSocketConnection(ipAddress, port, path, password) {
@@ -129,19 +171,6 @@ function ConnectionSettings() {
 		}
 	}
 
-	function updateHostIsLocal() {
-		const ipAddress = ipAddressElement.value
-		if (ipAddress === 'localhost') {
-			hostIsLocalElement.checked = true
-			hostIsRemoteElement.checked = false
-			ipAddressElement.disabled = true
-		} else {
-			hostIsLocalElement.checked = false
-			hostIsRemoteElement.checked = true
-			ipAddressElement.disabled = false
-		}
-	}
-
 	function updateResetButtonState() {
 		if (ipAddressElement.value !== localStorage.ipAddress ||
 			portElement.value !== localStorage.port ||
@@ -160,7 +189,7 @@ function ConnectionSettings() {
 
 	function connect() {
 		resetResults()
-		updateHostIsLocal()
+		updateConnectionMode()
 		const ipAddress = ipAddressElement.value
 		const port = portElement.value
 		if (!ipAddress || ipAddress.length === 0 || !port || port.length === 0) {
@@ -177,8 +206,9 @@ function ConnectionSettings() {
 	return {
 		onInputChanged: onInputChanged,
 		initInputsFromStorage: initInputsFromStorage,
-		hostIsLocalComputer: hostIsLocalComputer,
-		hostIsRemoteComputer: hostIsRemoteComputer,
+		selectModeDemo: selectModeDemo,
+		selectModeLocal: selectModeLocal,
+		selectModeRemote: selectModeRemote,
 		resetResults: resetResults,
 		connect: connect
 	}

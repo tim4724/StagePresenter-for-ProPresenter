@@ -27,14 +27,21 @@
 
 			<div class='setting'>
 				<label class='radioLabel'>
-					<input id='hostIsLocal' type='radio' name='remoteLocal'
+					<input id='demoMode' type='radio' name='demoMode'
 						checked=true
-						onchange='connectionSettings.hostIsLocalComputer()'>
+						onchange='connectionSettings.selectModeDemo()'>
+					<span class='radio'></span>
+					Demo Connection (without ProPresenter)
+				</label>
+				<label class='radioLabel'>
+					<input id='localMode' type='radio' name='localMode'
+						onchange='connectionSettings.selectModeLocal()'>
 					<span class='radio'></span>
 					Connect to ProPresenter instance on this computer
 				</label>
 				<label class='radioLabel'>
-					<input id='hostIsRemote' type='radio' name='remoteLocal' onchange='connectionSettings.hostIsRemoteComputer()'>
+					<input id='remoteMode' type='radio' name='remoteMode'
+						onchange='connectionSettings.selectModeRemote()'>
 					<span class='radio'></span>
 					Connect to ProPresenter instance on another computer
 				</label>

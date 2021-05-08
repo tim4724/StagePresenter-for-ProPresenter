@@ -12,7 +12,7 @@ function WebSocketConnectionState(isConnected = false,
 	}
 }
 
-function ProPresenterConnection(stateManager) {
+function ProPresenterConnection(stateManager, host) {
 	const proPresenterParser = ProPresenterParser()
 
 	const lowResolutionImageWidth = 57 // Image height 32px
@@ -44,20 +44,22 @@ function ProPresenterConnection(stateManager) {
 
 	let displaySlidesFromStageDisplayTimeout = undefined
 
-	function connect() {
-		window.onbeforeunload = function () {
-			if (remoteWebSocket) {
-				remoteWebSocket.onclose = function () {}
-				remoteWebSocket.close()
-			}
-			if (stageWebSocket) {
-				stageWebSocket.onclose = function () {}
-				stageWebSocket.close()
-			}
+	function disconnect() {
+		if (remoteWebSocket) {
+			remoteWebSocket.onclose = function () {}
+			remoteWebSocket.close()
 		}
+		if (stageWebSocket) {
+			stageWebSocket.onclose = function () {}
+			stageWebSocket.close()
+		}
+	}
 
+	window.onbeforeunload = disconnect
+
+	function connect() {
 		function connectToRemoteWebsocket() {
-			remoteWebSocket = new WebSocket('ws://' + getHost() + '/remote')
+			remoteWebSocket = new WebSocket('ws://' + host + '/remote')
 			remoteWebSocket.onopen = function () {
 				waitingForIntialConnection = false
 				clearConnectionErrors() // Will be shown after timeout
@@ -110,7 +112,7 @@ function ProPresenterConnection(stateManager) {
 		}
 
 		function connectToStageWebSocket() {
-			stageWebSocket = new WebSocket('ws://' + getHost() + '/stagedisplay')
+			stageWebSocket = new WebSocket('ws://' + host + '/stagedisplay')
 			stageWebSocket.onopen = function () {
 				clearConnectionErrors()
 				stageWebsocketConnectionState.isConnected = true
@@ -230,7 +232,7 @@ function ProPresenterConnection(stateManager) {
 				}
 
 				function firstSlideWidth(presentation, callback) {
-					// TODO: better parser jpeg byte array?
+					// TODO: better/faster parser jpeg byte array?
 					const groups = presentation.groups
 					if (groups.length > 0 && groups[0].slides.length > 0) {
 						const image = new Image()
@@ -465,10 +467,6 @@ function ProPresenterConnection(stateManager) {
 		stateManager.clearConnectionErrors()
 	}
 
-	function exportState() {
-		// TODO
-	}
-
 	function loadPresentation(presentationPath) {
 		currentPresentationDataCache = undefined
 		// For the next Presentation Title if skipMediaPlaylistItems has been changed
@@ -477,12 +475,10 @@ function ProPresenterConnection(stateManager) {
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}
 	}
-
 	return {
 		connect: connect,
-		exportState: exportState,
 		loadPresentation: loadPresentation,
-		// TODO: test reloadCurrentPresentation
+ 		// TODO: test reloadCurrentPresentation
 		reloadCurrentPresentation: () => loadPresentation(stateManager.getCurrentPresentationPath())
 	}
 }

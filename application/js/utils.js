@@ -10,12 +10,6 @@ function arrayEquals(a, b) {
 		a.length === b.length && a.every((val, index) => val === b[index]);
 }
 
-function getHost() {
-	const ipAddress = localStorage.ipAddress || 'localhost'
-	const port = localStorage.port || '63147'
-	return ipAddress + ':' + port
-}
-
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }

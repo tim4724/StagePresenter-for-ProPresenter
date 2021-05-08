@@ -43,7 +43,7 @@ function StateManager(stateBroadcastChannel) {
 			currentPlaylistIndex = -1
 			currentPlaylistItemIndex = -1
 			playlistDomUpdater.clear()
-			presentationDomUpdater.clearNextPresentationTitle()
+			presentationDomUpdater.setNextPresentationTitle(undefined)
 		} else {
 			const playlistItemIndex = playlist.items.findIndex(i => i.location === currentPresentationPath)
 			if (playlistIndex !== currentPlaylistIndex || playlistItemIndex !== currentPlaylistItemIndex) {
