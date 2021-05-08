@@ -17,6 +17,7 @@ let waitingForDisplay = undefined
 let stagePresenterWindow = undefined
 let settingsWindow = undefined
 let operatorWindow = undefined
+let welcomeWindow = undefined
 
 if (!app.isPackaged) {
 	// Enable live reload for Electron too
@@ -124,6 +125,31 @@ function createSettingsWindow () {
 	})
 	settingsWindow.loadFile(`${__dirname}/application/settings.html`)
 	settingsWindow.once('closed', function (ev) {
+		checkIfShouldQuit()
+	})
+}
+
+function createWelcomeWindow () {
+	if (welcomeWindow && !welcomeWindow.isDestroyed()) {
+		welcomeWindow.close()
+	}
+
+	welcomeWindow = new BrowserWindow({
+		backgroundColor: '#000000',
+		darkTheme: true,
+		title: 'Welcome to StagePresenter',
+		width: 1024,
+		height: 700,
+		fullscreen: false,
+		center: true,
+		webPreferences: {
+			nodeIntegration: true,
+			contextIsolation: false,
+			enableRemoteModule: true
+		},
+	})
+	welcomeWindow.loadFile(`${__dirname}/application/welcome.html`)
+	welcomeWindow.once('closed', function (ev) {
 		checkIfShouldQuit()
 	})
 }
@@ -286,7 +312,7 @@ app.whenReady().then(async () => {
 		}
 	} else {
 		waitingForDisplay = false
-		createSettingsWindow()
+		createWelcomeWindow()
 	}
 })
 
