@@ -133,13 +133,14 @@
 #nextUp {
 	display: none;
 	position: absolute;
-	bottom: 4px;
+	bottom: 0;
 	right: 0;
 	max-width: 50%;
 	overflow: hidden;
 	z-index: -1;
 	padding: 4px 16px;
 	font-size: 3.5em;
+	background: rgba(0,0,0,.8);
 	color: #909090;
 	white-space: nowrap;
 	text-overflow: ellipsis;
