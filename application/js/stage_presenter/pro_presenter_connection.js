@@ -184,11 +184,6 @@ function ProPresenterConnection(stateManager, host) {
 				stageWebsocketConnectionState.error = data.err
 				break
 			case 'fv': // FrameValue
-				if (connectionStatusElement.style.display != 'none') {
-					connectionStatusElement.innerText = 'Not Connected'
-					connectionStatusElement.classList.remove('success')
-					connectionStatusElement.style.display = 'none'
-				}
 				onNewStageDisplayFrameValue(data)
 				break
 			case 'sys':
@@ -232,13 +227,6 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
-				if (connectionStatusElement.style.display != 'none') {
-					connectionStatusElement.innerText = 'Not Connected'
-					connectionStatusElement.classList.remove('success')
-					connectionStatusElement.style.display = 'none'
-				}
-
-				// TODO: Better send playlistRequestAll in a fix interval?
 				remoteWebSocket.send(Actions.playlistRequestAll)
 
 				if (currentPresentationDataCache === data_string) {

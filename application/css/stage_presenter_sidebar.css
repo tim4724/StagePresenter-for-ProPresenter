@@ -214,3 +214,16 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 	font-size: 3em;
 	background: inherit;
 }
+
+#connectionStatus {
+	position: absolute;
+	bottom: 15%;
+	font-size: 0.5em;
+    left: 50%;
+	padding: 16px;
+	transform: translate(-50%, 0);
+}
+
+#connectionStatus.success {
+	color: #00ff00;
+}

@@ -101,7 +101,6 @@ function ProPresenterDemoConnection(stateManager) {
 	}
 
 	function connect() {
-		connectionStatusElement.style.display = 'none'
 		setInterval(function() {
 			const seconds = 0 | (Date.now() / 1000)
 			stateManager.onNewClock(seconds)
