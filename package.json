@@ -1,23 +1,23 @@
 {
-  "name": "StagePresenter",
-  "version": "0.0.2",
-  "description": "A better stage monitor",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "repository": "https://github.com/tim4724/Stage-Monitor-2",
-  "keywords": [
-    "ProPresenter",
-    "stage display",
-    "stage",
-    "monitor",
-    "confidence"
-  ],
-  "author": "Tim Vogel",
-  "license": "",
-  "devDependencies": {
-    "electron": "^12.0.4",
-    "electron-reload": "^1.5.0"
-  }
+    "name": "StagePresenter",
+    "version": "0.0.2",
+    "description": "A better stage monitor",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "repository": "https://github.com/tim4724/StagePresenter-for-ProPresenter",
+    "keywords": [
+        "ProPresenter",
+        "stage display",
+        "stage",
+        "monitor",
+        "confidence"
+    ],
+    "author": "Tim Vogel",
+    "license": "",
+    "devDependencies": {
+        "electron": "^12.0.4",
+        "electron-reload": "^1.5.0"
+    }
 }

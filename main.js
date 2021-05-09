@@ -324,22 +324,6 @@ function screenConfigChanged() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-	// TODO: Only first launch ?
-	if (app.isPackaged && !app.isInApplicationsFolder()) {
-		app.moveToApplicationsFolder({
-		  conflictHandler: (conflictType) => {
-			if (conflictType === 'exists') {
-			  return dialog.showMessageBoxSync({
-				type: 'question',
-				buttons: ['Halt Move', 'Continue Move'],
-				defaultId: 0,
-				message: 'An app of this name already exists'
-			  }) === 1
-			}
-		  }
-		})
-	}
-
 	app.dock.setMenu(dockMenu)
 
 	dummyWindow = new BrowserWindow({
