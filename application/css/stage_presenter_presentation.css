@@ -145,3 +145,36 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
+
+#connectionStatus {
+	position: absolute;
+	bottom: 10%;
+	font-size: 0.5em;
+    left: 50%;
+	padding: 16px;
+	transform: translate(-50%, 0);
+}
+
+#connectionStatus.success {
+	color: #00ff00;
+}
+
+#stagePresenterName {
+	position: absolute;
+	top: calc(30% + 128px + 32px);
+	font-size: 0.8em;
+    left: 50%;
+	padding: 16px;
+	transform: translate(-50%, 0);
+}
+
+#stagePresenterIcon {
+	width: 256px;
+	max-width: 256px;
+	height: 256px;
+	max-height: 256px;
+	position: absolute;
+ 	top: 30%;
+ 	left: 50%;
+	transform: translate(-50%, -50%);
+}
