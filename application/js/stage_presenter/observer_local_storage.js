@@ -26,7 +26,7 @@ function LocalStorageObserver(localStorageChanged,
 
 	function update() {
 		if (localStorage.features === undefined) {
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide skipMediaPlaylistItems'
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150
@@ -94,7 +94,7 @@ function LocalStorageObserver(localStorageChanged,
 	function reloadPresentationIfNecessary() {
 		const features = localStorage.features.split(' ')
 
-		const importantFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages', 'skipMediaPlaylistItems']
+		const importantFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages']
 		if (importantFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
 				|| customCSS !== localStorage.customCSS) {

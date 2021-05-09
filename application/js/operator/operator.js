@@ -160,8 +160,6 @@ function Operator() {
 
 		let currentOptGroupElement = undefined
 		if (playlist != undefined && playlist.items != undefined) {
-			const disableMediaItems = localStorage.features.split(' ').includes('skipMediaPlaylistItems')
-
 			for (let i = 0; i < playlist.items.length; i++) {
 				const item = playlist.items[i]
 				if (item.type == 'playlistItemTypeHeader') {
@@ -171,9 +169,6 @@ function Operator() {
 				} else {
 					const selected = i === playlistItemIndex
 					const optionElement = buildOptionElement(item.text, i, selected)
-					if(disableMediaItems && item.type == 'playlistItemTypeVideo') {
-						optionElement.disabled = true
-					}
 					const parent = currentOptGroupElement || presentationSelect
 					parent.appendChild(optionElement)
 				}
