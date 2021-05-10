@@ -1,44 +1,45 @@
 function ProPresenterDemoConnection(stateManager) {
 	let presentationSong = {
-		"name": "One thing remains",
-		"groups": [
-			{
-				"name": "Chorus",
-				"color": "rgba(215.9409686923027, 35.055064558982856, 96.31569653749466, 255)",
-				"slides": [
-					{
-						"rawText": "Your love never fails, \nIt never gives up",
-						"lines": ["Your love never fails","It never gives up"]
-					},
-					{
-						"rawText": "It never runs out on me",
-						"lines": ["It never runs out on me"]
-					}
-				]
-			},
-			{
-				"name": "Bridge",
-				"color": "rgba(138.70549231767654, 45.39075314998627, 213.78469079732895, 255)",
-				"slides": [
-					{
-						"rawText": "In death, in life, I'm confident and covered by",
-						"lines": ["In death, in life, I'm confident and covered by"]
-					},
-					{
-						"rawText": "The power of your great love",
-						"lines": ["The power of your great love"]
-					},
-					{
-						"rawText": "My debt is paid, There's nothing that can separate",
-						"lines": ["My debt is paid, There's nothing that can separate"]
-					},
-					{
-						"rawText": "My heart from your great love",
-						"lines": ["My heart from your great love"]
-					}
-				]
-			}
-		]
+	    "name": "Amazing Grace",
+	    "groups": [
+	        {
+	            "name": "Chorus",
+	            "color": "rgba(215.9409686923027, 35.055064558982856, 96.31569653749466, 255)",
+	            "slides": [
+	                {
+	                    "rawText": "Amazing Grace, how sweet the sound\nThat saved a wretch like me",
+	                    "lines": ["Amazing Grace, how sweet the sound", "That saved a wretch like me"
+	                    ]
+	                },
+	                {
+	                    "rawText": "I once was lost, but now am found\nWas blind but now I see",
+	                    "lines": ["I once was lost, but now am found", "Was blind but now I see"]
+	                }
+	            ]
+	        },
+	        {
+	            "name": "Verse 1",
+	            "color": "rgba(0, 140.00479459762573, 213.7954518198967, 255)",
+	            "slides": [
+	                {
+	                    "rawText": "Was Grace that taught my heart to fear\nAnd Grace, my fears relieved",
+	                    "lines": ["Was Grace that taught my heart to fear", "And Grace, my fears relieved"],
+	                },
+	                {
+	                    "rawText": "How precious did that Grace appear\nThe hour I first believed",
+	                    "lines": ["How precious did that Grace appear", "The hour I first believed"]
+	                },
+	                {
+	                    "rawText": "Through many dangers, toils and snares\nWe have already come",
+	                    "lines": ["Through many dangers, toils and snares", "We have already come"]
+	                },
+	                {
+	                    "rawText": "T'was Grace that brought us safe thus far\nAnd Grace will lead us home\nAnd Grace will lead us home",
+	                    "lines": ["T'was Grace that brought us safe thus far", "And Grace will lead us home", "And Grace will lead us home"]
+	                }
+	            ]
+	        }
+	    ]
 	}
 	let presentationBible = {
 		"name": "John 3:16 (KJV)",
@@ -73,7 +74,7 @@ function ProPresenterDemoConnection(stateManager) {
 	const connectionStatusElement = document.getElementById("connectionStatus")
 
 	function loadPresentationJSONs(doneCallback) {
-		fetch('json/one_thing_remains.json').then(response => {
+		fetch('json/amazing_grace.json').then(response => {
 			if (response.ok) {
 				return response.json()
 			} else {
