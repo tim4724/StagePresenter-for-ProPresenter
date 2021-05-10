@@ -1,8 +1,11 @@
+
 # ![Icon](/icon64x64.png?raw=true) StagePresenter for ProPresenter
 
 A better Stage Display for ProPresenter 7.
 An electron application that automatically synchronizes with ProPresenter
 and displays Presentations, Playlists, Slide-Previews, Timers, Countdowns and Stage-Messages.
+
+https://user-images.githubusercontent.com/15907780/117730049-0b9a6c80-b1ec-11eb-83d4-a6ff259b55de.mp4
 
 StagePresenter can be used on the same machine, where ProPresenter is running.
 It can also be installed on a different machine on the same network.
