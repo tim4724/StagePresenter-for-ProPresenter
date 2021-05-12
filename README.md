@@ -1,5 +1,5 @@
 
-# ![Icon](/icon64x64.png?raw=true) StagePresenter for ProPresenter
+# ![Icon](/readme_res/icon64x64.png?raw=true) StagePresenter for ProPresenter
 
 A better Stage Display for ProPresenter 7.
 An electron application that automatically synchronizes with ProPresenter

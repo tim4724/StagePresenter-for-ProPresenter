@@ -58,6 +58,8 @@ async function createStagePresenterWindow(displayBounds) {
 	}
 
 	if (displayBounds) {
+		localStorageSet("stagePresenterWindowModeWindowBounds", '')
+		localStorageSet("stagePresenterWindowModeWindowFullscreen", 'false')
 		stagePresenterWindow = new BrowserWindow({
 			x: displayBounds.x,
 			y: displayBounds.y,
@@ -66,7 +68,6 @@ async function createStagePresenterWindow(displayBounds) {
 			fullscreen: true,
 			backgroundColor: '#000000',
 			darkTheme: true,
-			frame: false,
 			title: 'StagePresenter',
 			show: false,
 			webPreferences: {
@@ -77,7 +78,6 @@ async function createStagePresenterWindow(displayBounds) {
 			}
 		})
 	} else {
-
 		let bounds = {x: undefined, y: undefined, width: 4096, height: 2304}
 		const boundsValue = await localStorageGet("stagePresenterWindowModeWindowBounds")
 		try {
@@ -94,6 +94,7 @@ async function createStagePresenterWindow(displayBounds) {
 		} catch (e) {
 			console.log("Error parsing stagePresenterWindowModeWindowBounds", e)
 		}
+		const isFullscreen = await localStorageGet("stagePresenterWindowModeWindowFullscreen") == 'true'
 
 		stagePresenterWindow = new BrowserWindow({
 			x: bounds.x,
@@ -105,7 +106,8 @@ async function createStagePresenterWindow(displayBounds) {
 			fullscreen: false,
 			backgroundColor: '#000000',
 			darkTheme: true,
-			frame: true,
+			fullscreenable: true,
+			fullscreen: isFullscreen,
 			title: 'StagePresenter',
 			show: false,
 			webPreferences: {
@@ -116,6 +118,7 @@ async function createStagePresenterWindow(displayBounds) {
 			}
 		})
 	}
+	stagePresenterWindow.webContents.setMaxListeners(100)
 
 	if (displayBounds != undefined) {
 		// When showing the operator window, this line is important to keep the
@@ -134,29 +137,40 @@ async function createStagePresenterWindow(displayBounds) {
 	stagePresenterWindow.loadFile(`${__dirname}/application/stagePresenter.html`)
 
 	stagePresenterWindow.once('close', function (ev) {
-		if (ev.sender === stagePresenterWindow) {
-			if (displayBounds != undefined) {
-				stagePresenterWindow.removeListener('move', move)
-				localStorageSet("stagePresenterWindowModeWindowBounds", undefined)
-			} else {
-				const b = stagePresenterWindow.getBounds()
-				const value = b.x + ";" + b.y + ";" + b.width + ";" + b.height
-				localStorageSet("stagePresenterWindowModeWindowBounds", value)
-			}
+		try {
+			if (ev.sender === stagePresenterWindow) {
+				if (displayBounds != undefined) {
+					stagePresenterWindow.removeListener('move', move)
+				} else {
+					const b = stagePresenterWindow.getBounds()
+					const value = b.x + ";" + b.y + ";" + b.width + ";" + b.height
+					localStorageSet("stagePresenterWindowModeWindowBounds", value)
+					const fullscreen = stagePresenterWindow.isFullScreen()
+					localStorageSet("stagePresenterWindowModeWindowFullscreen", fullscreen)
+				}
 
-			stagePresenterWindow = undefined
-			if (operatorWindow != undefined && !operatorWindow.isDestroyed()) {
-				operatorWindow.close()
+				stagePresenterWindow = undefined
+				if (operatorWindow != undefined && !operatorWindow.isDestroyed()) {
+					operatorWindow.close()
+				}
 			}
+		} catch (e) {
+			console.log('stagePresenterWindow close did not work')
 		}
 	})
 	stagePresenterWindow.once('closed', function (ev) {
 		checkIfShouldQuit()
+		if (settingsWindow && !settingsWindow.isDestroyed()) {
+			settingsWindow.webContents.send('updateDisplays')
+		}
+		if (welcomeWindow && !welcomeWindow.isDestroyed()) {
+			welcomeWindow.webContents.send('updateDisplays')
+		}
 	})
 	stagePresenterWindow.show()
 
 	localStorageGet("showOperatorWindow").then(showOperatorWindow => {
-		if (showOperatorWindow === 'true') {
+		if (showOperatorWindow == 'true') {
 			createOperatorWindow()
 		}
 	})
@@ -173,13 +187,14 @@ function createSettingsWindow () {
 		title: 'Stagemonitor Settings',
 		width: 1200,
 		height: 800,
-		fullscreen: false,
 		center: true,
+		fullscreenable: false,
+		maximizable: false,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
 			enableRemoteModule: true
-		},
+		}
 	})
 	settingsWindow.loadFile(`${__dirname}/application/settings.html`)
 	settingsWindow.once('closed', function (ev) {
@@ -198,8 +213,9 @@ function createWelcomeWindow () {
 		title: 'Welcome to StagePresenter',
 		width: 1024,
 		height: 700,
-		fullscreen: false,
 		center: true,
+		fullscreenable: false,
+		maximizable: false,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
@@ -324,6 +340,9 @@ function screenConfigChanged() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+	const initApplicationMenu = require('./init_application_menu');
+	initApplicationMenu.initApplicationMenu(app, Menu)
+
 	app.dock.setMenu(dockMenu)
 
 	dummyWindow = new BrowserWindow({
@@ -374,9 +393,7 @@ function checkIfShouldQuit() {
 	}
 	const wins = BrowserWindow.getAllWindows()
 	if (wins.length === 0 || wins.length === 1 && wins[0] === dummyWindow) {
-		// app.quit()
-		// Do not quit? I don't know...
-		return
+		app.quit()
 	}
 }
 
@@ -387,7 +404,7 @@ function localStorageGet(key) {
 function localStorageSet(key, value) {
 	if (dummyWindow != undefined && !dummyWindow.isDestroyed()) {
 		const script = 'localStorage.' + key + ' = "' + value + '"'
-		dummyWindow.webContents.executeJavaScript(script)
+		return dummyWindow.webContents.executeJavaScript(script)
 	} else {
 		console.log("localStorageSet failed; Dummy window is undefined or destroyed...")
 	}

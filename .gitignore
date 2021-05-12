@@ -1,5 +1,3 @@
-node_modules
-
-out/
-Stagemonitor-darwin-x64
-StagePresenter-darwin-x64
+stagepresenter/node_modules
+build/
+*.provisionprofile

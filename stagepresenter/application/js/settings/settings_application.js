@@ -1,15 +1,12 @@
 "use strict"
 
 function ApplicationSettings() {
-	let screen, app, ipcRenderer
+	let remote, ipcRenderer
 	try {
-		let remote
 		({ remote, ipcRenderer } = require('electron'))
-		screen = remote.screen
-		app = remote.app
 	} catch (e) {
 	}
-	if (!screen || !app || !ipcRenderer) {
+	if (!remote && !ipcRenderer) {
 		console.log('electron remote and ipcRenderer are not available')
 		return
 	}
@@ -19,17 +16,41 @@ function ApplicationSettings() {
 	const displayNoneOptionElement = document.getElementById('showOnDisplayNone')
 
 	const autoStartElement = document.getElementById('autoStart')
-	autoStartElement.checked = app.getLoginItemSettings().openAtLogin
+	autoStartElement.checked = remote.app.getLoginItemSettings().openAtLogin
 
-	ipcRenderer.on('updateDisplays', updateDisplaySelect)
+	ipcRenderer.on('updateDisplays', function() {
+		displaySelectElement.disabled = true
+		setTimeout(updateDisplaySelect, 500)
+	})
 	updateDisplaySelect()
 
 	function updateDisplaySelect() {
 		displaySelectElement.innerText = ''
+		let showOnDisplay = localStorage.showOnDisplay || -1
+
+		let stagePresenterWindowIsVisible = undefined
+		if (remote != undefined) {
+			try {
+				const wins = remote.BrowserWindow.getAllWindows()
+				const stagePresenterWindow = wins.find(w => w.title === 'StagePresenter')
+				if (stagePresenterWindow) {
+					stagePresenterWindowIsVisible = stagePresenterWindow.isVisible()
+				} else {
+					stagePresenterWindowIsVisible = false
+				}
+			} catch (e) {
+				stagePresenterWindowIsVisible = false
+			}
+		}
+		if (stagePresenterWindowIsVisible == false) {
+			localStorage.showOnDisplay = '-1'
+			showOnDisplay = -1
+		}
+
+		const displays = remote.screen.getAllDisplays()
+		const primaryDisplayId = remote.screen.getPrimaryDisplay().id
 
 		displaySelectElement.appendChild(displayNoneOptionElement)
-
-		const showOnDisplay = localStorage.showOnDisplay || -1
 
 		const windowOptionElement = displayNoneOptionElement.cloneNode()
 		windowOptionElement.id = "window"
@@ -38,10 +59,9 @@ function ApplicationSettings() {
 		if (showOnDisplay == '' + "window") {
 			windowOptionElement.selected = true
 		}
+
 		displaySelectElement.appendChild(windowOptionElement)
 
-		const displays = screen.getAllDisplays()
-		const primaryDisplayId = screen.getPrimaryDisplay().id
 		for (let i = 0; i < displays.length; i++) {
 			const display = displays[i]
 
@@ -71,10 +91,11 @@ function ApplicationSettings() {
 
 			displaySelectElement.appendChild(newOptionElement)
 		}
+		displaySelectElement.disabled = false
 	}
 
 	function startAtLogin(input) {
-		app.setLoginItemSettings({openAtLogin: input.checked})
+		remote.app.setLoginItemSettings({openAtLogin: input.checked})
 	}
 
 	function onDisplaySelected(option) {

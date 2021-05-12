@@ -1,10 +1,10 @@
 {
     "name": "StagePresenter",
-    "version": "0.0.2",
+    "version": "0.1.1",
     "description": "A better stage monitor",
     "main": "main.js",
     "scripts": {
-        "start": "electron ."
+        "start": "electron . --trace-warnings --unhandled-rejections=strict"
     },
     "repository": "https://github.com/tim4724/StagePresenter-for-ProPresenter",
     "keywords": [

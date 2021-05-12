@@ -22,6 +22,7 @@ function StageMonitorSettings() {
 		document.getElementById('zoomSetting').style.display = 'none'
 	}
 
+	let getZoomValueInterval = undefined
 	let webContents = undefined
 	let width = 1920
 	let height = 1080
@@ -29,25 +30,38 @@ function StageMonitorSettings() {
 	function listenToZoomChanges() {
 		const wins = BrowserWindow.getAllWindows()
 		const stagemonitorWindow = wins.find(w => w.title === 'StagePresenter')
-		if (stagemonitorWindow && stagemonitorWindow.webContents) {
+		if (stagemonitorWindow
+				&& !stagemonitorWindow.isDestroyed()
+				&& stagemonitorWindow.isVisible()
+				&& stagemonitorWindow.webContents) {
 			webContents = stagemonitorWindow.webContents
-
-			stagemonitorWindow.once('close', () => {
-				clearInterval(getZoomValue)
-				setTimeout(listenToZoomChanges, 1000)
-			})
-
-			function getZoomValue() {
-				zoomInput.value = 0 | (webContents.zoomFactor * 100)
-				zoomValue = webContents.zoomFactor
-				// updateZoomPreviewIFrame()
-			}
-			const getZoomValueInterval = setInterval(getZoomValue, 1000)
-
 			const size = stagemonitorWindow.getContentSize()
 			width = size[0]
 			height = size[1]
+
+			function reset() {
+				webContents = undefined
+				clearInterval(getZoomValueInterval)
+				setTimeout(listenToZoomChanges, 1000)
+			}
+
+			function getZoomValue() {
+				try {
+					if (!stagemonitorWindow.isDestroyed() && stagemonitorWindow.isVisible()) {
+						zoomInput.value = 0 | (webContents.zoomFactor * 100)
+						zoomValue = webContents.zoomFactor
+						// updateZoomPreviewIFrame()
+					} else {
+						reset()
+					}
+				} catch(e) {
+					reset()
+				}
+			}
+			clearInterval(getZoomValueInterval)
+			getZoomValueInterval = setInterval(getZoomValue, 1000)
 		}  else {
+			webContents = undefined
 			setTimeout(listenToZoomChanges, 1000)
 		}
 	}
