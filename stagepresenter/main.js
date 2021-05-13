@@ -44,7 +44,7 @@ ipcMain.on('displaySelected', (event, arg) => {
 			createStagePresenterWindow(undefined)
 			waitingForDisplay = false
 		} else {
-			const display = getDisplayById(displayId)
+			const display = getDisplayById(displayId, screen.getAllDisplays())
 			if (display) {
 				createStagePresenterWindow(display.bounds)
 			}
@@ -237,13 +237,23 @@ async function createOperatorWindow () {
 
 	let bounds = {x: undefined, y: undefined, width: 350, height: 108}
 	if (boundsValue != undefined && boundsValue.length > 0) {
+		// TODO: avoid controller is behind Stagemonitor
 		const v = boundsValue.split(';')
 		const b = {x: parseInt(v[0]), y: parseInt(v[1]),
 			width: parseInt(v[2]), height: parseInt(v[3])}
 		const display = screen.getDisplayMatching(b)
-		const intersectAmount = rectIntersectionAmount(display.bounds, b)
-		if (intersectAmount / (b.width * b.height) > 0.5) {
-			bounds = b
+		let intersectsWithStagePresenterWindow = false
+		if (stagePresenterWindow != undefined && !stagePresenterWindow.isDestroyed()) {
+			const stagePresenterBounds = stagePresenterWindow.getBounds()
+			const intersectAmount = rectIntersectionAmount(stagePresenterBounds, b)
+			console.log("intersectAmount with stagePresenterBounds", intersectAmount)
+			intersectsWithStagePresenterWindow = intersectAmount > 0
+		}
+		if (!intersectsWithStagePresenterWindow) {
+			const intersectAmount = rectIntersectionAmount(display.bounds, b)
+			if (intersectAmount / (b.width * b.height) > 0.5) {
+				bounds = b
+			}
 		}
 	}
 	operatorWindow = new BrowserWindow({
@@ -325,7 +335,7 @@ function screenConfigChanged() {
 
 		if (waitingForDisplay) {
 			const displayId = await localStorageGet('showOnDisplay')
-			const display = getDisplayById(displayId)
+			const display = getDisplayById(displayId, screen.getAllDisplays())
 			if (display) {
 				waitingForDisplay = false
 				createStagePresenterWindow(display.bounds)
@@ -366,13 +376,20 @@ app.whenReady().then(async () => {
 		if (displayId == "window") {
 			createStagePresenterWindow(undefined)
 		} else {
-			const display = getDisplayById(displayId)
-			if (display) {
+			const allDisplays = screen.getAllDisplays()
+			if (allDisplays.length <= 1) {
 				waitingForDisplay = false
-				createStagePresenterWindow(display.bounds)
+				createWelcomeWindow()
 			} else {
-				console.log('Waiting for Display', displayId)
-				waitingForDisplay = true
+				const display = getDisplayById(displayId, allDisplays)
+				if (display) {
+					waitingForDisplay = false
+					// TODO: Deadlock if only one display is connected
+					createStagePresenterWindow(display.bounds)
+				} else {
+					console.log('Waiting for Display', displayId)
+					waitingForDisplay = true
+				}
 			}
 		}
 	} else {
@@ -410,14 +427,18 @@ function localStorageSet(key, value) {
 	}
 }
 
-function getDisplayById(id) {
+function getDisplayById(id, allDisplays) {
 	// Do not use '===' !
-	return screen.getAllDisplays().find(d => d.id == id)
+	return allDisplays.find(d => d.id == id)
 }
 
 function rectIntersectionAmount(a, b) {
 	const max = Math.max
 	const min = Math.min
-	return max(0, max(a.x + a.width, b.x + b.width) - min(a.x, b.x)) *
-		max(0, max(a.y + a.height, b.y + b.height) - min(a.y, b.y));
+
+	const top = max(a.y, b.y);
+  	const bottom = min(a.y + a.height, b.y + b.height);
+	const left = max(a.x, b.x);
+	const right = min(a.x + a.width, b.x + b.width);
+	return max(0, right - left) * max(0, bottom - top);
 }
