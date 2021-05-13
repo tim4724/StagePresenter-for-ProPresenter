@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<title>StagePresenter</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+	<link rel='stylesheet' href='main.css'>
+</head>
+
+<body>
+
+<header>
+	<div id="appName">STAGEPRESENTER</div>
+	<div id="appNameSubtitle">for ProPresenter</div>
+</header>
+
+<video id="vid" muted poster="StagePresenter_demo_poster.jpeg">
+  <source src="StagePresenter_demo.mp4" type="video/mp4">
+</video>
+
+<script>
+	const videoElement = document.getElementById('vid')
+	setTimeout(function() { videoElement.play() }, 2000)
+	setTimeout(function() { videoElement.setAttribute("controls", true) }, 5000)
+</script>
+
+<main class="descriptionItem">
+	<h1>A better Stage Display for ProPresenter 7</h2>
+	<p class="primaryContent">
+		A Stage display that is automatically synchronized with <a href="https://renewedvision.com/propresenter/">ProPresenter 7</a> and displays Presentations, Slides, Playlists, Timers, Countdowns and Stage-Messages.
+		StagePresenter shows far more than only the current and next slide.
+	</p>
+	<p class="secondaryContent">
+		StagePresenter can be used on the same machine, where ProPresenter is running. But it can also be installed on a different machine on the same network.
+	</p>
+	<div id="startDemoWrapper" style="display: none">
+		<a href="https://github.com/tim4724/StagePresenter-for-ProPresenter"
+			class="button primaryContent">
+			Start demo &nbsp;▶
+		</a>
+	</div>
+</main>
+
+<section class="descriptionItem" style="display: none">
+	<h2>Download for macOS on the AppStore</h2>
+	<a href="https://github.com/tim4724/StagePresenter-for-ProPresenter" class="button primaryContent">
+		Download on the App Store
+	</a>
+</section>
+
+<section class="descriptionItem">
+	<h2>Source Code available on Github</h2>
+	<a href="https://github.com/tim4724/StagePresenter-for-ProPresenter" class="button primaryContent">
+		Take me to the github repository
+	</a>
+</section>
+
+<section class="descriptionItem">
+	<h2>Contact</h2>
+	<p>
+	Feel free to contact me at
+	<a href= "mailto:tim.vogel@stagepresenter.com">tim.vogel@stagepresenter.com</a>
+	if you have any ideas for improvements or new features.
+	</p>
+</section>
+
+<footer>
+	<a href="privacy_policy.html"> Privacy Policy </a>
+</footer>
+</body>
+
+</html>

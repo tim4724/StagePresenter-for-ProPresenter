@@ -1,0 +1,120 @@
+html {
+	box-sizing: border-box;
+	font-family: "Lato", 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 18px;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+body {
+	background: #111111;
+	color: #ffffff;
+	margin: 0;
+}
+
+header {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 400;
+	text-align: center;
+	padding: 120px 16px;
+	background-color: #4497f8;
+	letter-spacing: 0em;
+	background-image: linear-gradient(to bottom right, #3478F6, #53B6F9);
+}
+
+#appName {
+	font-size: 4em;
+}
+
+#appNameSubtitle {
+	font-size: 2em;
+	padding-bottom: 1em;
+}
+
+header button {
+	margin: 16px;
+}
+
+p {
+	line-height: 1.7;
+}
+
+.descriptionItem h1 {
+	margin: 16px 0 12px;
+	font-family: "Montserrat", sans-serif;
+}
+
+.descriptionItem h2 {
+	margin: 16px 0 12px;
+	font-family: "Montserrat", sans-serif;
+}
+
+.descriptionItem {
+	margin: 8px auto;
+	padding: 8px;
+	max-width: 1024px;
+}
+
+.descriptionItem .primaryContent, .descriptionItem .secondaryContent {
+	margin: 10px 0 0;
+}
+
+.descriptionItem .secondaryContent {
+	color: #d0d0d0;
+}
+
+a {
+	color: #d0d0d0;
+	text-decoration: inherit;
+}
+
+a:hover {
+	color: #ffffff;
+}
+
+a.button {
+	display: inline-block;
+	padding: 16px;
+	color: #000000;
+	background: #eeeeee;
+	font-family: "Montserrat", sans-serif;
+}
+
+a.button:hover {
+	background: #aaa;
+}
+
+#startDemoWrapper {
+	text-align: center;
+}
+
+video {
+	padding: 2px;
+	background: #000000;
+	display: block;
+	margin-top: -64px;
+	margin-left: auto;
+	margin-right: auto;
+	border: 2px solid black;
+	width: 1024px;
+	height: 576px;
+}
+
+footer {
+	margin-top: 64px;
+	display: block;
+	text-align: center;
+	padding: 16px;
+	color: #111111;
+	background: #eeeeee;
+}
+
+footer a {
+	color: #111111;
+}
+
+footer a:hover {
+	color: #aaa;
+}
