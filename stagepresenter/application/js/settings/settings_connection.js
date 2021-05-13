@@ -1,6 +1,8 @@
 "use strict"
 
 function ConnectionSettings() {
+	const runningInElectron = !location.href.startsWith("http")
+	const isSettingsWindow = document.title.toLowerCase().includes("settings")
 	const modeDemoElement = document.getElementById('demoMode')
 	const modeLocalElement = document.getElementById('localMode')
 	const modeRemoteElement = document.getElementById('remoteMode')
@@ -16,6 +18,17 @@ function ConnectionSettings() {
 
 	const testConnectionButton = document.getElementById('connectButton')
 	const resetButton = document.getElementById('resetButton')
+
+	const electronAppSettingsElement = document.getElementById('electronAppSettings')
+
+	if (!runningInElectron) {
+		if (!isSettingsWindow) {
+			testConnectionButton.innerText = "Test Connection and Start"
+		}
+
+		const doneButton = document.getElementById("doneButton")
+		doneButton.style.display = "none"
+	}
 
 	let connectTimeout = undefined
 	let changed = false
@@ -41,13 +54,13 @@ function ConnectionSettings() {
 	}
 
 	function updateConnectionMode() {
-		if ((localStorage.demoMode || 'true') == 'true') {
+		if ((localStorage.demoMode || 'true') == 'true' ) {
 			modeDemoElement.checked = true
 			modeLocalElement.checked = false
 			modeRemoteElement.checked = false
 			ipAddressElement.disabled = true
 			portElement.disabled = true
-			testConnectionButton.disabled = true
+			testConnectionButton.disabled = runningInElectron || isSettingsWindow
 			remoteAppPassElement.disabled = true
 			stageAppPassElement.disabled = true
 		} else {
@@ -114,6 +127,12 @@ function ConnectionSettings() {
 			clearTimeout(webSocketTimeout)
 			webSocket.onclose = function() {}
 			webSocket.close()
+
+			if (!runningInElectron && !isSettingsWindow) {
+				setTimeout(function() {
+					location.href = "stagePresenter.html"
+				}, 2000)
+			}
 		}
 
 		function onAuthenticatedResult(resultElement, hasAuthenticated, error) {
@@ -188,18 +207,22 @@ function ConnectionSettings() {
 	}
 
 	function connect() {
-		resetResults()
-		updateConnectionMode()
-		const ipAddress = ipAddressElement.value
-		const port = portElement.value
-		if (!ipAddress || ipAddress.length === 0 || !port || port.length === 0) {
-			showResult(proPresenterVersionElement, false, 'Invalid')
+		if ((localStorage.demoMode || "true") == "true") {
+			location.href = "stagePresenter.html"
 		} else {
-			// TODO: improve?
-			testWebSocketConnection(ipAddress, port, 'stagedisplay', stageAppPassElement.value)
-			setTimeout(() => {
-				testWebSocketConnection(ipAddress, port, 'remote', remoteAppPassElement.value)
-			}, 1000)
+			resetResults()
+			updateConnectionMode()
+			const ipAddress = ipAddressElement.value
+			const port = portElement.value
+			if (!ipAddress || ipAddress.length === 0 || !port || port.length === 0) {
+				showResult(proPresenterVersionElement, false, 'Invalid')
+			} else {
+				// TODO: improve?
+				testWebSocketConnection(ipAddress, port, 'stagedisplay', stageAppPassElement.value)
+				setTimeout(() => {
+					testWebSocketConnection(ipAddress, port, 'remote', remoteAppPassElement.value)
+				}, 1000)
+			}
 		}
 	}
 

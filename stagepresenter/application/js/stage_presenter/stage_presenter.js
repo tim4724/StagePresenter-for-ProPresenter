@@ -1,4 +1,5 @@
 function StagePresenter() {
+	const runningInElectron = !location.href.startsWith("http")
 	function getHost() {
 		if ((localStorage.demoMode || "true") == "true") {
 			return 'demo'
@@ -8,7 +9,7 @@ function StagePresenter() {
 
 	let host = getHost()
 	let stateBroadcastChannel = undefined
-	if (window.BroadcastChannel) {
+	if (runningInElectron && window.BroadcastChannel) {
 		stateBroadcastChannel = new BroadcastChannel('state')
 	}
 
@@ -23,6 +24,11 @@ function StagePresenter() {
 		proPresenterConnection = ProPresenterConnection(stateManager, host)
 	}
 
+	if (location.href.startsWith("http")) {
+		document.title = "StagePresenter Demo"
+		document.getElementById('settingsButton').style.display = ""
+	}
+
 	function issuePresentationReload() {
 		proPresenterConnection.reloadCurrentPresentation()
 	}
@@ -35,7 +41,7 @@ function StagePresenter() {
 
 	const localStorageObserver = LocalStorageObserver(localStorageChangedCallback,
 													  issuePresentationReload)
-
+	// No broadcast if not running in electron
 	if (stateBroadcastChannel !== undefined) {
 		stateBroadcastChannel.onmessage = (ev) => {
 			const action = ev.data.action
