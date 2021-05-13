@@ -59,15 +59,32 @@ function ProPresenterDemoConnection(stateManager) {
 			}
 		]
 	}
-	const mediaPresentationName = 'Video'
+	const presentationImageSlide = {
+		"name": "Presentation",
+		"groups": [
+			{
+				"name": "",
+				"slides": [
+					{
+						"rawText": "",
+						"lines": [],
+						"previewImage": "img/banner16x9.jpeg"
+					}
+				],
+				"hasLongTextLines": true
+			}
+		]
+	}
+	const mediaPresentationName = 'Some Video.mp4'
 	const playlist = Playlist(
 		'Playlist',
 		[
 			PlaylistItem('Worship', 'playlistItemTypeHeader', '0:0'),
 			PlaylistItem(presentationSong.name, 'playlistItemTypePresentation', '0:1'),
 			PlaylistItem('Sermon', 'playlistItemTypeHeader', '0:2'),
-			PlaylistItem(presentationBible.name, 'playlistItemTypePresentation', '0:3'),
-			PlaylistItem(mediaPresentationName, 'playlistItemTypeVideo', '0:4')
+			PlaylistItem(presentationImageSlide.name, 'playlistItemTypePresentation', '0:3'),
+			PlaylistItem(mediaPresentationName, 'playlistItemTypeVideo', '0:4'),
+			PlaylistItem(presentationBible.name, 'playlistItemTypePresentation', '0:5')
 		],
 		'0'
 	)
@@ -102,6 +119,9 @@ function ProPresenterDemoConnection(stateManager) {
 	}
 
 	function connect() {
+		connectionStatusElement.innerText = "Connected"
+		connectionStatusElement.classList.add('success')
+
 		setInterval(function() {
 			const seconds = 0 | (Date.now() / 1000)
 			stateManager.onNewClock(seconds)
@@ -152,6 +172,10 @@ function ProPresenterDemoConnection(stateManager) {
 								}
 							}, 1000)
 							break
+						case '0:4':
+							timeout = 6000
+							loadPresentation('0:5')
+							break
 						default:
 							timeout = 2000
 							loadPresentation('0:1')
@@ -169,6 +193,8 @@ function ProPresenterDemoConnection(stateManager) {
 		if (presentationPath == '0:1') {
 			presentation = presentationSong
 		} else if(presentationPath == '0:3') {
+			presentation = presentationImageSlide
+		} else if(presentationPath == '0:5') {
 			presentation = presentationBible
 		}
 		if (presentation != undefined) {

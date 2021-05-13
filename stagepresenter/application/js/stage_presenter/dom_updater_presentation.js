@@ -206,7 +206,11 @@ function PresentationDomUpdater() {
 			if (slide.lines.length <= 0 && slide.previewImage != undefined
 				&& slide.previewImage.length > 0) {
 				const image = new Image()
-				image.src = 'data:image/jpeg;base64,' + slide.previewImage
+				if (slide.previewImage.length > 64) {
+					image.src = 'data:image/jpeg;base64,' + slide.previewImage
+				} else {
+					image.src = slide.previewImage
+				}
 				slideElement.appendChild(image)
 			}
 			if (slide.lines.length > 0 && slide.isBiblePassage) {
@@ -230,7 +234,11 @@ function PresentationDomUpdater() {
 		if (previewElement.offsetParent !== null) {
 			const previewImage = slideImagesCache[slideIndex]
 			if (previewImage != undefined && previewImage.length > 0) {
-				previewElement.src = 'data:image/jpeg;base64,' + previewImage
+				if (previewImage.length > 64) {
+					previewElement.src = 'data:image/jpeg;base64,' + previewImage
+				} else {
+					previewElement.src = previewImage
+				}
 			} else {
 				previewElement.src = 'img/black16x9.png'
 			}
