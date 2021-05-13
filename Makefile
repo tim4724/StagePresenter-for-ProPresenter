@@ -34,22 +34,6 @@ appstore: icns
 		/Applications \
 		--sign "3rd Party Mac Developer Installer: Tim Vogel (5ZH48MPAM3)" \
 		"build/StagePresenter-mas-x64/StagePresenter.pkg"
-	@echo "--- Packaging arm64 application ---"
-	electron-packager stagepresenter  --platform=mas --arch=arm64 --overwrite \
-	   --icon build/icon.icns \
-	   --app-bundle-id="com.stagepresenter" \
-	   --out "build"
-	@echo "--- Signing arm64 application ---"
-	electron-osx-sign "build/StagePresenter-mas-arm64/StagePresenter.app" \
-		--platform=mas \
-		--type=distribution \
-		--entitlements="entitlements.mas.plist" \
-		--provisioning-profile="StagePresenter_AppStore.provisionprofile"
-	@echo "--- Creating arm64 signed installer ---"
-	productbuild --component "build/StagePresenter-mas-arm64/StagePresenter.app" \
-		/Applications \
-		--sign "3rd Party Mac Developer Installer: Tim Vogel (5ZH48MPAM3)" \
-		"build/StagePresenter-mas-arm64/StagePresenter.pkg"
 
 icns:
 	@echo "--- Creating iconset and icns icon ---"
