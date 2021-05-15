@@ -67,7 +67,14 @@ function initApplicationMenu(app, Menu) {
               const { shell } = require('electron')
               await shell.openExternal('https://stagepresenter.com')
             }
+        },
+        {
+          label: 'View project on Github',
+          click: async () => {
+            const { shell } = require('electron')
+            await shell.openExternal('https://github.com/tim4724/StagePresenter-for-ProPresenter')
           }
+        }
         ]
       }
     ]
