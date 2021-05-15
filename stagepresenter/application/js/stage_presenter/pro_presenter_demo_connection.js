@@ -68,7 +68,7 @@ function ProPresenterDemoConnection(stateManager) {
 					{
 						"rawText": "",
 						"lines": [],
-						"previewImage": "img/banner16x9.jpeg"
+						"previewImage": "img/banner16x9.png"
 					}
 				],
 				"hasLongTextLines": true
