@@ -1,5 +1,5 @@
 .radioLabel {
-	display: block;
+	display: inline-block;
 	position: relative;
 	padding-left: 35px;
 	margin-bottom: 12px;

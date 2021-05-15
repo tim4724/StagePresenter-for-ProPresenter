@@ -10,96 +10,110 @@
 
 	<script src='js/utils.js'></script>
 
+	<script src='js/settings/settings.js'></script>
 	<script src='js/settings/settings_connection.js'></script>
 	<script src='js/settings/settings_application.js'></script>
 
 	<title>Welcome to StagePresenter</title>
 </head>
 
-<body onload='connectionSettings = ConnectionSettings()
+<body onload='settings = Settings()
+			  connectionSettings = ConnectionSettings()
 			  applicationSettings = ApplicationSettings()'>
 	<main>
 		<h1 id='title'>Welcome to StagePresenter for ProPresenter</h1>
 
 		<section class='settingGroup'>
-			<div class='settingGroupTitle'>Pro Presenter Connection</div>
+		    <div class='settingGroupTitle'>ProPresenter Connection</div>
 
-			<div class='setting'>
-				<label class='radioLabel'>
-					<input id='demoMode' type='radio' name='demoMode'
-						checked=true
-						onchange='connectionSettings.selectModeDemo()'>
-					<span class='radio'></span>
-					Demo Mode (test without ProPresenter)
-				</label>
-				<label class='radioLabel'>
-					<input id='localMode' type='radio' name='localMode'
-						onchange='connectionSettings.selectModeLocal()'>
-					<span class='radio'></span>
-					Connect to ProPresenter instance on this computer
-				</label>
-				<label class='radioLabel'>
-					<input id='remoteMode' type='radio' name='remoteMode'
-						onchange='connectionSettings.selectModeRemote()'>
-					<span class='radio'></span>
-					Connect to ProPresenter instance on another computer
-				</label>
-			</div>
+		    <div class='settingGroupHelpContainer'>
+		        <div class='settingGroupHelpButton' onclick='settings.toggleSettingGroupHelp(this.parentElement); event.stopPropagation();'>?</div>
+		        <div class="settingGroupHelp" onclick='event.stopPropagation()'>
+		            <span class="settingGroupTitle">ProPresenter Connection</span>
+		            <div class="settingGroupHelpButton" onclick='settings.toggleSettingGroupHelp(this.parentElement.parentElement); event.stopPropagation();'>?</div><br>
+		            Open the Preferences in ProPresenter and go to the Network tab.
+		            <strong> Ensure that Network and the Remote Apps are enabled as shown in the screenshot.</strong>
+		            <img src='img/pro_presenter_network_preferences.png'>
+		            The port and the passwords need to be entered in StagePresenter.
+		        </div>
+		    </div>
 
-			<div class='setting'>
-				IP-Address or Network Name
-				<input id='ipAddress' type='text' value='localhost' disabled
-						oninput='connectionSettings.onInputChanged()'>
-				Port
-				<input id='port' type='number' min='0' max='999999'
-						oninput='connectionSettings.onInputChanged()'>
-				<span id='proPresenterVersion'></span>
-			</div>
+		    <div class='setting'>
+		        <div><label class='radioLabel'>
+		            <input id='demoMode' type='radio' name='demoMode'
+		                checked=true
+		                onchange='connectionSettings.selectModeDemo()'>
+		            <span class='radio'></span>
+		            Demo Mode (test without ProPresenter)
+		        </label></div>
+		        <div><label class='radioLabel'>
+		            <input id='localMode' type='radio' name='localMode'
+		                onchange='connectionSettings.selectModeLocal()'>
+		            <span class='radio'></span>
+		            Connect to ProPresenter instance on this computer
+		        </label></div>
+		        <div><label class='radioLabel'>
+		            <input id='remoteMode' type='radio' name='remoteMode'
+		                onchange='connectionSettings.selectModeRemote()'>
+		            <span class='radio'></span>
+		            Connect to ProPresenter instance on another computer
+		        </label></div>
+		    </div>
 
-			<div class='setting'>
-				Remote Observer Password
-				<input id='remoteAppPass' type='text'
-						oninput='connectionSettings.onInputChanged()'>
-				<span id='remoteAppConnectionResult'></span>
-			</div>
+		    <div class='setting'>
+		        IP-Address or Network Name
+		        <input id='ipAddress' type='text' value='localhost' disabled
+		                oninput='connectionSettings.onInputChanged()'>
+		        Port
+		        <input id='port' type='number' min='0' max='999999'
+		                oninput='connectionSettings.onInputChanged()'>
+		        <span id='proPresenterVersion'></span>
+		    </div>
 
-			<div class='setting'>
-				Stage App Password
-				<input id='stageAppPass' type='text' name='remoteAppPass'
-						oninput='connectionSettings.onInputChanged()'>
-				<span id='stageAppConnectionResult'></span>
-			</div>
+		    <div class='setting'>
+		        Remote Observer Password
+		        <input id='remoteAppPass' type='text'
+		                oninput='connectionSettings.onInputChanged()'>
+		        <span id='remoteAppConnectionResult'></span>
+		    </div>
 
-			<button id='connectButton'
-					onclick='connectionSettings.connect()'>
-				Test Connection and Save
-			</button>
+		    <div class='setting'>
+		        Stage App Password
+		        <input id='stageAppPass' type='text' name='remoteAppPass'
+		                oninput='connectionSettings.onInputChanged()'>
+		        <span id='stageAppConnectionResult'></span>
+		    </div>
 
-			<button id='resetButton' disabled
-					onclick='connectionSettings.initInputsFromStorage()'>
-				Reset
-			</button>
+		    <button id='connectButton'
+		            onclick='connectionSettings.connect()'>
+		        Test Connection and Save
+		    </button>
+
+		    <button id='resetButton' disabled
+		            onclick='connectionSettings.initInputsFromStorage()'>
+		        Reset
+		    </button>
 		</section>
 
 		<section class='settingGroup' id='electronAppSettings' style='display: none'>
-			<div class='settingGroupTitle'>Application</div>
-			<div class='setting'>
-				Show StagePresenter on display
-				<select id='showOnDisplay' onchange='applicationSettings.onDisplaySelected(this)'>
-					<option id='showOnDisplayNone' value='-1'> None </option>
-			   </select>
-			</div>
+		    <div class='settingGroupTitle'>Application</div>
+		    <div class='setting'>
+		        Show StagePresenter on display
+		        <select id='showOnDisplay' onchange='applicationSettings.onDisplaySelected(this)'>
+		            <option id='showOnDisplayNone' value='-1'> None </option>
+		       </select>
+		    </div>
 
-			<div class='setting'>
-				<span class='settingText'>
-					Open StagePresenter automatically at Login
-				</span>
-				<label class='switch right'>
-					<input id='autoStart' type='checkbox'
-						   onchange='applicationSettings.startAtLogin(this)'>
-					<span class='slider'></span>
-				</label>
-			</div>
+		    <div class='setting'>
+		        <span class='settingText'>
+		            Open StagePresenter automatically at Login
+		        </span>
+		        <label class='switch right'>
+		            <input id='autoStart' type='checkbox'
+		                   onchange='applicationSettings.startAtLogin(this)'>
+		            <span class='slider'></span>
+		        </label>
+		    </div>
 		</section>
 
 		<button id='doneButton' onclick='window.close()'>

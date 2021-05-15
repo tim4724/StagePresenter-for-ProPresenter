@@ -27,6 +27,62 @@ span, div, h1  {
 	font-size: 0.7em;
 }
 
+.settingGroupHelpContainer {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+}
+
+.settingGroupHelpButton {
+	background: #eee;
+    color: #111111;
+    padding: 8px;
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    line-height: 1;
+    border-radius: 100%;
+    text-align: center;
+}
+
+.settingGroupHelp {
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.95);
+	color: #000000;
+	display: none;
+	position: absolute;
+    right: -8px;
+    top: -8px;
+    z-index: 100;
+	padding: 8px;
+}
+
+.settingGroupHelp .settingGroupHelpButton {
+	float: right;
+	background: #212121;
+	color: #ffffff;
+}
+
+.settingGroupHelp strong {
+    font-weight: 500;
+}
+
+.settingGroupHelp button {
+	display: block;
+	margin: 8px auto 0;
+}
+
+.settingGroup img {
+	width: min(800px, 80vw);
+	border-radius: 8px;
+	margin: 4px;
+}
+
+.settingGroupHelpButton:hover {
+	opacity: 0.8;
+	cursor: pointer;
+}
+
 main {
 	display: inline-block;
 	width: 90%;
@@ -39,6 +95,7 @@ main {
 }
 
 .settingGroup {
+	position: relative;
 	margin-top: 1em;
 	margin-bottom: 1em;
 	background: #111111;

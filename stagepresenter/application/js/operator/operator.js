@@ -306,14 +306,12 @@ function Operator() {
 			}
 		},
 		prevPresentation: () => {
-			const presentationOptions = presentationSelect.querySelectorAll('option')
 			const prevOption = prevPresentationOption()
 			if (prevOption != undefined) {
 				changePlaylistItemIndex(parseInt(prevOption.value))
 			}
 		},
 		nextPresentation: () => {
-			const presentationOptions = presentationSelect.querySelectorAll('option')
 			const nextOption = nextPresentationOption()
 			if (nextOption != undefined) {
 				changePlaylistItemIndex(parseInt(nextOption.value))
