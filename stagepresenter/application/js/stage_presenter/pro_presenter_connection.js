@@ -17,7 +17,7 @@ function ProPresenterConnection(stateManager, host) {
 	const proPresenterParser = ProPresenterParser()
 
 	const lowResolutionImageWidth = 57 // Image height 32px
-	const middleResolutionImageWidth = 426 // Image height 240px; Takes approx 10x as long to load compared to the low resolution inage
+	const middleResolutionImageWidth = 426 // Image height 240px; Takes approx 10x as long to load compared to the low resolution image
 	const highResolutionImageWidth = 1280 // Image Height 720px
 
 	const Actions = {
@@ -33,7 +33,6 @@ function ProPresenterConnection(stateManager, host) {
 
 	let remoteWebsocketConnectionState = WebSocketConnectionState()
 	let stageWebsocketConnectionState = WebSocketConnectionState()
-	let waitingForIntialConnection = true
 
 	let remoteWebSocket = undefined
 	let stageWebSocket = undefined
@@ -59,38 +58,68 @@ function ProPresenterConnection(stateManager, host) {
 	window.onbeforeunload = disconnect
 
 	function connect() {
+		let connectIfNecessaryTimeout = undefined
+		let checkAuthenticatedTimeout = undefined
+
+		function connectIfNecessary() {
+			// Do not connect to both websockets at the same time, because that will crash ProPresenter
+			// Even waiting 500ms is not enough sometimes
+			// Therefore we wait 2 seconds between the connection attempts
+
+			const connectToStageNecessary = stageWebSocket == undefined || [WebSocket.CLOSING, WebSocket.CLOSED].includes(stageWebSocket.readyState)
+			const connectToRemoteNecessary = remoteWebSocket == undefined || [WebSocket.CLOSING, WebSocket.CLOSED].includes(remoteWebSocket.readyState)
+
+			if (connectToStageNecessary) {
+				connectToStageWebSocket()
+				if (connectToRemoteNecessary) {
+					clearTimeout(connectIfNecessaryTimeout)
+					connectIfNecessaryTimeout = setTimeout(connectIfNecessary, 2000)
+				}
+			} else if (connectToRemoteNecessary) {
+				connectToRemoteWebsocket()
+			}
+		}
+
+		function checkAuthenticated() {
+			if (remoteWebSocket != undefined && !remoteWebsocketConnectionState.isAuthenticated) {
+				console.log("RemoteWebSocket is still not authenticated.")
+				// Close will happen only after timeout, therefore speed things up
+				// TODO: Submit bug report to renewed vision?
+				remoteWebSocket.onclose({reason: remoteWebsocketConnectionState.error})
+				remoteWebSocket.onclose = function() {}
+				remoteWebSocket.close()
+			}
+			if (stageWebSocket != undefined && !stageWebsocketConnectionState.isAuthenticated) {
+				console.log("StageWebSocket is still not authenticated.")
+				// Close will happen only after timeout, therefore speed things up
+				// TODO: Submit bug report to renewed vision?
+				stageWebSocket.onclose({reason: stageWebsocketConnectionState.error})
+				stageWebSocket.onclose = function () {}
+				stageWebSocket.close()
+			}
+		}
+
 		function connectToRemoteWebsocket() {
+			clearTimeout(checkAuthenticatedTimeout)
+
 			remoteWebSocket = new WebSocket('ws://' + host + '/remote')
-			remoteWebSocket.onopen = function () {
-				waitingForIntialConnection = false
+			remoteWebSocket.onopen = function (ev) {
 				clearConnectionErrors() // Will be shown after timeout
 				remoteWebsocketConnectionState.isConnected = true
+				connectionStatusElement.innerText = "Connected"
+				connectionStatusElement.classList.add('success')
 
 				const password = localStorage.remoteAppPass || 'observer'
 				// Authenticating is not necessary apparently, but do it anyway :)
 				remoteWebSocket.send(Actions.authenticate(password))
 
-				// In case authenticate is not successful
-				setTimeout(function() {
-					if (!remoteWebsocketConnectionState.isAuthenticated) {
-						// Close will happen only after timeout, therefore speed things up
-						// TODO: Submit bug report to renewed vision?
-						remoteWebSocket.onclose({reason: remoteWebsocketConnectionState.error})
-						remoteWebSocket.onclose = function () {}
-						remoteWebSocket.close()
-					} else {
-						// remoteWebSocket.onclose will also call showupdateConnectionErrors
-						updateConnectionErrors()
-					}
-				}, 1000)
+				clearTimeout(checkAuthenticatedTimeout)
+				checkAuthenticatedTimeout = setTimeout(checkAuthenticated, 1000)
 
 				// The following does not give reliable info, if e.g. "quick" bible text is displayed...
 				// Also there are bugs in pro presenter 7.4 and this is wrong sometimes
 				// remoteWebSocket.send(JSON.stringify({action: 'presentationCurrent'}))
 				// remoteWebSocket.send(JSON.stringify({action: 'presentationSlideIndex'}))
-
-				connectionStatusElement.innerText = "Connected"
-				connectionStatusElement.classList.add('success')
 			}
 			remoteWebSocket.onmessage = function (ev) {
 				remoteWebSocketCloseCounter = 0
@@ -105,42 +134,31 @@ function ProPresenterConnection(stateManager, host) {
 				}
 				remoteWebSocketCloseCounter++
 				if (remoteWebSocketCloseCounter === 1) {
-					setTimeout(connectToRemoteWebsocket, 50)
+					clearTimeout(connectIfNecessaryTimeout)
+					connectIfNecessaryTimeout = setTimeout(connectIfNecessary, 50)
 				} else {
-					setTimeout(connectToRemoteWebsocket, 5000)
+					clearTimeout(connectIfNecessaryTimeout)
+					connectIfNecessaryTimeout = setTimeout(connectIfNecessary, 2000)
 				}
-				if (!waitingForIntialConnection) {
-					updateConnectionErrors()
-				}
+				updateConnectionErrors()
 			}
 		}
 
 		function connectToStageWebSocket() {
+			clearTimeout(checkAuthenticatedTimeout)
+
 			stageWebSocket = new WebSocket('ws://' + host + '/stagedisplay')
-			stageWebSocket.onopen = function () {
+			stageWebSocket.onopen = function(ev) {
 				clearConnectionErrors()
 				stageWebsocketConnectionState.isConnected = true
 
 				const password = localStorage.stageAppPass || 'stage'
 				stageWebSocket.send(Actions.ath(password))
 
-				setTimeout(function() {
-					if (!stageWebsocketConnectionState.isAuthenticated) {
-						// Close will happen only after timeout, therefore speed things up
-						// TODO: Submit bug report to renewed vision?
-						stageWebSocket.onclose({reason: stageWebsocketConnectionState.error})
-						stageWebSocket.onclose = function () {}
-						stageWebSocket.close()
-					} else {
-						// stageWebSocket.onclose will also call showupdateConnectionErrors
-						updateConnectionErrors()
-					}
-				}, 2000)
+				clearTimeout(checkAuthenticatedTimeout)
+				checkAuthenticatedTimeout = setTimeout(checkAuthenticated, 3000)
 			}
 			stageWebSocket.onmessage = function (ev) {
-				if (waitingForIntialConnection) {
-					return
-				}
 				stageWebSocketCloseCounter = 0
 				onStageWebsocketAction(ev.data)
 			}
@@ -153,18 +171,17 @@ function ProPresenterConnection(stateManager, host) {
 				}
 				stageWebSocketCloseCounter++
 				if (stageWebSocketCloseCounter === 1) {
-					setTimeout(connectToStageWebSocket, 50)
+					clearTimeout(connectIfNecessaryTimeout)
+					connectIfNecessaryTimeout = setTimeout(connectIfNecessary, 50)
 				} else {
-					setTimeout(connectToStageWebSocket, 6500)
+					clearTimeout(connectIfNecessaryTimeout)
+					connectIfNecessaryTimeout = setTimeout(connectIfNecessary, 2000)
 				}
-
+				updateConnectionErrors()
 			}
 		}
 
-		// Pro Presenter will crash if not waiting between connecting...
-		setTimeout(connectToStageWebSocket, 0)
-		// Need to connect in that order for any weird reason...
-		setTimeout(connectToRemoteWebsocket, 2000)
+		connectIfNecessaryTimeout = setTimeout(connectIfNecessary, 1000)
 	}
 
 	function onStageWebsocketAction(data_string) {
@@ -184,7 +201,9 @@ function ProPresenterConnection(stateManager, host) {
 				stageWebsocketConnectionState.error = data.err
 				break
 			case 'fv': // FrameValue
-				onNewStageDisplayFrameValue(data)
+				if (remoteWebSocket != undefined && remoteWebSocket.readyState == WebSocket.OPEN) {
+					onNewStageDisplayFrameValue(data)
+				}
 				break
 			case 'sys':
 				stateManager.onNewClock(parseInt(data.txt))
@@ -476,7 +495,7 @@ function ProPresenterConnection(stateManager, host) {
 
 	function loadPresentation(presentationPath) {
 		currentPresentationDataCache = undefined
-		if (remoteWebSocket !== undefined) {
+		if (remoteWebSocket !== undefined && remoteWebSocket.readyState == WebSocket.OPEN) {
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}
 	}

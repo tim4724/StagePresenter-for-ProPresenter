@@ -15,7 +15,7 @@ function ErrorDomUpdater() {
 		}, 5000)
 	}
 
-	function updateConnectionErrors(remoteWebsocketConnectionState,  stageWebSocketConnectionState) {
+	function updateConnectionErrors(remoteWebsocketConnectionState, stageWebSocketConnectionState) {
 		let errorMessages = []
 
 		function checkState(connectionState, name) {
