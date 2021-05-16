@@ -11,7 +11,8 @@ function WebSocketConnectionState(isConnected = false,
 		error: error
 	}
 }
-
+let remoteWebSocket = undefined
+let stageWebSocket = undefined
 function ProPresenterConnection(stateManager, host) {
 	const connectionStatusElement = document.getElementById("connectionStatus")
 	const proPresenterParser = ProPresenterParser()
@@ -24,6 +25,8 @@ function ProPresenterConnection(stateManager, host) {
 		playlistRequestAll: JSON.stringify({action: 'playlistRequestAll'}),
 		authenticate: (p) => JSON.stringify({action: 'authenticate', protocol: '740', password: p}),
 		ath: (p) => JSON.stringify({ acn: 'ath', pwd: p, ptl: 610 }),
+		stageDisplaySets: JSON.stringify({action: "stageDisplaySets"}),
+		fv: (uid) => JSON.stringify({acn:"fv", uid: uid}),
 		presentationRequest: (path, imageWidth=lowResolutionImageWidth) => JSON.stringify({
 			action: 'presentationRequest',
 			presentationPath: path,
@@ -34,13 +37,13 @@ function ProPresenterConnection(stateManager, host) {
 	let remoteWebsocketConnectionState = WebSocketConnectionState()
 	let stageWebsocketConnectionState = WebSocketConnectionState()
 
-	let remoteWebSocket = undefined
-	let stageWebSocket = undefined
+
 	let remoteWebSocketCloseCounter = 0
 	let stageWebSocketCloseCounter = 0
 
 	let currentPlaylistDataCache = undefined
 	let currentPresentationDataCache = undefined
+	let existingStageDisplayUid = undefined
 
 	let displaySlidesFromStageDisplayTimeout = undefined
 
@@ -237,11 +240,20 @@ function ProPresenterConnection(stateManager, host) {
 				remoteWebsocketConnectionState.error = data.error
 
 				remoteWebSocket.send(Actions.playlistRequestAll)
+
+				// Requests StageDisplaySets in order to get a valid stage display id
+				remoteWebSocket.send(Actions.stageDisplaySets)
 				break
 			case 'playlistRequestAll':
 				if (data_string !== currentPlaylistDataCache) {
 					currentPlaylistDataCache = data_string
 					stateManager.onNewPlaylists(proPresenterParser.parsePlaylists(data))
+				}
+				break
+			case 'stageDisplaySets':
+				console.log("stageDisplaySets", data)
+				if (data.stageLayouts.length > 0) {
+					existingStageDisplayUid = data.stageLayouts[0].stageLayoutUUID
 				}
 				break
 			case 'presentationCurrent':
@@ -413,11 +425,11 @@ function ProPresenterConnection(stateManager, host) {
 			let currentStageDisplaySlide = proPresenterParser.parseSlide(cs.text, undefined, undefined, undefined, true)
 			currentStageDisplaySlide.stageDisplayApiPresentationUid = cs.uid
 
-			let nextStageDisplaySlide
-			if (ns && ns.uid === '00000000-0000-0000-0000-000000000000'
+			let nextStageDisplaySlide = undefined
+			if (ns != undefined && ns.uid === '00000000-0000-0000-0000-000000000000'
 					&& undefinedToEmpty(ns.text).length === 0) {
 				nextStageDisplaySlide = undefined
-			} else {
+			} else if (ns != undefined) {
 				nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text, undefined, undefined, undefined, true)
 				nextStageDisplaySlide.stageDisplayApiPresentationUid = ns.uid
 			}
@@ -427,9 +439,13 @@ function ProPresenterConnection(stateManager, host) {
 			// Change current presentation
 			if (currentPresentationPath === 'stageDisplayApiPresentation' && currentPresentation != undefined) {
 				const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
-				if (allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
-					// Prepend at the start
+				if (ns != undefined && allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
 					const presentation = currentPresentation
+					if (nextStageDisplaySlide != undefined) {
+						// Update the one slide that is already in the presentation
+						presentation.groups[0].slides[0] = nextStageDisplaySlide
+					}
+					// Prepend at the start
 					const name = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
 					const newGroup = Group(name, '', [currentStageDisplaySlide])
 					presentation.groups.splice(0, 0, newGroup)
@@ -438,26 +454,41 @@ function ProPresenterConnection(stateManager, host) {
 					stateManager.onNewSlideIndex('stageDisplayApiPresentation', 0, true)
 					return
 				} else if (allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid) {
+					const presentation = currentPresentation
+					// Update the one slide that is already in the presentation
+					const lastGroup = presentation.groups[presentation.groups.length - 1]
+					lastGroup.slides[lastGroup.slides.length -1] = currentStageDisplaySlide
+
 					if (nextStageDisplaySlide !== undefined) {
 						// Append at the end of presentation
-						const presentation = currentPresentation
 						const name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
 						const newGroup = Group(name, '', [nextStageDisplaySlide])
 						presentation.groups.push(newGroup)
-						const index = allPresentationSlides.length - 1
-						stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
-						stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
-					} else {
-						// Just scroll
-						const index = allPresentationSlides.length - 1
-						stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
 					}
+					// Update presentation and scroll
+					const index = allPresentationSlides.length - 1
+					stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
+					stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
 					return
 				} else {
 					// Just scroll
-					const index = allPresentationSlides.findIndex(s => s.stageDisplayApiPresentationUid === cs.uid)
-					if (index >= 0) {
-						stateManager.onNewSlideIndex('stageDisplayApiPresentation', index, true)
+					const slideIndex = allPresentationSlides.findIndex(s => s.stageDisplayApiPresentationUid === cs.uid)
+					if (slideIndex >= 0) {
+						const presentation = currentPresentation
+						// Update the two slides of the presentation
+						var slideCounter = 0
+						for (const group of presentation.groups) {
+							for (let i = 0; i < group.slides.length; i++) {
+								if (slideCounter == slideIndex) {
+									group.slides[i] = currentStageDisplaySlide
+								} else if(slideCounter == slideIndex + 1 && nextStageDisplaySlide != undefined) {
+									group.slides[i] = nextStageDisplaySlide
+								}
+								slideCounter += 1
+							}
+						}
+						stateManager.onNewSlideIndex('stageDisplayApiPresentation', slideIndex, true)
+						stateManager.onNewPresentation(presentation, 'stageDisplayApiPresentation', false)
 						return
 					}
 				}
@@ -466,7 +497,7 @@ function ProPresenterConnection(stateManager, host) {
 			// Display a new presentation
 			const currentName = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
 			let groups = [Group(currentName, '', [currentStageDisplaySlide])]
-			if (nextStageDisplaySlide) {
+			if (nextStageDisplaySlide != undefined) {
 				const nextName = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
 				groups.push(Group(nextName, '', [nextStageDisplaySlide]))
 			}
@@ -495,16 +526,25 @@ function ProPresenterConnection(stateManager, host) {
 
 	function loadPresentation(presentationPath) {
 		currentPresentationDataCache = undefined
-		if (remoteWebSocket !== undefined
+		if (presentationPath == "stageDisplayApiPresentation") {
+			if (stageWebSocket !== undefined
+				&& stageWebSocket.readyState == WebSocket.OPEN
+				&& stageWebsocketConnectionState.isAuthenticated
+				&& existingStageDisplayUid != undefined) {
+				stageWebSocket.send(Actions.fv(existingStageDisplayUid))
+			}
+		} else if (remoteWebSocket !== undefined
 			&& remoteWebSocket.readyState == WebSocket.OPEN
-			&& remoteWebsocketConnectionState.isAuthenticated) {
+			&& remoteWebsocketConnectionState.isAuthenticated
+			&& presentationPath != undefined
+			&& presentationPath.length > 0) {
+			// If the presentationPath is an empty string, ProPresenter will crash always
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}
 	}
 	return {
 		connect: connect,
 		loadPresentation: loadPresentation,
- 		// TODO: test reloadCurrentPresentation
 		reloadCurrentPresentation: () => loadPresentation(stateManager.getCurrentPresentationPath())
 	}
 }
