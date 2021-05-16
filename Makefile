@@ -12,23 +12,28 @@ packageAll: icns
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
 
-distribution: icns
+development: icns
 	@echo "--- Packaging x64 application ---"
-	electron-packager stagepresenter \
-		--platform darwin \
-		--arch x64 \
-		--overwrite \
+	electron-packager stagepresenter  --platform=darwin --arch=x64 --overwrite \
 		--icon build/icon.icns \
-		--app-bundle-id "com.stagepresenter" \
-		--out "build" \
-		--osxSign entitlements="entitlements.distribution.plist"
-		--osxNotarize appBundleId="com.stagepresenter"
-
-	@echo "--- Creating x64 signed installer ---"
-	productbuild --component "build/StagePresenter-darwin-x64/StagePresenter.app" \
-		/Applications \
-		--sign "Developer ID Installer: Tim Vogel (5ZH48MPAM3)" \
-		"build/StagePresenter-darwin-x64/StagePresenter.pkg"
+		--app-bundle-id="com.stagepresenter" \
+		--out "build"
+	@echo "--- Packaging arm64 application ---"
+	electron-packager stagepresenter  --platform=darwin --arch=arm64 --overwrite \
+		--icon build/icon.icns \
+		--app-bundle-id="com.stagepresenter" \
+		--out "build"
+	@echo "--- Merge x64 and arm64 application ---"
+	node -e "async function main() {await require('@electron/universal').makeUniversalApp({ \
+			x64AppPath: process.cwd() + '/build/StagePresenter-darwin-x64/StagePresenter.app', \
+			arm64AppPath: process.cwd() + '/build/StagePresenter-darwin-arm64/StagePresenter.app', \
+			outAppPath: process.cwd() + '/build/StagePresenter-darwin-universal/StagePresenter.app', \
+			force: true})}; main();"
+	@echo "--- Signing universal application ---"
+	electron-osx-sign "build/StagePresenter-darwin-universal/StagePresenter.app" \
+		--platform=darwin \
+		--type=development \
+		--provisioning-profile="StagePresenter_Development_Tims_MacBook_Pro.provisionprofile"
 
 appstore: icns
 	@echo "--- Packaging x64 application ---"
@@ -36,18 +41,29 @@ appstore: icns
 		--icon build/icon.icns \
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
-	@echo "--- Signing x64 application ---"
-	electron-osx-sign "build/StagePresenter-mas-x64/StagePresenter.app" \
+	@echo "--- Packaging arm64 application ---"
+	electron-packager stagepresenter  --platform=mas --arch=arm64 --overwrite \
+		--icon build/icon.icns \
+		--app-bundle-id="com.stagepresenter" \
+		--out "build"
+	@echo "--- Merge x64 and arm64 application ---"
+	node -e "async function main() {await require('@electron/universal').makeUniversalApp({ \
+			x64AppPath: process.cwd() + '/build/StagePresenter-mas-x64/StagePresenter.app', \
+			arm64AppPath: process.cwd() + '/build/StagePresenter-mas-arm64/StagePresenter.app', \
+			outAppPath: process.cwd() + '/build/StagePresenter-mas-universal/StagePresenter.app', \
+			force: true})}; main();"
+	@echo "--- Signing universal application ---"
+	electron-osx-sign "build/StagePresenter-mas-universal/StagePresenter.app" \
 		--platform=mas \
 		--type=distribution \
 		--hardened-runtime \
 		--entitlements="entitlements.mas.plist" \
 		--provisioning-profile="StagePresenter_AppStore.provisionprofile"
-	@echo "--- Creating x64 signed installer ---"
-	productbuild --component "build/StagePresenter-mas-x64/StagePresenter.app" \
+	@echo "--- Creating signed installer for universal application ---"
+	productbuild --component "build/StagePresenter-mas-universal/StagePresenter.app" \
 		/Applications \
 		--sign "3rd Party Mac Developer Installer: Tim Vogel (5ZH48MPAM3)" \
-		"build/StagePresenter-mas-x64/StagePresenter.pkg"
+		"build/StagePresenter-mas-universal/StagePresenter.pkg"
 
 icns:
 	@echo "--- Creating iconset and icns icon ---"
