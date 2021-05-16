@@ -16,12 +16,12 @@
 	<div id="appNameSubtitle">for ProPresenter</div>
 </header>
 
-<video id="vid" muted poster="StagePresenter_demo_poster.jpeg">
+<video id="demoVideo" muted poster="StagePresenter_demo_poster.jpeg">
   <source src="StagePresenter_demo2.mp4" type="video/mp4">
 </video>
 
 <script>
-	const videoElement = document.getElementById('vid')
+	const videoElement = document.getElementById('demoVideo')
 	setTimeout(function() { videoElement.play() }, 2000)
 	setTimeout(function() { videoElement.setAttribute("controls", true) }, 5000)
 </script>
@@ -50,6 +50,13 @@
 		</div>
 	</div>
 </main>
+
+<section class="descriptionItem">
+	<h2>Easy Setup</h2>
+	<video id="vid" muted controls>
+	  <source src="StagePresenter_setup.mp4" type="video/mp4">
+	</video>
+</section>
 
 <section class="descriptionItem">
 	<h2>The Source Code is available on Github</h2>

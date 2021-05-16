@@ -90,14 +90,17 @@ a.button {
 	height: 64px;
 }
 
-video {
+#demoVideo {
+	margin-top: -64px;
 	padding: 2px;
+	border: 2px solid black;
+}
+
+video {
 	background: #000000;
 	display: block;
-	margin-top: -64px;
 	margin-left: auto;
 	margin-right: auto;
-	border: 2px solid black;
 	width: 100%;
 	max-width: 1024px;
 	height: auto;
