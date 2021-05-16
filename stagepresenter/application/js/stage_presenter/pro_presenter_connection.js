@@ -495,7 +495,9 @@ function ProPresenterConnection(stateManager, host) {
 
 	function loadPresentation(presentationPath) {
 		currentPresentationDataCache = undefined
-		if (remoteWebSocket !== undefined && remoteWebSocket.readyState == WebSocket.OPEN) {
+		if (remoteWebSocket !== undefined
+			&& remoteWebSocket.readyState == WebSocket.OPEN
+			&& remoteWebsocketConnectionState.isAuthenticated) {
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}
 	}

@@ -94,8 +94,7 @@ function LocalStorageObserver(localStorageChanged,
 
 		const importantFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages']
 		if (importantFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
-				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold
-				|| customCSS !== localStorage.customCSS) {
+				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold) {
 			reloadPresentationCallback()
 		}
 
@@ -104,5 +103,10 @@ function LocalStorageObserver(localStorageChanged,
 		customCSS = localStorage.customCSS
 	}
 
-	requestAnimationFrame(update)
+	requestAnimationFrame(function() {
+		update()
+		// Do note reload presentation on initial load...
+		clearTimeout(reloadPresentationTimeout)
+		clearTimeout(localStorageChangedCallbackTimeout)
+	})
 }
