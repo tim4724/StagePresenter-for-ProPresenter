@@ -443,6 +443,7 @@ function ProPresenterConnection(stateManager, host) {
 					const presentation = currentPresentation
 					if (nextStageDisplaySlide != undefined) {
 						// Update the one slide that is already in the presentation
+						presentation.groups[0].name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
 						presentation.groups[0].slides[0] = nextStageDisplaySlide
 					}
 					// Prepend at the start
@@ -457,6 +458,7 @@ function ProPresenterConnection(stateManager, host) {
 					const presentation = currentPresentation
 					// Update the one slide that is already in the presentation
 					const lastGroup = presentation.groups[presentation.groups.length - 1]
+					lastGroup.name = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
 					lastGroup.slides[lastGroup.slides.length -1] = currentStageDisplaySlide
 
 					if (nextStageDisplaySlide !== undefined) {
@@ -480,8 +482,10 @@ function ProPresenterConnection(stateManager, host) {
 						for (const group of presentation.groups) {
 							for (let i = 0; i < group.slides.length; i++) {
 								if (slideCounter == slideIndex) {
+									group.name = proPresenterParser.parseGroupName(currentStageDisplaySlide.label)
 									group.slides[i] = currentStageDisplaySlide
 								} else if(slideCounter == slideIndex + 1 && nextStageDisplaySlide != undefined) {
+									group.name = proPresenterParser.parseGroupName(nextStageDisplaySlide.label)
 									group.slides[i] = nextStageDisplaySlide
 								}
 								slideCounter += 1
