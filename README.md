@@ -31,7 +31,7 @@ If possible the complete verse, chorus or bridge is on the screen, since they ge
 :-------------------------:|:-------------------------:
 Bible passages ![](/readme_res/StagePresenter_Bible.png?raw=true) | Countdowns, Timers and Stage-Messages ![](/readme_res/StagePresenter_Timer-and-Stagemessage.png?raw=true)
 Optional sidebar with playlist and preview ![](/readme_res/StagePresenter_Song_Playlist.png?raw=true) | Video with Countdown ![](/readme_res/StagePresenter_Video.png?raw=true)
-Any screen orientation ![](/readme_res/StagePresenter_Portrait.png?raw=true) | Slides with images ![](/readme_res/StagePresenter_Slide_Image.png?raw=true)
+Any screen orientation ![](/readme_res/StagePresenter_Portrait.png?raw=true) | Slides with images ![](/readme_res/Stagepresenter_Slide_Image.png?raw=true)
 Extensive settings ![](/readme_res/StagePresenter_Settings.png?raw=true) | Small Controller window ![](/readme_res/StagePresenter_Controller.png?raw=true) Display the next song or slide ahead of time for the people on the stage. |
 
 ## Planned features / improvements
