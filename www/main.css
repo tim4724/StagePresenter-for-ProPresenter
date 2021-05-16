@@ -96,6 +96,10 @@ a.button {
 	border: 2px solid black;
 }
 
+#setupVideo {
+	margin-top: 24px;
+}
+
 video {
 	background: #000000;
 	display: block;
