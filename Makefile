@@ -12,12 +12,25 @@ packageAll: icns
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
 
+distribution: icns
+	@echo "--- Packaging x64 application ---"
+	electron-packager stagepresenter \
+		--platform darwin \
+		--arch x64 \
+		--overwrite \
+		--icon build/icon.icns \
+		--app-bundle-id "com.stagepresenter" \
+		--out "build" \
+		--osxSign entitlements="entitlements.distribution.plist"
+		--osxNotarize appBundleId="com.stagepresenter"
+
+	@echo "--- Creating x64 signed installer ---"
+	productbuild --component "build/StagePresenter-darwin-x64/StagePresenter.app" \
+		/Applications \
+		--sign "Developer ID Installer: Tim Vogel (5ZH48MPAM3)" \
+		"build/StagePresenter-darwin-x64/StagePresenter.pkg"
+
 appstore: icns
-	rm -rf build/icon.iconset/
-	mkdir build/icon.iconset/
-	convert icon.png -resize 1024x1024 build/icon.iconset/icon512x512@2x.png
-	convert icon.png -resize 512x512 build/icon.iconset/icon512x512.png
-	iconutil -c icns build/icon.iconset
 	@echo "--- Packaging x64 application ---"
 	electron-packager stagepresenter  --platform=mas --arch=x64 --overwrite \
 		--icon build/icon.icns \
@@ -27,6 +40,7 @@ appstore: icns
 	electron-osx-sign "build/StagePresenter-mas-x64/StagePresenter.app" \
 		--platform=mas \
 		--type=distribution \
+		--hardened-runtime \
 		--entitlements="entitlements.mas.plist" \
 		--provisioning-profile="StagePresenter_AppStore.provisionprofile"
 	@echo "--- Creating x64 signed installer ---"
@@ -47,4 +61,4 @@ favicon:
 	convert icon.png -crop 896x896+64+64 -define icon:auto-resize=256,128,64,32,16 "www/favicon.ico"
 
 resize:
-	# convert readme_res/StagePresenter_Portrait.png -resize 2880x1800 readme_res/StagePresenter_Portrait.png
+	convert readme_res/StagePresenter_Welcome_mac.png -resize 2880x1800 readme_res/StagePresenter_Welcome_mac.png

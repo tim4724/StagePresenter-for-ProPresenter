@@ -1,6 +1,6 @@
 {
     "name": "StagePresenter",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "A better stage monitor",
     "main": "main.js",
     "scripts": {
