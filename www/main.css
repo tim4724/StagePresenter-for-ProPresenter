@@ -1,6 +1,6 @@
 html {
 	box-sizing: border-box;
-	font-family: "Lato", 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-family: "Montserrat", 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	font-size: 18px;
 }
 
@@ -12,11 +12,10 @@ body {
 	background: #111111;
 	color: #ffffff;
 	margin: 0;
+	font-size: 18px;
 }
 
 header {
-	font-family: "Montserrat", sans-serif;
-	font-weight: 400;
 	text-align: center;
 	padding: 128px 16px;
 	background-color: #4497f8;
@@ -40,53 +39,55 @@ p {
 	line-height: 1.7;
 }
 
-.descriptionItem h1 {
+.descriptionItem h1, .descriptionItem h2 {
 	margin: 16px 0 12px;
-	font-family: "Montserrat", sans-serif;
-}
-
-.descriptionItem h2 {
-	margin: 16px 0 12px;
-	font-family: "Montserrat", sans-serif;
 }
 
 .descriptionItem {
 	margin: 8px auto;
-	padding: 24px 16px;
+	padding: 8px 16px;
 	max-width: 1024px;
 }
 
 .descriptionItem .primaryContent, .descriptionItem .secondaryContent {
-	margin: 10px 0 0;
-}
-
-.descriptionItem .secondaryContent {
-	color: #d0d0d0;
+	margin: 12px 0 12px;
 }
 
 a {
-	color: #d0d0d0;
-	text-decoration: inherit;
+	color: #ffffff;
+	text-decoration: underline;
 }
 
 a:hover {
-	color: #ffffff;
+	opacity: 0.85;
 }
 
 a.button {
-	display: inline-block;
-	padding: 16px;
+	padding-left: 16px;
+	padding-right: 16px;
+	height: 64px;
 	color: #000000;
-	background: #eeeeee;
-	font-family: "Montserrat", sans-serif;
+	background: #ffffff;
+	display: flex;
+    align-items: center;
+	text-decoration: inherit;
 }
 
-a.button:hover {
-	background: #aaa;
+.actions {
+	display: flex;
+    justify-content: space-evenly;
+	padding-left: 64px;
+	padding-right: 64px;
+	gap: 32px;
 }
 
-#startDemoWrapper {
-	text-align: center;
+.buttonWrapper {
+	display: inline-block;
+	margin: 12px 0;
+}
+
+#downloadAppStore img {
+	height: 64px;
 }
 
 video {
@@ -113,10 +114,7 @@ footer {
 
 footer a {
 	color: #111111;
-}
-
-footer a:hover {
-	color: #aaa;
+	text-decoration: underline;
 }
 
 @media (max-width: 800px) {
