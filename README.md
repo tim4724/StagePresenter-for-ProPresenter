@@ -1,14 +1,24 @@
 
 # ![Icon](/readme_res/icon64x64.png?raw=true) StagePresenter for ProPresenter
 
+Visit the Website over at [stagepresenter.com](https://stagepresenter.com/)
+
 A better Stage Display for ProPresenter 7.
-An electron application that automatically synchronizes with ProPresenter
-and displays Presentations, Playlists, Slide-Previews, Timers, Countdowns and Stage-Messages.
+An electron application that connects to ProPresenter 7 and
+displays Presentations, Playlists, Slide-Previews, Timers, Countdowns and Stage-Messages.
 
 https://user-images.githubusercontent.com/15907780/117730049-0b9a6c80-b1ec-11eb-83d4-a6ff259b55de.mp4
 
-StagePresenter can be used on the same machine, where ProPresenter is running.
-It can also be installed on a different machine on the same network.
+StagePresenter can be used on the same computer, where ProPresenter is running.
+But it can also be installed on a different computer on the same network.
+
+## Download
+
+Download on the [Mac App Store](https://apps.apple.com/us/app/stagepresenter/id1566729423)
+
+## Try it in the Browser
+
+Visit [https://stagepresenter.com](https://stagepresenter.com/) to try directly in the browser (Chrome is recommended).
 
 ## Screenshots
 
@@ -24,17 +34,11 @@ Optional sidebar with playlist and preview ![](/readme_res/StagePresenter_Song_P
 Any screen orientation ![](/readme_res/StagePresenter_Portrait.png?raw=true) | Slides with images ![](/readme_res/StagePresenter_Slide_Image.png?raw=true)
 Extensive settings ![](/readme_res/StagePresenter_Settings.png?raw=true) | Small Controller window ![](/readme_res/StagePresenter_Controller.png?raw=true) Display the next song or slide ahead of time for the people on the stage. |
 
-## Download
-
-Go to [Releases](https://github.com/tim4724/StagePresenter-for-ProPresenter/releases)
-
 ## Planned features / improvements
-- Auto update for the application
 - Operator Preview window
-- Descriptions, help and tips in the settings
-- Windows and Linux support
-- Option to test the application directly in the browser
-- Release in apple app store
+- Add Descriptions, help and tips in the settings
+- Windows and Linux support?
+- Native Apple-M1 support
 
 ## I noticed a bug / I have an idea for an awesome feature
 Please let me know if you notice a bug.
