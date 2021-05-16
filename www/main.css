@@ -73,6 +73,10 @@ a.button {
 	text-decoration: inherit;
 }
 
+#paypalLogo {
+	height: 42px;
+}
+
 .actions {
 	display: flex;
     justify-content: space-evenly;
