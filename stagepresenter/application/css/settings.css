@@ -117,11 +117,30 @@ main {
 	float: right;
 }
 
+#useChromeWarning {
+	text-align: center;
+	margin: 8px;
+	color: #b98b00;
+}
+
+.nonElectron #useChromeWarning {
+	display: block;
+}
+
+.onlyChromeSupportedHint {
+	display: none;
+}
+
+.nonElectron .onlyChromeSupportedHint {
+	display: inline;
+	opacity: 0.7;
+}
+
 .warning {
 	color: #b98b00;
 }
 
-.errorResult {
+.errorResult, #useChromeWarning.errorResult {
 	color: #ff0000;
 }
 

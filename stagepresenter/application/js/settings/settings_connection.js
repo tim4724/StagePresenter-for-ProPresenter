@@ -20,8 +20,11 @@ function ConnectionSettings() {
 	const resetButton = document.getElementById('resetButton')
 
 	const electronAppSettingsElement = document.getElementById('electronAppSettings')
+	const useChromeWarningElement = document.getElementById("useChromeWarning")
+
 
 	if (!runningInElectron) {
+		document.body.classList.add("nonElectron")
 		if (!isSettingsWindow) {
 			testConnectionButton.innerText = "Test Connection and Start"
 		}
@@ -29,7 +32,6 @@ function ConnectionSettings() {
 		const doneButton = document.getElementById("doneButton")
 		doneButton.style.display = "none"
 	}
-
 	let connectTimeout = undefined
 	let changed = false
 
@@ -63,7 +65,12 @@ function ConnectionSettings() {
 			testConnectionButton.disabled = runningInElectron || isSettingsWindow
 			remoteAppPassElement.disabled = true
 			stageAppPassElement.disabled = true
+			useChromeWarningElement.classList.remove("errorResult")
 		} else {
+			if (/Chrome/.test(navigator.userAgent) == false) {
+				useChromeWarningElement.classList.add("errorResult")
+			}
+
 			const ipAddress = ipAddressElement.value
 			if (ipAddress === 'localhost') {
 				modeDemoElement.checked = false
@@ -128,10 +135,13 @@ function ConnectionSettings() {
 			webSocket.onclose = function() {}
 			webSocket.close()
 
-			if (!runningInElectron && !isSettingsWindow) {
+			if (!runningInElectron
+				&& !isSettingsWindow
+				&& remoteConnectionResultElement.classList.contains('successResult')
+				&& stageConnectionResultElement.classList.contains('successResult')) {
 				setTimeout(function() {
 					location.href = "stagePresenter.html"
-				}, 2000)
+				}, 500)
 			}
 		}
 

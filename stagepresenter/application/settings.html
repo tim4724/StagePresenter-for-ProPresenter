@@ -42,7 +42,7 @@
 		    </div>
 
 		    <div class='setting'>
-		        <div><label class='radioLabel'>
+				<div><label class='radioLabel'>
 		            <input id='demoMode' type='radio' name='demoMode'
 		                checked=true
 		                onchange='connectionSettings.selectModeDemo()'>
@@ -54,12 +54,14 @@
 		                onchange='connectionSettings.selectModeLocal()'>
 		            <span class='radio'></span>
 		            Connect to ProPresenter instance on this computer
+					<span class="onlyChromeSupportedHint">(Only supported in Google Chrome)</span>
 		        </label></div>
 		        <div><label class='radioLabel'>
 		            <input id='remoteMode' type='radio' name='remoteMode'
 		                onchange='connectionSettings.selectModeRemote()'>
 		            <span class='radio'></span>
 		            Connect to ProPresenter instance on another computer
+					<span class="onlyChromeSupportedHint">(Only supported in Google Chrome)</span>
 		        </label></div>
 		    </div>
 
@@ -86,6 +88,10 @@
 		                oninput='connectionSettings.onInputChanged()'>
 		        <span id='stageAppConnectionResult'></span>
 		    </div>
+
+			<div id="useChromeWarning" class="onlyChromeSupportedHint">
+				&#9888; Only Google Chrome is supported!
+			</div>
 
 		    <button id='connectButton'
 		            onclick='connectionSettings.connect()'>
