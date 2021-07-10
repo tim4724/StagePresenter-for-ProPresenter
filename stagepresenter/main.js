@@ -188,7 +188,6 @@ function createSettingsWindow () {
 		title: 'Stagemonitor Settings',
 		width: 1200,
 		height: 800,
-		center: true,
 		fullscreenable: false,
 		maximizable: false,
 		webPreferences: {
@@ -198,11 +197,6 @@ function createSettingsWindow () {
 		}
 	})
 	settingsWindow.loadFile(`${__dirname}/application/settings.html`)
-	/*
-	settingsWindow.webContents.on('new-window', function(e, url) {
-	  e.preventDefault();
-	  shell.openExternal(url);
-  });*/
 	settingsWindow.webContents.setWindowOpenHandler(({ url }) => {
 		shell.openExternal(url)
 		return { action: 'deny' }
