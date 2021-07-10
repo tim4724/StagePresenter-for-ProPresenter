@@ -308,6 +308,14 @@
 				</div>
 
 				<div class='setting'>
+					Clock mode
+					<select id='clockMode' onchange='stagemonitorSettings.selectChanged(this)'>
+						<option value=''>Show clock with seconds (hh:mm:ss)</option>
+						<option value='clockWithoutSeconds'>Show clock without seconds (hh:mm)</option>
+				   </select>
+				</div>
+
+				<div class='setting'>
 					<span class='settingText'>
 						Playlist Font-Size
 					</span>

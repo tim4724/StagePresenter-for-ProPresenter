@@ -8,6 +8,7 @@ function StageMonitorSettings() {
 	const previewCheckboxInput = document.getElementById('showSmallSlidePreview')
 	const playlistCheckboxInput = document.getElementById('showPlaylist')
 	const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
+	const clockModeInput = document.getElementById('clockMode')
 	const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
 	const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
 	const inputs = stagePresenterSettings.querySelectorAll('input, textarea')
@@ -92,6 +93,13 @@ function StageMonitorSettings() {
 		}
 
 		for (const option of showSidebar.options) {
+			if (features.includes(option.value)) {
+				option.selected = true;
+				break;
+			}
+		}
+
+		for (const option of clockMode.options) {
 			if (features.includes(option.value)) {
 				option.selected = true;
 				break;

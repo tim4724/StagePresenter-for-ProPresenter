@@ -208,6 +208,10 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 	background: inherit;
 }
 
+.clockWithoutSeconds #clockSeconds {
+	display: none;
+}
+
 #clockSeconds {
 	padding-left: 0.1em;
 	padding-right: 0em;
