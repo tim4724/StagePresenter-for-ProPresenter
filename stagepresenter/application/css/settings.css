@@ -117,6 +117,17 @@ main {
 	float: right;
 }
 
+.left {
+	float: left;
+}
+
+.subText {
+	opacity: 0.8;
+	font-size: 0.9em;
+	margin: 16px;
+	display: inline-block;
+}
+
 #useChromeWarning {
 	text-align: center;
 	margin: 8px;
@@ -187,4 +198,13 @@ input[type="text"], input[type="number"] {
 
 textarea {
 	resize: vertical;
+}
+
+a {
+	color: #ffffff;
+	text-decoration: underline;
+}
+
+a:hover {
+	opacity: 0.85;
 }

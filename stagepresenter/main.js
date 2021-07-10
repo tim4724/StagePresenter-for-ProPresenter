@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu } = require('electron')
+const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu, shell }
+	= require('electron')
 
 // App Icon color: #3478F6 - #53B6F9
 // App Icon middle color: #4497f8
@@ -197,6 +198,15 @@ function createSettingsWindow () {
 		}
 	})
 	settingsWindow.loadFile(`${__dirname}/application/settings.html`)
+	/*
+	settingsWindow.webContents.on('new-window', function(e, url) {
+	  e.preventDefault();
+	  shell.openExternal(url);
+  });*/
+	settingsWindow.webContents.setWindowOpenHandler(({ url }) => {
+		shell.openExternal(url)
+		return { action: 'deny' }
+	});
 	settingsWindow.once('closed', function (ev) {
 		checkIfShouldQuit()
 	})

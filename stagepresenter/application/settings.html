@@ -319,21 +319,28 @@
 				</div>
 
 				<div class='setting'>
-					<span class='settingText'>
+					<span class='settingText left'>
 						Custom CSS
+						<br>
+						<span class="subText">For developers that know html and css.<br>
+							<a href="https://github.com/tim4724/StagePresenter-for-ProPresenter/tree/main/stagepresenter/application"
+								target="_blank">
+								Link to Github Repository
+							</a>
+						</span>
 					</span>
 
 					<textarea id="customCSS" class="right" name="customCSS" rows="6" cols="60"
 						placeholder="/*For advanced layout customizing. E.g.*/
 
 .group {
-	border-radius: 8px;
+    border-radius: 8px;
 }
 .groupName { color: #6b63e0; }
 .lineNumber { color: #6b63e0; }
 #clock {
-	background: #ffffff;
-	color: #000000;
+    background: #ffffff;
+    color: #000000;
 }"
 						onchange='stagemonitorSettings.inputChanged(this)'></textarea>
 				</div>
