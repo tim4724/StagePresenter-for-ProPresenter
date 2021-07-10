@@ -250,7 +250,6 @@ async function createOperatorWindow () {
 		if (stagePresenterWindow != undefined && !stagePresenterWindow.isDestroyed()) {
 			const stagePresenterBounds = stagePresenterWindow.getBounds()
 			const intersectAmount = rectIntersectionAmount(stagePresenterBounds, b)
-			console.log("intersectAmount with stagePresenterBounds", intersectAmount)
 			intersectsWithStagePresenterWindow = intersectAmount > 0
 		}
 		if (!intersectsWithStagePresenterWindow) {

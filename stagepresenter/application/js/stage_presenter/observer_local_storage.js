@@ -26,7 +26,7 @@ function LocalStorageObserver(localStorageChanged,
 
 	function update() {
 		if (localStorage.features === undefined) {
-			// as also defined in settings_stagemonitor.js 
+			// as also defined in settings_stagemonitor.js
 			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
@@ -78,9 +78,18 @@ function LocalStorageObserver(localStorageChanged,
 		if (fontSizesStyle.length > 0) {
 			style.appendChild(document.createTextNode(fontSizesStyle))
 		}
+
+		if (localStorage.previewImageHeight) {
+			const heightInPx = parseInt(localStorage.previewImageHeight)
+			if(Number.isInteger(heightInPx)) {
+				style.appendChild(document.createTextNode(
+					".group img {height: " + heightInPx + "px;}"))
+			}
+		}
 		if (localStorage.customCSS) {
 			style.appendChild(document.createTextNode(localStorage.customCSS))
 		}
+
 
 		window.dispatchEvent(new Event('styleChanged'))
 
