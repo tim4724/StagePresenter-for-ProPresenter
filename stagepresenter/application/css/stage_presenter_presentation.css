@@ -42,6 +42,8 @@
 .group img {
 	height: 240px;
 	opacity: 0.25;
+	display: block;
+	margin: auto;
 }
 
 .currentGroup .currentSlide img {
