@@ -34,7 +34,7 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers) {
+function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled=true) {
 	return {
 		rawText: rawText,
 		previewImage: previewImage,
@@ -42,7 +42,8 @@ function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineN
 		label: label,
 		color: color,
 		isBiblePassage: isBiblePassage,
-		lineNumbers: lineNumbers
+		lineNumbers: lineNumbers,
+		enabled: enabled
 	}
 }
 
@@ -73,7 +74,7 @@ function ProPresenterParser() {
 	}
 
 	function parseSlide(rawText, label, color, previewImage = undefined,
-						assumeIsBiblePassage = false) {
+						assumeIsBiblePassage = false, enabled = true) {
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
@@ -228,7 +229,7 @@ function ProPresenterParser() {
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
@@ -238,7 +239,7 @@ function ProPresenterParser() {
 					lines[i] = lines[i].trim()
 				}
 			}
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined, enabled)
 		}
 	}
 
@@ -295,7 +296,8 @@ function ProPresenterParser() {
 					slide.slideLabel,
 					asCSSColor(slide.slideColor),
 					slide.slideImage,
-					isBiblePresentation || isBibleGroup
+					isBiblePresentation || isBibleGroup,
+					slide.slideEnabled
 				)
 
 				if (splitSlidesInGroups) {

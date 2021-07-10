@@ -26,7 +26,8 @@ function LocalStorageObserver(localStorageChanged,
 
 	function update() {
 		if (localStorage.features === undefined) {
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
+			// as also defined in settings_stagemonitor.js 
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150

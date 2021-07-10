@@ -61,6 +61,13 @@
 	border-width: 0;
 }
 
+.doNotShowDisabledSlides .slide.slideNotEnabled,
+.doNotShowDisabledSlides .group.groupNotEnabled {
+	visibility: hidden;
+	height: 0;
+	min-height: 0;
+}
+
 .group.onlyGroup .slide.onlySlide {
 	border-style: none;
 	background: #000000;

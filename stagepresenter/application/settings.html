@@ -256,6 +256,19 @@
 
 					</label>
 				</div>
+
+				<div class='setting'>
+					<span class='settingText'>
+						Do not show disabled slides
+					</span>
+
+					<label class='switch right'>
+						<input id='doNotShowDisabledSlides' type='checkbox'
+							onchange='stagemonitorSettings.checkBoxChanged(this)'>
+						<span class='slider'></span>
+					</label>
+				</div>
+
 			</section>
 
 			<section class='settingGroup'>
@@ -312,15 +325,16 @@
 
 					<textarea id="customCSS" class="right" name="customCSS" rows="6" cols="60"
 						placeholder="/*For advanced layout customizing. E.g.*/
-	.group {
-		border-radius: 8px;
-	}
-	.groupName { color: #6b63e0; }
-	.lineNumber { color: #6b63e0; }
-	#clock {
-		background: #ffffff;
-		color: #000000;
-	}"
+
+.group {
+	border-radius: 8px;
+}
+.groupName { color: #6b63e0; }
+.lineNumber { color: #6b63e0; }
+#clock {
+	background: #ffffff;
+	color: #000000;
+}"
 						onchange='stagemonitorSettings.inputChanged(this)'></textarea>
 				</div>
 			</section>

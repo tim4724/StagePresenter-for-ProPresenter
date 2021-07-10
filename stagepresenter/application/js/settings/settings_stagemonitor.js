@@ -68,7 +68,8 @@ function StageMonitorSettings() {
 
 	function initInputs() {
 		if (localStorage.features === undefined) {
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide'
+			// as also defined in observer local storage
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150

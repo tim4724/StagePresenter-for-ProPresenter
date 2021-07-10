@@ -171,12 +171,19 @@ function PresentationDomUpdater() {
 		if (group.hasLongTextLines) {
 			groupElement.classList.add('groupWithText')
 		}
+
+		let allSlidesNotEnabled = true;
 		for (const slide of group.slides) {
 			const slideElement = document.createElement('div')
 			slideElement.classList.add('slide')
 
 			if (group.slides.length == 1) {
-				slideElement.classList.add('onlySlide')	
+				slideElement.classList.add('onlySlide')
+			}
+			if(slide.enabled === false) {
+				slideElement.classList.add('slideNotEnabled')
+			} else {
+				allSlidesNotEnabled = false;
 			}
 
 			for (let i = 0; i < slide.lines.length; i++) {
@@ -221,6 +228,9 @@ function PresentationDomUpdater() {
 				slideElement.classList.add('biblePassage')
 			}
 			groupElement.appendChild(slideElement)
+		}
+		if (allSlidesNotEnabled == true) {
+			groupElement.classList.add('groupNotEnabled')
 		}
 		if (group.slides.length <= 0) {
 			groupElement.classList.add('emptyGroup')
