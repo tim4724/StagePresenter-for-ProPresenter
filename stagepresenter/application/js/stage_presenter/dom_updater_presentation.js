@@ -169,7 +169,7 @@ function PresentationDomUpdater() {
 		groupElement.appendChild(groupNameElement)
 
 		if (group.hasLongTextLines) {
-			groupElement.classList.add('groupWithLongText')
+			groupElement.classList.add('groupWithText')
 		}
 		for (const slide of group.slides) {
 			const slideElement = document.createElement('div')
@@ -182,12 +182,13 @@ function PresentationDomUpdater() {
 				const lineSpan = document.createElement('span')
 				lineSpan.classList.add('line')
 
-				const bibleVerseNumber = (slide.bibleVerseNumbers || [])[i]
-				if (bibleVerseNumber && bibleVerseNumber.length > 0){
+				const lineNumber = (slide.lineNumbers || [])[i]
+				if (lineNumber && lineNumber.length > 0){
 					const bibleVerseSpan = document.createElement('span')
-					bibleVerseSpan.innerText = bibleVerseNumber
-					bibleVerseSpan.classList.add('bibleVerseNumber')
+					bibleVerseSpan.innerText = lineNumber
+					bibleVerseSpan.classList.add('lineNumber')
 					lineSpan.appendChild(bibleVerseSpan)
+					groupElement.classList.add('groupWithText')
 				}
 
 				const textSpan = document.createElement('span')

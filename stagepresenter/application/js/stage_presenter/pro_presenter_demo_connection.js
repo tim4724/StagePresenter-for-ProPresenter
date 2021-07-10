@@ -52,7 +52,7 @@ function ProPresenterDemoConnection(stateManager) {
 						"lines": ["For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."],
 						"label": "John 3:16",
 						"isBiblePassage": true,
-						"bibleVerseNumbers": ["16"]
+						"lineNumbers": ["16"]
 					}
 				],
 				"hasLongTextLines": true

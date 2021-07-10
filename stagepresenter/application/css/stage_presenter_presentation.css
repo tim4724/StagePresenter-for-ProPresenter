@@ -58,11 +58,11 @@
 	border-width: 0;
 }
 
-.groupWithLongText .slide .text, .slide.biblePassage .text {
+.groupWithText .slide .text, .slide.biblePassage .text {
 	padding: 8px 0;
 }
 
-.groupWithLongText, .slide.biblePassage {
+.groupWithText, .slide.biblePassage {
 	text-align: start;
 }
 
@@ -74,7 +74,7 @@
 	min-height: 1em;
 }
 
-.groupWithLongText .slide .line, .slide.biblePassage .line {
+.groupWithText .slide .line, .slide.biblePassage .line {
 	margin-top: 0.125em;
 	margin-bottom: 0.125em;
 }
@@ -95,11 +95,12 @@
 }
 
 .flexibleSlides .slide.biblePassage .line,
-.flexibleSlides .groupWithLongText .slide .line {
+.flexibleSlides .slide .lineWithNumber,
+.flexibleSlides .groupWithText .slide .line {
 	display: block;
 }
 
-.bibleVerseNumber {
+.lineNumber {
 	color: #ffde3b;
 	margin-right: 0.25em;
 	font-size: 0.8em;

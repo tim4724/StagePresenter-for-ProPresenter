@@ -34,7 +34,7 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(rawText, previewImage, lines, label, color, isBiblePassage, bibleVerseNumbers) {
+function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers) {
 	return {
 		rawText: rawText,
 		previewImage: previewImage,
@@ -42,7 +42,7 @@ function Slide(rawText, previewImage, lines, label, color, isBiblePassage, bible
 		label: label,
 		color: color,
 		isBiblePassage: isBiblePassage,
-		bibleVerseNumbers: bibleVerseNumbers
+		lineNumbers: lineNumbers
 	}
 }
 
@@ -199,16 +199,16 @@ function ProPresenterParser() {
 			}
 			lines = fixNewLineOfBiblePassage(lines)
 
-			let bibleVerseNumbers = undefined
+			let lineNumbers = undefined
 			let firstVerseNumber = undefined
 			let lastVerseNumber = undefined
 
 			const verseNumberRegex = /^(\d+)([^\d\n\r].*$)/
 			if (lines.some(l => verseNumberRegex.test(l))) {
-				bibleVerseNumbers = []
+				lineNumbers = []
 				for (let i = 0; i < lines.length; i++) {
 					if (bibleReferenceRegex.test(lines[i])) {
-						bibleVerseNumbers.push('')
+						lineNumbers.push('')
 						continue
 					}
 					const match = lines[i].match(verseNumberRegex)
@@ -219,16 +219,16 @@ function ProPresenterParser() {
 							firstVerseNumber = verseNumber - (i > 0 ? 1 : 0)
 						}
 						lastVerseNumber = verseNumber
-						bibleVerseNumbers.push('' + verseNumber)
+						lineNumbers.push('' + verseNumber)
 					} else {
-						bibleVerseNumbers.push('')
+						lineNumbers.push('')
 					}
 				}
 			}
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, bibleVerseNumbers)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
@@ -312,20 +312,20 @@ function ProPresenterParser() {
 				const groupColor = asCSSColor(group.groupColor)
 				if(isBibleGroup
 					&& newSlides.length > 0
-					&& newSlides[0].bibleVerseNumbers) {
+					&& newSlides[0].lineNumbers) {
 					const firstSlide = newSlides[0]
 
-					let firstVerseNumber = firstSlide.bibleVerseNumbers[0]
-					if (!firstVerseNumber && firstSlide.bibleVerseNumbers[1]) {
-						firstVerseNumber = parseInt(firstSlide.bibleVerseNumbers[1]) - 1
+					let firstVerseNumber = firstSlide.lineNumbers[0]
+					if (!firstVerseNumber && firstSlide.lineNumbers[1]) {
+						firstVerseNumber = parseInt(firstSlide.lineNumbers[1]) - 1
 					}
 
 					if (firstVerseNumber && !isNaN(firstVerseNumber)) {
 						const lastSlide = newSlides[newSlides.length - 1]
 						let lastVerseNumber = undefined
-						if (lastSlide && lastSlide.bibleVerseNumbers) {
-							const lastIndex = lastSlide.bibleVerseNumbers.length - 1
-							lastVerseNumber = lastSlide.bibleVerseNumbers[lastIndex]
+						if (lastSlide && lastSlide.lineNumbers) {
+							const lastIndex = lastSlide.lineNumbers.length - 1
+							lastVerseNumber = lastSlide.lineNumbers[lastIndex]
 						}
 						groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
 					}

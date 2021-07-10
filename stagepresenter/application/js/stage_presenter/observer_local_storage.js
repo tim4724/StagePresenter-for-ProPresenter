@@ -61,10 +61,10 @@ function LocalStorageObserver(localStorageChanged,
 		let fontSizesStyle = ""
 		if (localStorage.presentationFontSize) {
 			const fontSize = localStorage.presentationFontSize / 100
-			fontSizesStyle += ".group:not(.groupWithLongText) { font-size: " + fontSize + "em }"
+			fontSizesStyle += ".group:not(.groupWithText) { font-size: " + fontSize + "em }"
 		}
-		const groupWithLongTextFontSize = (localStorage.presentationLongTextFontSize || 80) / 100
-		fontSizesStyle += ".group.groupWithLongText { font-size: " + groupWithLongTextFontSize + "em }"
+		const groupWithTextFontSize = (localStorage.presentationLongTextFontSize || 80) / 100
+		fontSizesStyle += ".group.groupWithText { font-size: " + groupWithTextFontSize + "em }"
 		if (localStorage.timerFontSize) {
 			const fontSize = localStorage.timerFontSize / 100
 			fontSizesStyle += "#timerContainer { font-size: " + fontSize + "em }"

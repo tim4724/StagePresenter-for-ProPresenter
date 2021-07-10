@@ -436,9 +436,9 @@ function rectIntersectionAmount(a, b) {
 	const max = Math.max
 	const min = Math.min
 
-	const top = max(a.y, b.y);
-  	const bottom = min(a.y + a.height, b.y + b.height);
-	const left = max(a.x, b.x);
-	const right = min(a.x + a.width, b.x + b.width);
-	return max(0, right - left) * max(0, bottom - top);
+	const top = max(a.y, b.y)
+  	const bottom = min(a.y + a.height, b.y + b.height)
+	const left = max(a.x, b.x)
+	const right = min(a.x + a.width, b.x + b.width)
+	return max(0, right - left) * max(0, bottom - top)
 }
