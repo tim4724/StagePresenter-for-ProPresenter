@@ -54,8 +54,14 @@
 	max-height: 100vh;
 }
 
-#presentationContainer.noText .currentSlide, #presentationContainer.noText .group {
+#presentationContainer.noText .currentSlide,
+#presentationContainer.noText .group {
 	border-width: 0;
+}
+
+.group.onlyGroup .slide.onlySlide {
+	border-style: none;
+	background: #000000;
 }
 
 .groupWithText .slide .text, .slide.biblePassage .text {
@@ -120,6 +126,7 @@
 }
 
 .onlyGroup {
+	border-width: 0;
 	border-style: none;
 }
 

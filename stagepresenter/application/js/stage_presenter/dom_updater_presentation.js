@@ -175,6 +175,9 @@ function PresentationDomUpdater() {
 			const slideElement = document.createElement('div')
 			slideElement.classList.add('slide')
 
+			if (group.slides.length == 1) {
+				slideElement.classList.add('onlySlide')	
+			}
 
 			for (let i = 0; i < slide.lines.length; i++) {
 				const line = slide.lines[i]
