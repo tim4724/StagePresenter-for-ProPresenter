@@ -1,5 +1,10 @@
 "use strict"
 
+// Matches e.g. 'Römer 8_18' or 'Römer 8_18-23 (LU17)'
+// Also matches 'John 3_16-17 (KJV)-1' or John 3_16-1
+const biblePresentationNameRegex =
+	/^((\d+).?\s?)?(.+)\s(\d+)_(\d+(-(\d+))?)((\s\(.+\))(-\d+)?)?$/
+
 function Playlist(name, items, location) {
 	return {
 		name: name,
@@ -272,8 +277,9 @@ function ProPresenterParser() {
 		const presentation = data.presentation
 
 		// Matches e.g. 'Römer 8_18' or 'Römer 8_18-23 (LU17)'
-		const bibleRegex = /^.+\s\d+_\d+(-\d+)?(\s\(.+\))?$/
-		const isBiblePresentation = bibleRegex.test(presentation.presentationName)
+		// Also atches e.g. 'Römer 8_18-23 (LU17)-1'
+		const isBiblePresentation = biblePresentationNameRegex
+			.test(presentation.presentationName)
 
 		const presentationName = parsePresentationName(presentation.presentationName)
 
@@ -345,9 +351,6 @@ function ProPresenterParser() {
 		}
 		presentationName = presentationName.trim().normalize()
 
-		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
-		const biblePresentationNameRegex = /^((\d+).?\s?)?(.+)\s(\d+)_(\d+(-\d+)?(\s\(.+\))?)$/
-
 		const match = presentationName.match(biblePresentationNameRegex)
 		if (match) {
 			// Römer 8_12-15 -> Römer 8:12-15
@@ -361,7 +364,14 @@ function ProPresenterParser() {
 			} else {
 				bookName += match[3]
 			}
-			return bookName + ' ' + match[4] + ':' + match[5]
+			const chapter = match[4]
+			let verse = parseInt(match[5])
+			const verseTo = parseInt(match[7])
+			if (Number.isInteger(verseTo) && verseTo > 1 && verse < verseTo) {
+				verse = "" + verse + "-" + verseTo
+			}
+			const translation = match[9] || ""
+			return bookName + ' ' + chapter + ':' + verse + translation
 		}
 		return presentationName
 	}
