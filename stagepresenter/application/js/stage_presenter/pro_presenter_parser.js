@@ -80,6 +80,11 @@ function ProPresenterParser() {
 
 	function parseSlide(rawText, label, color, previewImage = undefined,
 						assumeIsBiblePassage = false, enabled = true) {
+		if (label != undefined && label.includes("$stagepresenter:showImage")) {
+			label = label.replace("$stagepresenter:showImage", "")
+			return Slide("", previewImage, [], label, color, false, undefined, enabled)
+		}
+		
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
