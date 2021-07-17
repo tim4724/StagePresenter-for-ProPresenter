@@ -33,10 +33,9 @@ function ProPresenterConnection(stateManager, host) {
 			presentationSlideQuality: imageWidth
 		})
 	}
-
+	let onceConnected = false
 	let remoteWebsocketConnectionState = WebSocketConnectionState()
 	let stageWebsocketConnectionState = WebSocketConnectionState()
-
 
 	let remoteWebSocketCloseCounter = 0
 	let stageWebSocketCloseCounter = 0
@@ -107,6 +106,7 @@ function ProPresenterConnection(stateManager, host) {
 
 			remoteWebSocket = new WebSocket('ws://' + host + '/remote')
 			remoteWebSocket.onopen = function (ev) {
+				onceConnected = true
 				clearConnectionErrors() // Will be shown after timeout
 				remoteWebsocketConnectionState.isConnected = true
 				connectionStatusElement.innerText = "Connected"
@@ -152,6 +152,7 @@ function ProPresenterConnection(stateManager, host) {
 
 			stageWebSocket = new WebSocket('ws://' + host + '/stagedisplay')
 			stageWebSocket.onopen = function(ev) {
+				onceConnected = true
 				clearConnectionErrors()
 				stageWebsocketConnectionState.isConnected = true
 
@@ -521,7 +522,14 @@ function ProPresenterConnection(stateManager, host) {
 	}
 
 	function updateConnectionErrors() {
-		stateManager.onNewConnectionErrors(remoteWebsocketConnectionState, stageWebsocketConnectionState)
+		stateManager.clearConnectionErrors()
+		if (onceConnected == false) {
+			// Only show errors,
+			// if connection once worked, but is now problematic
+			return
+		}
+		stateManager.onNewConnectionErrors(remoteWebsocketConnectionState,
+			stageWebsocketConnectionState)
 	}
 
 	function clearConnectionErrors() {

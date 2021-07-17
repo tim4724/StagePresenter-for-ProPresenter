@@ -4,7 +4,7 @@ function TimerDomUpdater() {
 	const timezoneOffsetInMinutes = new Date().getTimezoneOffset()
 
 	const timerContainer = document.getElementById('timerContainer')
-
+	const clock = document.getElementById('clock')
 	const clockHoursMinutes = document.getElementById('clockHoursMinutes')
 	const clockSeconds = document.getElementById('clockSeconds')
 	const videoTimer = document.getElementById('videoTimer')
@@ -13,6 +13,7 @@ function TimerDomUpdater() {
 	let timeouts = {}
 
 	function updateClock(seconds) {
+		clock.style.display = "inline"
 		let totalMinutes = Math.floor(seconds / 60) - timezoneOffsetInMinutes
 
 		let hours = Math.floor(totalMinutes / 60 % 24)

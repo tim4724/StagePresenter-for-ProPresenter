@@ -182,6 +182,7 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 	color: #000000;
 	font-size: 1em;
 	padding: 0 1em;
+	display: none;
 }
 
 .timerMode0 {
