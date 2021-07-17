@@ -94,8 +94,10 @@ function PresentationDomUpdater() {
 			// Insert new elements
 			for (const group of presentation.groups) {
 				const groupElement = buildGroupElement(group)
-				if (presentation.groups.length == 1) {
-					groupElement.classList.add('onlyGroup')
+				const withoutColor = group.color == undefined
+					|| group.color.length <= 0
+				if (presentation.groups.length == 1 && withoutColor) {
+					groupElement.classList.add('onlyGroupWithoutColor')
 				}
 				presentationContainerElement.append(groupElement)
 			}

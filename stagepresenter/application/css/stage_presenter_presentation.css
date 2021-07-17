@@ -68,7 +68,7 @@
 	min-height: 0;
 }
 
-.group.onlyGroup .slide.onlySlide {
+.slide.onlySlide {
 	border-style: none;
 	background: #000000;
 }
@@ -134,7 +134,7 @@
 	color: #ffffff;
 }
 
-.onlyGroup {
+.onlyGroupWithoutColor {
 	border-width: 0;
 	border-style: none;
 }
