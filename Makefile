@@ -1,5 +1,5 @@
 start:
-	npm start --prefix stagepresenter
+	npm start --prefix stagepresenter --unhandled-rejections=strict
 
 clean:
 	rm -r build

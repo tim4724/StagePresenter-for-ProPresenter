@@ -374,6 +374,18 @@ app.whenReady().then(async () => {
 	screen.on('display-added', screenConfigChanged)
 	screen.on('display-metrics-changed', screenConfigChanged)
 
+	try {
+		const version = await localStorageGet('localStorageVersion')
+		if (version == undefined || version.length <= 0) {
+			let features = (await localStorageGet('features')).split(' ')
+			features.push('doNotShowDisabledSlides')
+			await localStorageSet('features', features.join(' '))
+			await localStorageSet('localStorageVersion', '1')
+		}
+	} catch(e) {
+		console.log("localStorageVersionCheckFailed", e)
+	}
+
 	const displayId = await localStorageGet('showOnDisplay')
 	if (displayId !== undefined && displayId !== '-1') {
 		if (displayId == "window") {
