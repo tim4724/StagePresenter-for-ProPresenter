@@ -39,7 +39,7 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled=true) {
+function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled=true, forceKeepLinebreaks=false) {
 	return {
 		rawText: rawText,
 		previewImage: previewImage,
@@ -48,7 +48,8 @@ function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineN
 		color: color,
 		isBiblePassage: isBiblePassage,
 		lineNumbers: lineNumbers,
-		enabled: enabled
+		enabled: enabled,
+		forceKeepLinebreaks: forceKeepLinebreaks
 	}
 }
 
@@ -80,11 +81,16 @@ function ProPresenterParser() {
 
 	function parseSlide(rawText, label, color, previewImage = undefined,
 						assumeIsBiblePassage = false, enabled = true) {
+		let keepLinebreaks = false
+		if (label != undefined && label.includes("$stagepresenter:keepLinebreaks")) {
+			label = label.replace("$stagepresenter:keepLinebreaks", "")
+			keepLinebreaks = true
+		}
 		if (label != undefined && label.includes("$stagepresenter:showImage")) {
 			label = label.replace("$stagepresenter:showImage", "")
-			return Slide("", previewImage, [], label, color, false, undefined, enabled)
+			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks)
 		}
-		
+
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
@@ -239,7 +245,7 @@ function ProPresenterParser() {
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled, keepLinebreaks)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
@@ -249,7 +255,7 @@ function ProPresenterParser() {
 					lines[i] = lines[i].trim()
 				}
 			}
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined, enabled)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined, enabled, keepLinebreaks)
 		}
 	}
 

@@ -187,6 +187,9 @@ function PresentationDomUpdater() {
 			} else {
 				allSlidesNotEnabled = false;
 			}
+			if (slide.forceKeepLinebreaks === true) {
+				slideElement.classList.add('keepLinebreaks')
+			}
 
 			for (let i = 0; i < slide.lines.length; i++) {
 				const line = slide.lines[i]

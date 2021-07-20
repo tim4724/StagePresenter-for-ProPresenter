@@ -101,12 +101,17 @@
 	display: block;
 }
 
-.slide .line:first-of-type {
+.slide .line:first-of-type,
+.flexibleSlides .keepLinebreaks .line:first-of-type {
 	display: inline-block;
 }
 
 .flexibleSlides .line {
 	display: inline-block;
+}
+
+.flexibleSlides .keepLinebreaks .line {
+	display: block;
 }
 
 .flexibleSlides .slide.biblePassage .line,
