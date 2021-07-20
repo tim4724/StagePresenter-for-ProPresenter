@@ -45,9 +45,12 @@ ipcMain.on('displaySelected', (event, arg) => {
 			createStagePresenterWindow(undefined)
 			waitingForDisplay = false
 		} else {
-			const display = getDisplayById(displayId, screen.getAllDisplays())
-			if (display) {
-				createStagePresenterWindow(display.bounds)
+			const allDisplays = screen.getAllDisplays()
+			if (allDisplays.length > 1) {
+				const display = getDisplayById(displayId, allDisplays)
+				if (display) {
+					createStagePresenterWindow(display.bounds)
+				}
 			}
 		}
 	})
@@ -337,13 +340,15 @@ function screenConfigChanged() {
 		}
 
 		if (waitingForDisplay) {
-			const displayId = await localStorageGet('showOnDisplay')
-			const display = getDisplayById(displayId, screen.getAllDisplays())
-			if (display) {
-				waitingForDisplay = false
-				createStagePresenterWindow(display.bounds)
-			} else {
-				console.log('Still waiting for display')
+			const allDisplays = screen.getAllDisplays()
+			if (allDisplays.length > 1) {
+				const display = getDisplayById(displayId, allDisplays)
+				if (display) {
+					waitingForDisplay = false
+					createStagePresenterWindow(display.bounds)
+				} else {
+					console.log('Still waiting for display')
+				}
 			}
 		}
 	}, 2000)
@@ -399,7 +404,6 @@ app.whenReady().then(async () => {
 				const display = getDisplayById(displayId, allDisplays)
 				if (display) {
 					waitingForDisplay = false
-					// TODO: Deadlock if only one display is connected
 					createStagePresenterWindow(display.bounds)
 				} else {
 					console.log('Waiting for Display', displayId)

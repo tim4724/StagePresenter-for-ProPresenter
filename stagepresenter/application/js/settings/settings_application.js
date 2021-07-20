@@ -85,6 +85,9 @@ function ApplicationSettings() {
 			newOptionElement.value = display.id
 			newOptionElement.innerText = displayName
 
+			if (displays.length == 1) {
+				newOptionElement.disabled = true
+			}
 			if (showOnDisplay == '' + display.id) {
 				newOptionElement.selected = true
 			}
