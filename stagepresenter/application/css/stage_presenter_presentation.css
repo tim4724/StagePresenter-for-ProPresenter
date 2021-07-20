@@ -50,10 +50,16 @@
 	opacity: 1;
 }
 
-#presentationContainer.noText .group img {
+#presentationContainer.noText .group img,
+#presentationContainer .group .showImageFullscreen img {
 	width: 100%;
 	height: auto;
 	max-height: 100vh;
+}
+
+#presentationContainer .group .showImageLarger img {
+	width: auto;
+	height: calc(50vh);
 }
 
 #presentationContainer.noText .currentSlide,

@@ -190,6 +190,11 @@ function PresentationDomUpdater() {
 			if (slide.forceKeepLinebreaks === true) {
 				slideElement.classList.add('keepLinebreaks')
 			}
+			if (slide.showImageFullscreen === true) {
+				slideElement.classList.add('showImageFullscreen')
+			} else if (slide.showImageLarger === true) {
+				slideElement.classList.add('showImageLarger')
+			}
 
 			for (let i = 0; i < slide.lines.length; i++) {
 				const line = slide.lines[i]

@@ -39,7 +39,9 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled=true, forceKeepLinebreaks=false) {
+function Slide(rawText, previewImage, lines, label, color, isBiblePassage,
+	lineNumbers, enabled=true, forceKeepLinebreaks=false, showImageFullscreen=false,
+	showImageLarger=false) {
 	return {
 		rawText: rawText,
 		previewImage: previewImage,
@@ -49,7 +51,9 @@ function Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineN
 		isBiblePassage: isBiblePassage,
 		lineNumbers: lineNumbers,
 		enabled: enabled,
-		forceKeepLinebreaks: forceKeepLinebreaks
+		forceKeepLinebreaks: forceKeepLinebreaks,
+		showImageFullscreen: showImageFullscreen,
+		showImageLarger: showImageLarger
 	}
 }
 
@@ -82,13 +86,21 @@ function ProPresenterParser() {
 	function parseSlide(rawText, label, color, previewImage = undefined,
 						assumeIsBiblePassage = false, enabled = true) {
 		let keepLinebreaks = false
-		if (label != undefined && label.includes("$stagepresenter:keepLinebreaks")) {
-			label = label.replace("$stagepresenter:keepLinebreaks", "")
+		if (label != undefined && (/\$stagepresenter:keepLinebreaks/i).test(label)) {
+			label = label.replace(/\$stagepresenter:keepLinebreaks/i, "")
 			keepLinebreaks = true
 		}
-		if (label != undefined && label.includes("$stagepresenter:showImage")) {
-			label = label.replace("$stagepresenter:showImage", "")
-			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks)
+		if (label != undefined && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
+			label = label.replace(/\$stagepresenter:showImageFullscreen/i, "")
+			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks, true, false)
+		}
+		if (label != undefined && (/\$stagepresenter:showImageLarger/i).test(label)) {
+			label = label.replace(/\$stagepresenter:showImageLarger/i, "")
+			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks, false, true)
+		}
+		if (label != undefined && (/\$stagepresenter:showImage/i).test(label)) {
+			label = label.replace(/\$stagepresenter:showImage/i, "")
+			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks, false, false)
 		}
 
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
@@ -245,7 +257,7 @@ function ProPresenterParser() {
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled, keepLinebreaks)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled, keepLinebreaks, false)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
@@ -255,7 +267,7 @@ function ProPresenterParser() {
 					lines[i] = lines[i].trim()
 				}
 			}
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined, enabled, keepLinebreaks)
+			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined, enabled, keepLinebreaks, false)
 		}
 	}
 
