@@ -5,9 +5,11 @@ function StageMonitorSettings() {
 	const stagePresenterSettings = document.getElementById('stagePresenterSettings')
 	const zoomInput = document.getElementById('zoom')
 	const showSidebar = document.getElementById('showSidebar')
+	const showSlideNotes = document.getElementById('showSlideNotes')
 	const previewCheckboxInput = document.getElementById('showSmallSlidePreview')
 	const playlistCheckboxInput = document.getElementById('showPlaylist')
 	const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
+	const slideNotesHeightInput = document.getElementById('slideNotesHeight')
 	const clockModeInput = document.getElementById('clockMode')
 	const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
 	const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
@@ -70,10 +72,13 @@ function StageMonitorSettings() {
 	function initInputs() {
 		if (localStorage.features === undefined) {
 			// as also defined in observer local storage
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides'
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides doNotShowSlideNotes'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150
+		}
+		if (localStorage.slideNotesHeight === undefined) {
+			localStorage.slideNotesHeight = 180
 		}
 		if (localStorage.minimumVideoLengthForTimer === undefined) {
 			localStorage.minimumVideoLengthForTimer = '00:01:00'
@@ -106,12 +111,21 @@ function StageMonitorSettings() {
 			}
 		}
 
+		for (const option of showSlideNotes.options) {
+			if (features.includes(option.value)) {
+				option.selected = true;
+				break;
+			}
+		}
+
 		if (!features.includes('showPlaylist') && !features.includes('showSmallSlidePreview')
 			|| !features.includes('showSidebarBottom') && !features.includes('showSidebarLeft')) {
 			sidebarMaxSizeInput.disabled = true
 		} else {
 			sidebarMaxSizeInput.disabled = false
 		}
+
+		slideNotesHeightInput.disabled = !features.includes('showSlideNotes')
 
 		if (!features.includes('showSidebarBottom')
 				&& !features.includes('showSidebarLeft')) {
@@ -174,6 +188,8 @@ function StageMonitorSettings() {
 			}
 
 			localStorage.features = features.join(' ')
+			initInputs()
+		} else if(select.id === 'showSlideNotes' && changedFeature) {
 			initInputs()
 		}
 	}

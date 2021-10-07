@@ -30,6 +30,7 @@
 .showSidebarBottom.showSmallSlidePreview #sidebar,
 	.showSidebarBottom.showPlaylist #sidebar {
 	position: relative;
+	background: #303030;
 }
 
 .showSidebarBottom #playlist {

@@ -57,6 +57,8 @@ main {
 	flex-grow: 200;
 	overflow: hidden;
 	position: relative;
+	display: flex;
+	flex-direction: column;
 }
 
 #message {
@@ -64,12 +66,12 @@ main {
 	position: absolute;
 	bottom: 1.25em;
 	left: 0;
+	z-index: 5000;
 	width: 100%;
 	right: 0;
 	color: #000000;
 	font-size: 5em;
 	background: #ffffff;
-	opacity: 0.8;
 	padding: 0 8px;
 }
 

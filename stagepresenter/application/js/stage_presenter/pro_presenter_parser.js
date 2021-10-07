@@ -39,7 +39,7 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(rawText, previewImage, lines, label, color, isBiblePassage,
+function Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage,
 	lineNumbers, enabled=true, forceKeepLinebreaks=false, showImageFullscreen=false,
 	showImageLarger=false) {
 	return {
@@ -53,7 +53,8 @@ function Slide(rawText, previewImage, lines, label, color, isBiblePassage,
 		enabled: enabled,
 		forceKeepLinebreaks: forceKeepLinebreaks,
 		showImageFullscreen: showImageFullscreen,
-		showImageLarger: showImageLarger
+		showImageLarger: showImageLarger,
+		slideNotes: slideNotes
 	}
 }
 
@@ -84,7 +85,7 @@ function ProPresenterParser() {
 	}
 
 	function parseSlide(rawText, label, color, previewImage = undefined,
-						assumeIsBiblePassage = false, enabled = true) {
+						assumeIsBiblePassage = false, enabled = true, slideNotes = "") {
 		let keepLinebreaks = false
 		if (label != undefined && (/\$stagepresenter:keepLinebreaks/i).test(label)) {
 			label = label.replace(/\$stagepresenter:keepLinebreaks/i, "")
@@ -92,15 +93,15 @@ function ProPresenterParser() {
 		}
 		if (label != undefined && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImageFullscreen/i, "")
-			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks, true, false)
+			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, keepLinebreaks, true, false)
 		}
 		if (label != undefined && (/\$stagepresenter:showImageLarger/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImageLarger/i, "")
-			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks, false, true)
+			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, keepLinebreaks, false, true)
 		}
 		if (label != undefined && (/\$stagepresenter:showImage/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImage/i, "")
-			return Slide("", previewImage, [], label, color, false, undefined, enabled, keepLinebreaks, false, false)
+			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, keepLinebreaks, false, false)
 		}
 
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
@@ -257,7 +258,7 @@ function ProPresenterParser() {
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, lineNumbers, enabled, keepLinebreaks, false)
+			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, lineNumbers, enabled, keepLinebreaks, false)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
@@ -267,7 +268,7 @@ function ProPresenterParser() {
 					lines[i] = lines[i].trim()
 				}
 			}
-			return Slide(rawText, previewImage, lines, label, color, isBiblePassage, undefined, enabled, keepLinebreaks, false)
+			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, undefined, enabled, keepLinebreaks, false)
 		}
 	}
 
@@ -320,13 +321,24 @@ function ProPresenterParser() {
 
 			let newSlides = []
 			for (const slide of group.groupSlides) {
+				const features = localStorage.features.split(' ')
+				let slideNotes = slide.slideNotes.trim()
+				let slideText = slide.slideText
+				if (features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0) {
+					slideText = slideNotes
+					slideNotes = ""
+				} else if (!features.includes("showSlideNotes")) {
+					slideNotes = ""
+				}
+
 				const newSlide = parseSlide(
-					slide.slideText,
+					slideText,
 					slide.slideLabel,
 					asCSSColor(slide.slideColor),
 					slide.slideImage,
 					isBiblePresentation || isBibleGroup,
-					slide.slideEnabled
+					slide.slideEnabled,
+					slideNotes
 				)
 
 				if (splitSlidesInGroups) {

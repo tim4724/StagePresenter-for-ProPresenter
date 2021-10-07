@@ -9,7 +9,6 @@ function LocalStorageObserver(localStorageChanged,
 	}
 
 	const sidebarContainerElement = document.getElementById('sidebar')
-	const nextUpElement = document.getElementById('nextUp')
 	const clockElement = document.getElementById('clock')
 
 	if (localStorage.alignLeftCharactersThreshold === undefined) {
@@ -27,10 +26,19 @@ function LocalStorageObserver(localStorageChanged,
 	function update() {
 		if (localStorage.features === undefined) {
 			// as also defined in settings_stagemonitor.js
-			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides'
+			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides doNotShowSlideNotes'
 		}
 		if (localStorage.sidebarMaxSize === undefined) {
 			localStorage.sidebarMaxSize = 150
+		}
+		if (localStorage.slideNotesHeight === undefined) {
+			localStorage.slideNotesHeight = 180
+		}
+		if (localStorage.minimumVideoLengthForTimer === undefined) {
+			localStorage.minimumVideoLengthForTimer = '00:01:00'
+		}
+		if (localStorage.alignLeftCharactersThreshold === undefined) {
+			localStorage.alignLeftCharactersThreshold = 60
 		}
 
 		const oldFeatures = document.body.className.split(' ')
@@ -38,14 +46,13 @@ function LocalStorageObserver(localStorageChanged,
 
 		const features = localStorage.features.split(' ')
 
+		slideNotesContent.style.height = localStorage.slideNotesHeight + "px"
+
 		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
 			const clockWidth = clockElement.scrollWidth
-			nextUpElement.style.right = clockWidth + 'px'
 			sidebarContainerElement.style.maxWidth = ''
 			sidebarContainerElement.style.maxHeight = ''
 		} else {
-			nextUpElement.style.right = ''
-
 			if (features.includes('showSidebarBottom')) {
 				sidebarContainerElement.style.maxWidth = ''
 				sidebarContainerElement.style.maxHeight = localStorage.sidebarMaxSize + 'px'
@@ -63,6 +70,10 @@ function LocalStorageObserver(localStorageChanged,
 		if (localStorage.presentationFontSize) {
 			const fontSize = localStorage.presentationFontSize / 100
 			fontSizesStyle += ".group:not(.groupWithText) { font-size: " + fontSize + "em }"
+		}
+		if (localStorage.slideNotesFontSize) {
+			const fontSize = localStorage.slideNotesFontSize / 100
+			fontSizesStyle += "#slideNotes { font-size: " + (5 * fontSize) + "em }"
 		}
 		const groupWithTextFontSize = (localStorage.presentationLongTextFontSize || 80) / 100
 		fontSizesStyle += ".group.groupWithText { font-size: " + groupWithTextFontSize + "em }"
@@ -94,7 +105,7 @@ function LocalStorageObserver(localStorageChanged,
 		window.dispatchEvent(new Event('styleChanged'))
 
 		clearTimeout(reloadPresentationTimeout)
-		reloadPresentationTimeout = setTimeout(reloadPresentationIfNecessary, 500)
+		reloadPresentationTimeout = setTimeout(reloadPresentationIfNecessary, 32)
 		clearTimeout(localStorageChangedCallbackTimeout)
 		localStorageChangedCallbackTimeout = setTimeout(localStorageChanged, 1000)
 	}
@@ -102,7 +113,7 @@ function LocalStorageObserver(localStorageChanged,
 	function reloadPresentationIfNecessary() {
 		const features = localStorage.features.split(' ')
 
-		const importantFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages']
+		const importantFeatures = ['onlyFirstTextInSlide', 'improveBiblePassages', 'doNotShowSlideNotes', 'showSlideNotes', 'slideNotesReplaceSlideContent']
 		if (importantFeatures.some(f => oldFeatures.includes(f) !== features.includes(f))
 				|| alignLeftCharactersThreshold !== localStorage.alignLeftCharactersThreshold) {
 			reloadPresentationCallback()

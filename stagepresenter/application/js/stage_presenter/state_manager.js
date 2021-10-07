@@ -35,7 +35,7 @@ function StateManager(stateBroadcastChannel) {
 		}
 	}
 
-	function updatePlaylistAndNextTitle(playlistIndex) {
+	function updatePlaylist(playlistIndex) {
 		let playlist = getPlaylist(playlistIndex)
 
 		if (playlist == undefined) {
@@ -43,7 +43,6 @@ function StateManager(stateBroadcastChannel) {
 			currentPlaylistIndex = -1
 			currentPlaylistItemIndex = -1
 			playlistDomUpdater.clear()
-			presentationDomUpdater.setNextPresentationTitle(undefined)
 		} else {
 			function getAllIndices(array, check) {
 				return array.map((e, i) => check(e) ? i : '').filter(String)
@@ -77,19 +76,6 @@ function StateManager(stateBroadcastChannel) {
 					// Change current item in playlist
 					playlistDomUpdater.changeCurrentItemAndScroll(playlistItemIndex)
 				}
-
-				let nextPresentationTitle = undefined
-				if (playlistItemIndex >= 0) {
-					for (let i = playlistItemIndex + 1; i < items.length; i++) {
-						const nextItem = items[i]
-						if (nextItem.type != 'playlistItemTypeHeader') {
-							nextPresentationTitle = nextItem.text
-							break
-						}
-					}
-				}
-				presentationDomUpdater.setNextPresentationTitle(nextPresentationTitle)
-
 				currentPlaylistIndex = playlistIndex
 				currentPlaylistItemIndex = playlistItemIndex
 			}
@@ -120,7 +106,7 @@ function StateManager(stateBroadcastChannel) {
 			stateBroadcastChannel.postMessage({action: 'playlists', value: playlists})
 		}
 
-		updatePlaylistAndNextTitle(playlistIndex)
+		updatePlaylist(playlistIndex)
 	}
 
 	function onNewPresentation(presentation, path, animate = true) {
@@ -128,7 +114,7 @@ function StateManager(stateBroadcastChannel) {
 		currentPresentationPath = path
 
 		const playlistIndex = currentPlaylists.findIndex(p => path.startsWith(p.location))
-		updatePlaylistAndNextTitle(playlistIndex >= 0 ? playlistIndex : currentPlaylistIndex)
+		updatePlaylist(playlistIndex >= 0 ? playlistIndex : currentPlaylistIndex)
 
 		// Update presentation
 		presentationDomUpdater.displayPresentation(presentation, currentSlideIndex, animate)
@@ -142,7 +128,7 @@ function StateManager(stateBroadcastChannel) {
 
 	function onNewMediaPresentation(name, presentationPath) {
 		renderPreviewImage('Media', name, 1920, 1080, (previewImage => {
-			const slide = Slide('', previewImage, [], undefined, undefined, false, [])
+			const slide = Slide('', previewImage, [], undefined, undefined, "", false, [])
 			const group = Group('', '', [slide])
 			const animate = currentPresentation == undefined || currentPresentation.name !== name
 			currentSlideIndex = 0

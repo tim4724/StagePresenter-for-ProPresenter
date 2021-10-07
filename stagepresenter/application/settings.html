@@ -89,19 +89,21 @@
 				<span id='stageAppConnectionResult'></span>
 			</div>
 
-			<div id="useChromeWarning" class="onlyChromeSupportedHint">
-				&#9888; Only Google Chrome is supported!
+			<div class='setting'>
+				<div id="useChromeWarning" class="onlyChromeSupportedHint">
+					&#9888; Only Google Chrome is supported!
+				</div>
+
+				<button id='connectButton'
+						onclick='connectionSettings.connect()'>
+					Test Connection and Save
+				</button>
+
+				<button id='resetButton' disabled
+						onclick='connectionSettings.initInputsFromStorage()'>
+					Reset
+				</button>
 			</div>
-
-			<button id='connectButton'
-					onclick='connectionSettings.connect()'>
-				Test Connection and Save
-			</button>
-
-			<button id='resetButton' disabled
-					onclick='connectionSettings.initInputsFromStorage()'>
-				Reset
-			</button>
 		</section>
 
 		<section class='settingGroup' id='electronAppSettings' style='display: none'>
@@ -144,7 +146,25 @@
 							</label>
 						</div>
 
-						<div class="settingSpacer"></div>
+						<div class='setting'>
+							Show Slide Notes (if available)
+							<select id='showSlideNotes' onchange='stagemonitorSettings.selectChanged(this)'>
+								<option value='doNotShowSlideNotes'>Do not show</option>
+								<option value='showSlideNotes'>Additionally the bottom</option>
+								<option value='slideNotesReplaceSlideContent'>Instead of slide content</option>
+						   </select>
+						</div>
+
+						<div class='setting'>
+							<span class='settingText'>
+								Slide Notes height
+							</span>
+							<label class='right'>
+								<input id='slideNotesHeight' type='number' min='30' max='1000'
+										value="180"
+										oninput='stagemonitorSettings.inputChanged(this)'>
+							</label>
+						</div>
 
 						<div class='setting'>
 							Clock, Timers, Playlist, Preview Position
@@ -303,6 +323,17 @@
 					<label class='right'>
 						<input id='presentationLongTextFontSize' type='number' min='1' max='1000'
 							value="80" oninput='stagemonitorSettings.inputChanged(this)'>
+						%
+					</label>
+				</div>
+
+				<div class='setting'>
+					<span class='settingText'>
+						Slide Notes maximum Font-Size
+					</span>
+					<label class='right'>
+						<input id='slideNotesFontSize' type='number' min='1' max='1000'
+							value="100" oninput='stagemonitorSettings.inputChanged(this)'>
 						%
 					</label>
 				</div>

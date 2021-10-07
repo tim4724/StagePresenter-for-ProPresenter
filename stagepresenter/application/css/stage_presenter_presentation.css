@@ -154,26 +154,6 @@
 	margin-bottom: 3em;
 }
 
-#nextUp::before {
-	content: "↳ ";
-}
-
-#nextUp {
-	display: none;
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	max-width: 50%;
-	overflow: hidden;
-	z-index: -1;
-	padding: 4px 16px;
-	font-size: 3.5em;
-	background: rgba(0,0,0,.8);
-	color: #909090;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
 #connectionStatus {
 	position: absolute;
 	bottom: 10%;
@@ -205,4 +185,14 @@
  	top: 30%;
  	left: 50%;
 	transform: translate(-50%, -50%);
+}
+
+#slideNotes {
+	z-index: 50;
+	font-size: 5em;
+	background: #303030; 	/* background should be same as for sidebar */
+	color: #ffffff;
+	padding: 8px;
+	display: none;
+	margin-right: 0;
 }

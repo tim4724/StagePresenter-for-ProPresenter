@@ -1,28 +1,42 @@
 "use strict"
 
 function PresentationDomUpdater() {
-	const nextUpElement = document.getElementById('nextUp')
 	const presentationContainerElement = document.getElementById('presentationContainer')
 	const scroller = Scroller(presentationContainerElement)
 	const titleElement = presentationContainerElement.querySelector('#title')
 	const slideElements = presentationContainerElement.getElementsByClassName('slide')
 	const groupElements = presentationContainerElement.getElementsByClassName('group')
+	const slideNotesElement = document.getElementById('slideNotes')
+	const slideNotesContentElement = document.getElementById('slideNotesContent')
+
 	const previewElement = document.getElementById('preview')
 	let slideImagesCache = []
+	let slideNotes = []
 	let scrollTimeout = undefined
 	let displayPresentationTimeout = undefined
 	let displayPresentationTimeoutEndTime = 0
 
 	if (ResizeObserver) {
 		new ResizeObserver(entries => {
-		   // Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
-		   requestAnimationFrame(() => {
-			 if (!Array.isArray(entries) || !entries.length) {
-			   return;
-			 }
-			 onresize()
-		   });
+			if (slideNotes.length <= 0) {
+				return
+			}
+			// Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
+			requestAnimationFrame(() => {
+				if (!Array.isArray(entries) || !entries.length) {
+					return
+				}
+				fixSlideNotesTextSize()
+			})
 		}).observe(presentationContainerElement)
+		new ResizeObserver(entries => {
+			// Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
+			requestAnimationFrame(() => {
+				if (!Array.isArray(entries) || !entries.length) {
+					return
+				}
+			})
+		}).observe(slideNotesElement)
 	} else {
 		window.onresize = onresize
 	}
@@ -37,9 +51,15 @@ function PresentationDomUpdater() {
 	}
 
 	function displayPresentation(presentation, slideIndex, animate) {
-		nextUpElement.style.display = 'none'
 		previewElement.src = 'img/black16x9.png'
 		slideImagesCache = presentation.groups.map(g => g.slides.map(s => s.previewImage)).flat()
+		slideNotes = presentation.groups.map(g => g.slides.map(s => s.slideNotes)).flat()
+		if (slideNotes.some(n => n.length > 0)) {
+			slideNotesElement.style.display = "block"
+		} else {
+			slideNotes = []
+			slideNotesElement.style.display = "none"
+		}
 
 		function displayDelayed(duration) {
 			return setTimeout(() => {
@@ -107,15 +127,6 @@ function PresentationDomUpdater() {
 		}
 	}
 
-	function setNextPresentationTitle(nextTitle) {
-		if(nextTitle && nextTitle.length > 0) {
-			nextUpElement.innerText = nextTitle
-		} else {
-			nextUpElement.innerText = ''
-			nextUpElement.style.display = 'none'
-		}
-	}
-
 	function fixGroupNameElementPosition() {
 		for (const groupElement of groupElements) {
 			const groupNameElement = groupElement.querySelector('.groupName')
@@ -131,9 +142,6 @@ function PresentationDomUpdater() {
 
 	function fixSlidesTextSize() {
 		const availableHeight = presentationContainerElement.clientHeight
-
-		const nextUpElementStyleDisplay = nextUpElement.style.display
-		nextUpElement.style.display = 'block'
 		for (const groupElement of groupElements) {
 			const groupNameElement = groupElement.querySelector('.groupName')
 
@@ -147,16 +155,10 @@ function PresentationDomUpdater() {
 					// TODO: Use real border with instead of hardcoded 6
 					maxHeight -= groupNameElement.scrollHeight + 6
 				}
-				if (i === slideElements.length - 1) {
-					// TODO: Use real border with instead of hardcoded 6
-					maxHeight -= nextUpElement.scrollHeight + 6
-				}
-
 				slideElements[i].style.fontSize = '1em'
 				fontSizeReducer(slideElements[i], maxHeight)
 			}
 		}
-		nextUpElement.style.display = nextUpElementStyleDisplay
 	}
 
 	function buildGroupElement(group) {
@@ -254,6 +256,13 @@ function PresentationDomUpdater() {
 	}
 
 	function changeCurrentSlideAndScroll(slideIndex, animate = true) {
+		if (slideIndex >= 0 && slideIndex < slideNotes.length) {
+			slideNotesContentElement.innerText = slideNotes[slideIndex]
+			fixSlideNotesTextSize()
+		} else {
+			slideNotesContentElement.innerText = ""
+		}
+
 		clearTimeout(scrollTimeout)
 		if (previewElement.offsetParent !== null) {
 			const previewImage = slideImagesCache[slideIndex]
@@ -271,9 +280,6 @@ function PresentationDomUpdater() {
 		}
 
 		if (!slideElements || slideElements.length === 0) {
-			if (nextUpElement.innerText.length > 0) {
-				nextUpElement.style.display = 'inherit'
-			}
 			return
 		}
 
@@ -297,29 +303,6 @@ function PresentationDomUpdater() {
 			newSlide.parentElement.classList.add('currentGroup')
 
 			scrollToCurrentSlide(animate)
-		}
-
-		const slide = newSlide ? newSlide : oldSlide
-		if (nextUpElement.innerText.length > 0 && slide) {
-			let isLastGroup = false
-			for (let i = groupElements.length - 1; i >= 0; i--) {
-				if (groupElements[i] === slide.parentElement) {
-					isLastGroup = true
-					break
-				}
-				if (!groupElements[i].classList.contains('emptyGroup')) {
-					break
-				}
-			}
-			if (slideElements[slideElements.length - 1] === newSlide) {
-				// Last slide
-				nextUpElement.style.zIndex = '100'
-			} else if (newSlide != undefined){
-				nextUpElement.style.zIndex = '-2'
-			}
-			nextUpElement.style.display = isLastGroup ? 'inherit' : 'none'
-		} else {
-			nextUpElement.style.display = 'none'
 		}
 	}
 
@@ -390,9 +373,17 @@ function PresentationDomUpdater() {
 		}
 	}
 
+	function fixSlideNotesTextSize() {
+		const height = slideNotesContentElement.offsetHeight
+		console.log("fixSlideNotesTextSize height", height)
+		slideNotesContentElement.style.fontSize = '1em'
+		slideNotesContentElement.style.height = ''
+		fontSizeReducer(slideNotesContentElement, height)
+		slideNotesContentElement.style.height = height + 'px'
+	}
+
 	return {
 		displayPresentation: displayPresentation,
-		setNextPresentationTitle: setNextPresentationTitle,
 		changeCurrentSlideAndScroll: changeCurrentSlideAndScroll
 	}
 }
