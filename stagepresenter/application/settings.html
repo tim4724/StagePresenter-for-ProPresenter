@@ -53,14 +53,14 @@
 					<input id='localMode' type='radio' name='localMode'
 						onchange='connectionSettings.selectModeLocal()'>
 					<span class='radio'></span>
-					Connect to ProPresenter instance on this computer
+					Connect to ProPresenter Instance on this Computer
 					<span class="onlyChromeSupportedHint">(Only supported in Google Chrome)</span>
 				</label></div>
 				<div><label class='radioLabel'>
 					<input id='remoteMode' type='radio' name='remoteMode'
 						onchange='connectionSettings.selectModeRemote()'>
 					<span class='radio'></span>
-					Connect to ProPresenter instance on another computer
+					Connect to ProPresenter Instance on another Computer
 					<span class="onlyChromeSupportedHint">(Only supported in Google Chrome)</span>
 				</label></div>
 			</div>
@@ -109,7 +109,7 @@
 		<section class='settingGroup' id='electronAppSettings' style='display: none'>
 			<div class='settingGroupTitle'>Application</div>
 			<div class='setting'>
-				Show StagePresenter on display
+				Show StagePresenter on Display
 				<select id='showOnDisplay' onchange='applicationSettings.onDisplaySelected(this)'>
 					<option id='showOnDisplayNone' value='-1'> None </option>
 			   </select>
@@ -147,7 +147,7 @@
 						</div>
 
 						<div class='setting'>
-							Show Slide Notes (if available)
+							Show Slide Notes (If available)
 							<select id='showSlideNotes' onchange='stagemonitorSettings.selectChanged(this)'>
 								<option value='doNotShowSlideNotes'>Do not show</option>
 								<option value='showSlideNotes'>Additionally the bottom</option>
@@ -157,7 +157,7 @@
 
 						<div class='setting'>
 							<span class='settingText'>
-								Slide Notes height
+								Slide Notes Height
 							</span>
 							<label class='right'>
 								<input id='slideNotesHeight' type='number' min='30' max='1000'
@@ -199,7 +199,7 @@
 
 						<div class='setting'>
 							<span class='settingText'>
-								Sidebar Maximum Size
+								Sidebar maximum Size
 							</span>
 							<label class='right'>
 								<input id='sidebarMaxSize' type='number' min='30' max='1000'
@@ -279,7 +279,7 @@
 
 				<div class='setting'>
 					<span class='settingText'>
-						Do not show disabled slides
+						Do not show disabled Slides
 					</span>
 
 					<label class='switch right'>
@@ -291,7 +291,7 @@
 
 				<div class='setting'>
 					<span class='settingText'>
-						Height of preview images for slides without text (Default: 240)
+						Height of Preview Images for Slides without text (Default: 240)
 					</span>
 					<label class='right'>
 						<input id='previewImageHeight' type='number' min='48' max='1080'
@@ -350,7 +350,7 @@
 				</div>
 
 				<div class='setting'>
-					Clock mode
+					Clock Mode
 					<select id='clockMode' onchange='stagemonitorSettings.selectChanged(this)'>
 						<option value=''>Show clock with seconds (hh:mm:ss)</option>
 						<option value='clockWithoutSeconds'>Show clock without seconds (hh:mm)</option>
