@@ -45,7 +45,30 @@ function StateManager(stateBroadcastChannel) {
 			playlistDomUpdater.clear()
 			presentationDomUpdater.setNextPresentationTitle(undefined)
 		} else {
-			const playlistItemIndex = playlist.items.findIndex(i => i.location === currentPresentationPath)
+			function getAllIndices(array, check) {
+				return array.map((e, i) => check(e) ? i : '').filter(String)
+			}
+
+			const items = playlist.items
+			const playlistItemIndicesByName = getAllIndices(items, i => i.text === currentPresentation.name)
+			const playlistItemIndexByPath = items.findIndex(i => i.location === currentPresentationPath)
+
+			let playlistItemIndex = -1
+			switch (playlistItemIndicesByName.length) {
+				case 1:
+					playlistItemIndex = playlistItemIndicesByName[0]
+					break
+				case 0:
+					playlistItemIndex = playlistItemIndexByPath
+					break
+				default:
+					const goal = playlistItemIndexByPath >= 0 ? playlistItemIndexByPath : currentPlaylistItemIndex
+					playlistItemIndex = playlistItemIndicesByName.reduce(function(prev, curr) {
+						return Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev
+					})
+					break
+			}
+
 			if (playlistIndex !== currentPlaylistIndex || playlistItemIndex !== currentPlaylistItemIndex) {
 				if (playlistIndex != currentPlaylistIndex) {
 					// Change whole playlist
@@ -57,8 +80,8 @@ function StateManager(stateBroadcastChannel) {
 
 				let nextPresentationTitle = undefined
 				if (playlistItemIndex >= 0) {
-					for (let i = playlistItemIndex + 1; i < playlist.items.length; i++) {
-						const nextItem = playlist.items[i]
+					for (let i = playlistItemIndex + 1; i < items.length; i++) {
+						const nextItem = items[i]
 						if (nextItem.type != 'playlistItemTypeHeader') {
 							nextPresentationTitle = nextItem.text
 							break

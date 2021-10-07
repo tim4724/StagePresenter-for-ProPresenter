@@ -45,6 +45,7 @@ function ProPresenterConnection(stateManager, host) {
 	let existingStageDisplayUid = undefined
 
 	let displaySlidesFromStageDisplayTimeout = undefined
+	let playlistRequestAllTimeout = undefined
 
 	function disconnect() {
 		if (remoteWebSocket) {
@@ -67,9 +68,10 @@ function ProPresenterConnection(stateManager, host) {
 			// Do not connect to both websockets at the same time, because that will crash ProPresenter
 			// Even waiting 500ms is not enough sometimes
 			// Therefore we wait 2 seconds between the connection attempts
-
-			const connectToStageNecessary = stageWebSocket == undefined || [WebSocket.CLOSING, WebSocket.CLOSED].includes(stageWebSocket.readyState)
-			const connectToRemoteNecessary = remoteWebSocket == undefined || [WebSocket.CLOSING, WebSocket.CLOSED].includes(remoteWebSocket.readyState)
+			const connectToStageNecessary =
+				stageWebSocket == undefined || [WebSocket.CLOSING, WebSocket.CLOSED].includes(stageWebSocket.readyState)
+			const connectToRemoteNecessary =
+				remoteWebSocket == undefined || [WebSocket.CLOSING, WebSocket.CLOSED].includes(remoteWebSocket.readyState)
 
 			if (connectToStageNecessary) {
 				connectToStageWebSocket()
@@ -250,6 +252,10 @@ function ProPresenterConnection(stateManager, host) {
 					currentPlaylistDataCache = data_string
 					stateManager.onNewPlaylists(proPresenterParser.parsePlaylists(data))
 				}
+				clearTimeout(playlistRequestAllTimeout)
+				playlistRequestAllTimeout = setTimeout(function() {
+					remoteWebSocket.send(Actions.playlistRequestAll)
+				}, 2000)
 				break
 			case 'stageDisplaySets':
 				console.log("stageDisplaySets", data)
