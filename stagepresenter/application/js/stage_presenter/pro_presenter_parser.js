@@ -181,7 +181,7 @@ function ProPresenterParser() {
 			function fixNewLineOfBiblePassage(lines, minMatches=2) {
 				// Foreach line, split line on a verse number
 				// Ugly but best we can do...
-				const verseRegex = /(^|\s)(\d+)[^\d\n\r].{6}/g
+				const verseRegex = /(^|\s)(\d+)(\w|\s)[^\d\n\r].{6}/g
 				let newLines = []
 
 				for (let i = 0; i < lines.length; i++) {
