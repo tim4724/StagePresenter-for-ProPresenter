@@ -12,11 +12,21 @@ function TimerDomUpdater() {
 	let lastKnownVideoTimerText = '00:00:00'
 	let timeouts = {}
 
+	let hourCycle = 24
+	try {
+		if (new Intl.DateTimeFormat([], { hour: "numeric" }).format(0).match(/am|pm/i)) {
+			hourCycle = 12
+		}
+	} catch (e) {
+		console.log("Failed to detect hour cycle mode for clock")
+	}
+
+
 	function updateClock(seconds) {
 		clock.style.opacity = 1
 		let totalMinutes = Math.floor(seconds / 60) - timezoneOffsetInMinutes
 
-		let hours = Math.floor(totalMinutes / 60 % 24)
+		let hours = Math.floor(totalMinutes / 60 % hourCycle)
 		let minutes = totalMinutes % 60
 		seconds = seconds % 60
 
