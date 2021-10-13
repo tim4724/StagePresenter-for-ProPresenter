@@ -71,10 +71,9 @@ function LocalStorageObserver(localStorageChanged,
 			const fontSize = localStorage.presentationFontSize / 100
 			fontSizesStyle += ".group:not(.groupWithText) { font-size: " + fontSize + "em }"
 		}
-		if (localStorage.slideNotesFontSize) {
-			const fontSize = localStorage.slideNotesFontSize / 100
-			fontSizesStyle += "#slideNotes { font-size: " + (5 * fontSize) + "em }"
-		}
+		const slideNotesFontSize = (localStorage.slideNotesFontSize || 80) / 100
+		fontSizesStyle += "#slideNotes { font-size: " + (5 * slideNotesFontSize) + "em }"
+
 		const groupWithTextFontSize = (localStorage.presentationLongTextFontSize || 80) / 100
 		fontSizesStyle += ".group.groupWithText { font-size: " + groupWithTextFontSize + "em }"
 		if (localStorage.timerFontSize) {
