@@ -23,7 +23,7 @@ function TimerDomUpdater() {
 
 
 	function updateClock(seconds) {
-		clock.style.opacity = 1
+		clock.style.display = "inline"
 		let totalMinutes = Math.floor(seconds / 60) - timezoneOffsetInMinutes
 
 		let hours = Math.floor(totalMinutes / 60 % hourCycle)
