@@ -178,12 +178,17 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 	margin: 0
 }
 
+.hideClock #clock {
+	display: none;
+}
+
 #clock {
+	opacity: 0;
 	background: #ffffff;
 	color: #000000;
 	font-size: 1em;
 	padding: 0 1em;
-	display: none;
+	display: inline;
 }
 
 .timerMode0 {

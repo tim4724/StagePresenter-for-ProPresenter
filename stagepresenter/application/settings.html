@@ -176,6 +176,15 @@
 						</div>
 
 						<div class='setting'>
+							Clock Mode
+							<select id='clockMode' onchange='stagemonitorSettings.selectChanged(this)'>
+								<option value=''>Show Clock with Seconds (hh:mm:ss)</option>
+								<option value='clockWithoutSeconds'>Show Clock without Seconds (hh:mm)</option>
+								<option value='hideClock'>Do not show Clock</option>
+						   </select>
+						</div>
+
+						<div class='setting'>
 							<span class='settingText'>
 								Show Playlist
 							</span>
@@ -257,7 +266,7 @@
 					<input id='alignLeftCharactersThreshold' type='number' min='10' max='1000'
 							value="60"
 							oninput='stagemonitorSettings.inputChanged(this)'>
-					characters in a line.
+					Characters in a line.
 					</span>
 				</div>
 
@@ -318,7 +327,7 @@
 
 				<div class='setting'>
 					<span class='settingText'>
-						Presentation with long textlines (e.g. bible passages) maximum Font-Size
+						Presentation with long text lines (e.g. Bible Passages) maximum Font-Size
 					</span>
 					<label class='right'>
 						<input id='presentationLongTextFontSize' type='number' min='1' max='1000'
@@ -347,14 +356,6 @@
 							value="100" oninput='stagemonitorSettings.inputChanged(this)'>
 						%
 					</label>
-				</div>
-
-				<div class='setting'>
-					Clock Mode
-					<select id='clockMode' onchange='stagemonitorSettings.selectChanged(this)'>
-						<option value=''>Show clock with seconds (hh:mm:ss)</option>
-						<option value='clockWithoutSeconds'>Show clock without seconds (hh:mm)</option>
-				   </select>
 				</div>
 
 				<div class='setting'>
