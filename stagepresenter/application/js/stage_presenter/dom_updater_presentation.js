@@ -213,9 +213,14 @@ function PresentationDomUpdater() {
 					groupElement.classList.add('groupWithText')
 				}
 
+				const isMusicInfo = (slide.lineHasMusicInfo || [])[i]
+				if (isMusicInfo) {
+					lineSpan.classList.add('musicInfo')
+				}
+
 				const textSpan = document.createElement('span')
 				textSpan.classList.add('text')
-				textSpan.innerText = line.trim()
+				textSpan.innerText = line
 
 				lineSpan.appendChild(textSpan)
 				slideElement.appendChild(lineSpan)

@@ -39,9 +39,21 @@ function Group(name, color, slides) {
 	}
 }
 
-function Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage,
-	lineNumbers, enabled=true, forceKeepLinebreaks=false, showImageFullscreen=false,
-	showImageLarger=false) {
+function Slide(
+	rawText,
+	previewImage,
+	lines,
+	label,
+	color,
+	slideNotes,
+	isBiblePassage,
+	lineNumbers,
+	enabled=true,
+	forceKeepLinebreaks=false,
+	showImageFullscreen=false,
+	showImageLarger=false,
+	lineHasMusicInfo=[]
+) {
 	return {
 		rawText: rawText,
 		previewImage: previewImage,
@@ -54,7 +66,8 @@ function Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePa
 		forceKeepLinebreaks: forceKeepLinebreaks,
 		showImageFullscreen: showImageFullscreen,
 		showImageLarger: showImageLarger,
-		slideNotes: slideNotes
+		slideNotes: slideNotes,
+		lineHasMusicInfo: lineHasMusicInfo
 	}
 }
 
@@ -87,21 +100,31 @@ function ProPresenterParser() {
 	function parseSlide(rawText, label, color, previewImage = undefined,
 						assumeIsBiblePassage = false, enabled = true, slideNotes = "") {
 		let keepLinebreaks = false
+		const features = localStorage.features.split(' ')
+		const slideNotesReplaceSlideContent = features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0
+		if (slideNotesReplaceSlideContent) {
+			rawText = slideNotes
+			slideNotes = ""
+			keepLinebreaks = true
+		} else if (!features.includes("showSlideNotes")) {
+			slideNotes = ""
+		}
+
 		if (label != undefined && (/\$stagepresenter:keepLinebreaks/i).test(label)) {
 			label = label.replace(/\$stagepresenter:keepLinebreaks/i, "")
 			keepLinebreaks = true
 		}
 		if (label != undefined && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImageFullscreen/i, "")
-			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, keepLinebreaks, true, false)
+			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, true, false)
 		}
 		if (label != undefined && (/\$stagepresenter:showImageLarger/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImageLarger/i, "")
-			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, keepLinebreaks, false, true)
+			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, true)
 		}
 		if (label != undefined && (/\$stagepresenter:showImage/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImage/i, "")
-			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, keepLinebreaks, false, false)
+			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, false)
 		}
 
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
@@ -130,6 +153,14 @@ function ProPresenterParser() {
 			bibleReferenceRegex = /$.^/
 		}
 
+		function removeEmptyLines(lines) {
+			return lines.filter(line => line.trim().length > 0)
+		}
+
+		function trimEndOfLine(line) {
+			return line.replace(/\s*$/, '')
+		}
+
 		function removeBibleReference(strings) {
 			if (strings.length > 1) {
 				const stringsWithoutBibleRef = strings.filter(s => !bibleReferenceRegex.test(s))
@@ -143,11 +174,30 @@ function ProPresenterParser() {
 			return strings
 		}
 
+		function getLineHasMusicInfo(lines) {
+			const musicalCharacters = [
+				"c", "d", "e", "f", "g", "a", "b", "h",
+				"C", "D", "E", "F", "G", "A", "B", "H",
+				"♭", "𝄫", "#", "♯", "♮", "m", "𝄞", "𝄢",
+				"1", "2", "3", "4", "5", "6", "7", "8", "9", "x",
+				"𝄀", "𝄁", "𝄂", "𝄃", "𝄄", "𝄅", "𝄆", "𝄇", "𝄈",
+				" ", "-", "_", ",", ".", ":", "/", "|", "(", ")", "{", "}", "?", "$"
+			]
+			let lineHasMusicInfo = []
+			for (let line of lines) {
+				const tmp = line.replace("sus", "x").replace("rif", "x")
+				lineHasMusicInfo.push(
+					line.split(' ').length / tmp.length >= 0.25 &&
+					line.split('').every(c => musicalCharacters.includes(c))
+				)
+			}
+			return lineHasMusicInfo
+		}
+
 		let textBoxes = []
 		if (rawText.length > 0) {
 			textBoxes = rawText.split('\r')
 		}
-		const features = localStorage.features.split(' ')
 		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
 		const improveBiblePassages = features.includes('improveBiblePassages')
 
@@ -171,10 +221,11 @@ function ProPresenterParser() {
 				if (isBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
 				}
-				lines = textBoxes[0].trim().split('\n')
+				lines = textBoxes[0].split('\n')
 			} else {
-				lines = textBoxes.join('\n').trim().split('\n')
+				lines = textBoxes.join('\n').split('\n')
 			}
+			lines = removeEmptyLines(lines)
 			if (isBiblePassage) {
 				lines = removeBibleReference(lines)
 			}
@@ -215,19 +266,24 @@ function ProPresenterParser() {
 								const verseNumber = verseNumbersAndIndices[i][0]
 								const index = verseNumbersAndIndices[i][1]
 								if (index > 0) {
-									newLines.push(line.substring(previousIndex, index).trim())
+									newLines.push(
+										trimEndOfLine(line.substring(previousIndex, index))
+									)
 								}
 								previousIndex = index
 							}
 						}
 					}
 
-					newLines.push(line.substring(previousIndex, line.length).trim())
+					newLines.push(
+						trimEndOfLine(line.substring(previousIndex, line.length))
+					)
 				}
 
 				return newLines
 			}
 			lines = fixNewLineOfBiblePassage(lines)
+			lines = removeEmptyLines(lines)
 
 			let lineNumbers = undefined
 			let firstVerseNumber = undefined
@@ -258,17 +314,26 @@ function ProPresenterParser() {
 
 			// Fix slidelabel to show wich verses are actually in slide
 			label = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, label)
-			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, lineNumbers, enabled, keepLinebreaks, false)
+			let lineHasMusicInfo = []
+			if (slideNotesReplaceSlideContent) {
+				lineHasMusicInfo = getLineHasMusicInfo(lines)
+			}
+			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, lineNumbers, enabled, keepLinebreaks, false, false, lineHasMusicInfo)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
 				const text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
-				lines = text.trim().split('\n')
+				lines = text.split('\n')
 				for (let i = 0; i < lines.length; i++) {
-					lines[i] = lines[i].trim()
+					lines[i] = trimEndOfLine(lines[i])
 				}
 			}
-			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, undefined, enabled, keepLinebreaks, false)
+			lines = removeEmptyLines(lines)
+			let lineHasMusicInfo = []
+			if (slideNotesReplaceSlideContent) {
+				lineHasMusicInfo = getLineHasMusicInfo(lines)
+			}
+			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, undefined, enabled, keepLinebreaks, false, false, lineHasMusicInfo)
 		}
 	}
 
@@ -322,14 +387,8 @@ function ProPresenterParser() {
 			let newSlides = []
 			for (const slide of group.groupSlides) {
 				const features = localStorage.features.split(' ')
-				let slideNotes = slide.slideNotes.trim()
+				let slideNotes = slide.slideNotes
 				let slideText = slide.slideText
-				if (features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0) {
-					slideText = slideNotes
-					slideNotes = ""
-				} else if (!features.includes("showSlideNotes")) {
-					slideNotes = ""
-				}
 
 				const newSlide = parseSlide(
 					slideText,

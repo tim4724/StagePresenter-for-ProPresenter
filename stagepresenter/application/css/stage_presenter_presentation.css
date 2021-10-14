@@ -196,3 +196,8 @@
 	display: none;
 	margin-right: 0;
 }
+
+.line.musicInfo {
+	color: #ffde3b;
+	white-space: pre;
+}
