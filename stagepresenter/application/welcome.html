@@ -87,19 +87,21 @@
 				<span id='stageAppConnectionResult'></span>
 			</div>
 
-			<div id="useChromeWarning" class="onlyChromeSupportedHint">
-				&#9888; Only Google Chrome is supported!
+			<div class='setting'>
+				<div id="useChromeWarning" class="onlyChromeSupportedHint">
+					&#9888; Only Google Chrome is supported!
+				</div>
+
+				<button id='connectButton'
+						onclick='connectionSettings.connect()'>
+					Test Connection and Save
+				</button>
+
+				<button id='resetButton' disabled
+						onclick='connectionSettings.initInputsFromStorage()'>
+					Reset
+				</button>
 			</div>
-
-			<button id='connectButton'
-					onclick='connectionSettings.connect()'>
-				Test Connection and Save
-			</button>
-
-			<button id='resetButton' disabled
-					onclick='connectionSettings.initInputsFromStorage()'>
-				Reset
-			</button>
 		</section>
 
 		<section class='settingGroup' id='electronAppSettings' style='display: none'>

@@ -236,7 +236,7 @@ function createWelcomeWindow () {
 		darkTheme: true,
 		title: 'Welcome to StagePresenter',
 		width: 1024,
-		height: 700,
+		height: 760,
 		center: true,
 		fullscreenable: false,
 		maximizable: false,
