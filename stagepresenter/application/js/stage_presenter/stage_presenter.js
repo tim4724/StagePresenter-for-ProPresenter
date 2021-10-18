@@ -26,7 +26,6 @@ function StagePresenter() {
 
 	if (location.href.startsWith("http")) {
 		document.title = "StagePresenter Demo"
-		document.getElementById('settingsButton').style.display = ""
 	}
 
 	function issuePresentationReload() {

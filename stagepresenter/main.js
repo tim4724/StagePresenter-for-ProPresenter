@@ -171,6 +171,20 @@ async function createStagePresenterWindow(displayBounds) {
 			welcomeWindow.webContents.send('updateDisplays')
 		}
 	})
+	stagePresenterWindow.webContents.setWindowOpenHandler(
+		details => {
+			if (details.url.endsWith("settings.html")) {
+				const b = stagePresenterWindow.getBounds()
+				const display = screen.getDisplayMatching(b)
+				const primaryDisplay = screen.getPrimaryDisplay()
+				if (display.id == primaryDisplay.id) {
+					stagePresenterWindow.close()
+				}
+				createSettingsWindow()
+			}
+			return { action: 'deny' }
+		}
+	)
 	stagePresenterWindow.show()
 
 	localStorageGet("showOperatorWindow").then(showOperatorWindow => {
@@ -181,6 +195,9 @@ async function createStagePresenterWindow(displayBounds) {
 }
 
 function createSettingsWindow () {
+	if (welcomeWindow && !welcomeWindow.isDestroyed()) {
+		welcomeWindow.close()
+	}
 	if (settingsWindow && !settingsWindow.isDestroyed()) {
 		settingsWindow.close()
 	}
@@ -340,8 +357,9 @@ function screenConfigChanged() {
 		}
 
 		if (waitingForDisplay) {
+			const displayId = await localStorageGet('showOnDisplay')
 			const allDisplays = screen.getAllDisplays()
-			if (allDisplays.length > 1) {
+			if (displayId !== undefined && displayId !== '-1' && allDisplays.length > 1) {
 				const display = getDisplayById(displayId, allDisplays)
 				if (display) {
 					waitingForDisplay = false
@@ -349,6 +367,8 @@ function screenConfigChanged() {
 				} else {
 					console.log('Still waiting for display')
 				}
+			} else {
+				console.log('Still waiting for display')
 			}
 		}
 	}, 2000)
@@ -452,12 +472,9 @@ function getDisplayById(id, allDisplays) {
 }
 
 function rectIntersectionAmount(a, b) {
-	const max = Math.max
-	const min = Math.min
-
-	const top = max(a.y, b.y)
-  	const bottom = min(a.y + a.height, b.y + b.height)
-	const left = max(a.x, b.x)
-	const right = min(a.x + a.width, b.x + b.width)
-	return max(0, right - left) * max(0, bottom - top)
+	const top = Math.max(a.y, b.y)
+  	const bottom = Math.min(a.y + a.height, b.y + b.height)
+	const left = Math.max(a.x, b.x)
+	const right = Math.min(a.x + a.width, b.x + b.width)
+	return Math.max(0, right - left) * Math.max(0, bottom - top)
 }
