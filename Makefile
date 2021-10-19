@@ -1,3 +1,6 @@
+install:
+	cd stagepresenter && npm install
+
 start:
 	npm start --prefix stagepresenter --unhandled-rejections=strict
 
@@ -16,6 +19,9 @@ packageAll: icns
 		--out "build"
 
 appstore: icns
+	@echo "--- Installing required npm modules  ---"
+	npm i -g electron-packager electron-osx-sign
+	cd build && npm i @electron/universal
 	@echo "--- Packaging x64 application ---"
 	electron-packager stagepresenter \
 		--platform=mas \
@@ -33,11 +39,11 @@ appstore: icns
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
 	@echo "--- Merge x64 and arm64 application ---"
-	node -e "async function main() {await require('@electron/universal').makeUniversalApp({ \
-			x64AppPath: process.cwd() + '/build/StagePresenter-mas-x64/StagePresenter.app', \
-			arm64AppPath: process.cwd() + '/build/StagePresenter-mas-arm64/StagePresenter.app', \
-			outAppPath: process.cwd() + '/build/StagePresenter-mas-universal/StagePresenter.app', \
-			force: true})}; main();"
+	cd build && node -e "async function main() {await require('@electron/universal').makeUniversalApp({ \
+		x64AppPath: process.cwd() + '/StagePresenter-mas-x64/StagePresenter.app', \
+		arm64AppPath: process.cwd() + '/StagePresenter-mas-arm64/StagePresenter.app', \
+		outAppPath: process.cwd() + '/StagePresenter-mas-universal/StagePresenter.app', \
+		force: true})}; main();"
 	@echo "--- Signing universal application ---"
 	electron-osx-sign "build/StagePresenter-mas-universal/StagePresenter.app" \
 		--platform=mas \
@@ -49,6 +55,16 @@ appstore: icns
 		/Applications \
 		--sign "3rd Party Mac Developer Installer: Tim Vogel (5ZH48MPAM3)" \
 		"build/StagePresenter-mas-universal/StagePresenter.pkg"
+	@echo "--- Remove node_modules and package json in dir build ---"
+		rm -r build/node_modules
+		rm build/package.json
+		rm build/package-lock.json
+	@echo "--- Remove icon files in dir build ---"
+		rm -r build/icon.iconset
+		rm build/icon.icns
+	@echo "--- Remove temp mas builds ---"
+		rm -r build/StagePresenter-mas-arm64
+		rm -r build/StagePresenter-mas-x64
 
 verify_appstore:
 	codesign -dv -r- "build/StagePresenter-mas-universal/StagePresenter.app"
