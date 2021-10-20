@@ -35,7 +35,7 @@ app.setAboutPanelOptions({
 	authors: ['Tim Vogel']
 })
 
-ipcMain.on('displaySelected', (event, arg) => {
+ipcMain.on('displaySelected', (event) => {
 	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed()) {
 		stagePresenterWindow.close()
 	}
@@ -55,6 +55,22 @@ ipcMain.on('displaySelected', (event, arg) => {
 		}
 	})
 })
+ipcMain.handle('get-open-at-login', (event) => {
+	return app.getLoginItemSettings().openAtLogin
+})
+ipcMain.handle('is-stagepresenter-window-visible', (event) => {
+	return stagePresenterWindow != undefined &&
+		stagePresenterWindow.isVisible()
+})
+ipcMain.handle('get-all-displays', (event) => {
+	return screen.getAllDisplays()
+})
+ipcMain.handle('get-primary-display-id', (event) => {
+	return screen.getPrimaryDisplay().id
+})
+ipcMain.handle('set-login-item-settings', (event, settings) => {
+	app.setLoginItemSettings(settings)
+})
 
 async function createStagePresenterWindow(displayBounds) {
 	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed()) {
@@ -73,13 +89,7 @@ async function createStagePresenterWindow(displayBounds) {
 			backgroundColor: '#000000',
 			darkTheme: true,
 			title: 'StagePresenter',
-			show: false,
-			webPreferences: {
-				nodeIntegration: false,
-				contextIsolation: true,
-				enableRemoteModule: false,
-				nativeWindowOpen: true
-			}
+			show: false
 		})
 	} else {
 		let bounds = {x: undefined, y: undefined, width: 4096, height: 2304}
@@ -114,12 +124,6 @@ async function createStagePresenterWindow(displayBounds) {
 			fullscreen: isFullscreen,
 			title: 'StagePresenter',
 			show: false,
-			webPreferences: {
-				nodeIntegration: false,
-				contextIsolation: true,
-				enableRemoteModule: false,
-				nativeWindowOpen: true
-			}
 		})
 	}
 	stagePresenterWindow.webContents.setMaxListeners(100)
@@ -212,8 +216,7 @@ function createSettingsWindow () {
 		maximizable: false,
 		webPreferences: {
 			nodeIntegration: true,
-			contextIsolation: false,
-			enableRemoteModule: true
+			contextIsolation: false
 		}
 	})
 	settingsWindow.loadFile(`${__dirname}/application/settings.html`)
@@ -242,8 +245,7 @@ function createWelcomeWindow () {
 		maximizable: false,
 		webPreferences: {
 			nodeIntegration: true,
-			contextIsolation: false,
-			enableRemoteModule: true
+			contextIsolation: false
 		},
 	})
 	welcomeWindow.loadFile(`${__dirname}/application/welcome.html`)
@@ -259,7 +261,7 @@ async function createOperatorWindow () {
 
 	const boundsValue = await localStorageGet("operatorWindowBounds")
 
-	let bounds = {x: undefined, y: undefined, width: 350, height: 108}
+	let bounds = { x: undefined, y: undefined, width: 350, height: 108 }
 	if (boundsValue != undefined && boundsValue.length > 0) {
 		// TODO: avoid controller is behind Stagemonitor
 		const v = boundsValue.split(';')
@@ -389,8 +391,7 @@ app.whenReady().then(async () => {
 		paintWhenInitiallyHidden: false,
 		webPreferences: {
 			nodeIntegration: false,
-			contextIsolation: true,
-			enableRemoteModule: false
+			contextIsolation: true
 		}
 	})
 	dummyWindow.loadFile(__filename)

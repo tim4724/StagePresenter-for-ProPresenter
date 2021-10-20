@@ -1,54 +1,47 @@
 "use strict"
 
 function ApplicationSettings() {
-	let remote, ipcRenderer
+	let ipcRenderer = undefined
 	try {
-		({ remote, ipcRenderer } = require('electron'))
+		({ ipcRenderer } = require('electron'))
 	} catch (e) {
+		console.log(e)
 	}
-	if (!remote && !ipcRenderer) {
+	if (ipcRenderer == undefined) {
 		console.log('electron remote and ipcRenderer are not available')
 		return
 	}
 
-	document.getElementById('electronAppSettings').style.display = ''
 	const displaySelectElement = document.getElementById('showOnDisplay')
 	const displayNoneOptionElement = document.getElementById('showOnDisplayNone')
-
 	const autoStartElement = document.getElementById('autoStart')
-	autoStartElement.checked = remote.app.getLoginItemSettings().openAtLogin
 
 	ipcRenderer.on('updateDisplays', function() {
 		displaySelectElement.disabled = true
 		setTimeout(updateDisplaySelect, 500)
 	})
+	updateOpenAtLogin()
 	updateDisplaySelect()
+	setInterval(updateOpenAtLogin, 1000)
 
-	function updateDisplaySelect() {
+	async function updateOpenAtLogin() {
+		const openAtLogin = await ipcRenderer.invoke('get-open-at-login')
+		autoStartElement.checked = openAtLogin
+	}
+
+	async function updateDisplaySelect() {
 		displaySelectElement.innerText = ''
 		let showOnDisplay = localStorage.showOnDisplay || -1
 
-		let stagePresenterWindowIsVisible = undefined
-		if (remote != undefined) {
-			try {
-				const wins = remote.BrowserWindow.getAllWindows()
-				const stagePresenterWindow = wins.find(w => w.title === 'StagePresenter')
-				if (stagePresenterWindow) {
-					stagePresenterWindowIsVisible = stagePresenterWindow.isVisible()
-				} else {
-					stagePresenterWindowIsVisible = false
-				}
-			} catch (e) {
-				stagePresenterWindowIsVisible = false
-			}
-		}
-		if (stagePresenterWindowIsVisible == false) {
+		const isStagePresenterWindowVisible =
+			await ipcRenderer.invoke('is-stagepresenter-window-visible')
+		if (!isStagePresenterWindowVisible) {
 			localStorage.showOnDisplay = '-1'
 			showOnDisplay = -1
 		}
 
-		const displays = remote.screen.getAllDisplays()
-		const primaryDisplayId = remote.screen.getPrimaryDisplay().id
+		const displays = await ipcRenderer.invoke('get-all-displays')
+		const primaryDisplayId = await ipcRenderer.invoke('get-primary-display-id')
 
 		displaySelectElement.appendChild(displayNoneOptionElement)
 
@@ -98,7 +91,8 @@ function ApplicationSettings() {
 	}
 
 	function startAtLogin(input) {
-		remote.app.setLoginItemSettings({openAtLogin: input.checked})
+		const settings = { openAtLogin: input.checked }
+		ipcRenderer.invoke('set-login-item-settings', settings)
 	}
 
 	function onDisplaySelected(option) {
@@ -106,6 +100,7 @@ function ApplicationSettings() {
 		ipcRenderer.send('displaySelected')
 	}
 
+	document.getElementById('electronAppSettings').style.display = ''
 	return {
 		onDisplaySelected: onDisplaySelected,
 		startAtLogin: startAtLogin
