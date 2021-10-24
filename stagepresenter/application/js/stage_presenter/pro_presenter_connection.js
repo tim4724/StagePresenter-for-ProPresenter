@@ -265,12 +265,13 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
-				remoteWebSocket.send(Actions.playlistRequestAll)
-
 				if (currentPresentationDataCache === data_string) {
 					// Nothing changed in the presentation...
 					break
 				}
+
+				clearTimeout(playlistRequestAllTimeout)
+				remoteWebSocket.send(Actions.playlistRequestAll)
 
 				function firstSlideWidth(presentation, callback) {
 					// TODO: better/faster parser jpeg byte array?
