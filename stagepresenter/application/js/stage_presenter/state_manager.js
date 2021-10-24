@@ -49,7 +49,10 @@ function StateManager(stateBroadcastChannel) {
 			}
 
 			const items = playlist.items
-			const playlistItemIndicesByName = getAllIndices(items, i => i.text === currentPresentation.name)
+			let playlistItemIndicesByName = []
+			if (currentPresentation != undefined) {
+				playlistItemIndicesByName = getAllIndices(items, i => i.text === currentPresentation.name)
+			}
 			const playlistItemIndexByPath = items.findIndex(i => i.location === currentPresentationPath)
 
 			let playlistItemIndex = -1
