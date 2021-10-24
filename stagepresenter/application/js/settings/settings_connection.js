@@ -179,7 +179,7 @@ function ConnectionSettings() {
 					localStorage.remoteAppPass = password
 				}
 
-				const version = data.majorVersion + '.' + data.minorVersion
+				const version = data.majorVersion
 				const msg = 'Pro Presenter Version ' + version
 				showResult(proPresenterVersionElement, true, msg)
 			} else if (data.acn === 'ath') {
