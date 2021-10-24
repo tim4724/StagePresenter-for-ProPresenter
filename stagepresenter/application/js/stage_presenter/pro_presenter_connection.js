@@ -23,7 +23,7 @@ function ProPresenterConnection(stateManager, host) {
 
 	const Actions = {
 		playlistRequestAll: JSON.stringify({action: 'playlistRequestAll'}),
-		authenticate: (p) => JSON.stringify({action: 'authenticate', protocol: '740', password: p}),
+		authenticate: (p) => JSON.stringify({action: 'authenticate', protocol: '799', password: p}),
 		ath: (p) => JSON.stringify({ acn: 'ath', pwd: p, ptl: 610 }),
 		stageDisplaySets: JSON.stringify({action: "stageDisplaySets"}),
 		fv: (uid) => JSON.stringify({acn:"fv", uid: uid}),
