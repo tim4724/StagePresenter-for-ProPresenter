@@ -199,9 +199,6 @@ async function createStagePresenterWindow(displayBounds) {
 }
 
 function createSettingsWindow () {
-	if (welcomeWindow && !welcomeWindow.isDestroyed()) {
-		welcomeWindow.close()
-	}
 	if (settingsWindow && !settingsWindow.isDestroyed()) {
 		settingsWindow.close()
 	}
@@ -239,7 +236,7 @@ function createWelcomeWindow () {
 		darkTheme: true,
 		title: 'Welcome to StagePresenter',
 		width: 1024,
-		height: 760,
+		height: 860,
 		center: true,
 		fullscreenable: false,
 		maximizable: false,
