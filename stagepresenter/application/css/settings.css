@@ -137,6 +137,11 @@ main {
 	color: #b98b00;
 }
 
+#proPresenterVersionWarning {
+	margin: 8px;
+	color: #b98b00;
+}
+
 .nonElectron #useChromeWarning {
 	display: block;
 }
