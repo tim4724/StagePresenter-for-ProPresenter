@@ -206,7 +206,7 @@ function createSettingsWindow () {
 	settingsWindow = new BrowserWindow({
 		backgroundColor: '#000000',
 		darkTheme: true,
-		title: 'Stagemonitor Settings',
+		title: 'StagePresenter Settings',
 		width: 1200,
 		height: 800,
 		fullscreenable: false,
@@ -282,7 +282,7 @@ async function createOperatorWindow () {
 		backgroundColor: '#000000',
 		opacity: 0.7,
 		darkTheme: true,
-		title: 'Stagemonitor Controller',
+		title: 'StagePresenter Controller',
 		minWidth: 80,
 		minHeight: 108,
 		maxHeight: 256,
