@@ -46,6 +46,7 @@ function ProPresenterConnection(stateManager, host) {
 
 	let displaySlidesFromStageDisplayTimeout = undefined
 	let playlistRequestAllTimeout = undefined
+	let presentationRequestAfterSlideClickTimeout = undefined
 
 	function disconnect() {
 		if (remoteWebSocket) {
@@ -356,11 +357,25 @@ function ProPresenterConnection(stateManager, host) {
 				const index = parseInt(data.slideIndex)
 				stateManager.onNewSlideIndex(presentationPath, index, true)
 
-				// Reload presentation in case something changed
-				// Instead of requesting current presentation,
-				// we request a specific presentation using the presentationPath
-				// Because we can set presentationSlideQuality
-				remoteWebSocket.send(Actions.presentationRequest(presentationPath))
+				clearTimeout(presentationRequestAfterSlideClickTimeout)
+
+				const action = Actions.presentationRequest(presentationPath)
+				if (presentationPath != stateManager.getCurrentPresentationPath()) {
+					// Request the presentation, as it probably changed...
+					remoteWebSocket.send(action)
+				} else {
+					// Reload presentation in case something changed
+					// Instead of requesting current presentation,
+					// we request a specific presentation using the presentationPath
+					// Because we can set presentationSlideQuality
+					// However reload after timeout to reduce the number of actions sent,
+					// if someone clicks many slides in a short timeframe.
+					presentationRequestAfterSlideClickTimeout = setTimeout(
+						function() { remoteWebSocket.send(action) },
+						800
+					)
+				}
+
 				break
 			case 'audioTriggered':
 				const name = data.audioName
