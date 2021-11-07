@@ -54,7 +54,7 @@ function PresentationDomUpdater() {
 		previewElement.src = 'img/black16x9.png'
 		slideImagesCache = presentation.groups.map(g => g.slides.map(s => s.previewImage)).flat()
 		slideNotes = presentation.groups.map(g => g.slides.map(s => s.slideNotes)).flat()
-		if (slideNotes.some(n => n.length > 0)) {
+		if (slideNotes.some(n => n != undefined && n.length > 0)) {
 			slideNotesElement.style.display = "block"
 		} else {
 			slideNotes = []
