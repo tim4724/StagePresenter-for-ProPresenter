@@ -1,7 +1,7 @@
 {
     "name": "StagePresenter",
-    "version": "0.3.0",
-    "description": "A better stage monitor",
+    "version": "0.3.1",
+    "description": "A better Stage Display",
     "main": "main.js",
     "scripts": {
         "start": "electron . --trace-warnings --unhandled-rejections=strict"
@@ -9,10 +9,14 @@
     "repository": "https://github.com/tim4724/StagePresenter-for-ProPresenter",
     "keywords": [
         "ProPresenter",
-        "stage display",
-        "stage",
-        "monitor",
-        "confidence"
+        "Church",
+        "House of Worship",
+        "Stage Display",
+        "Stage Monitor",
+        "Stage",
+        "Song",
+        "Lyrics",
+        "Confidence"
     ],
     "author": "Tim Vogel",
     "license": "",
