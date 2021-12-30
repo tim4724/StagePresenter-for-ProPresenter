@@ -479,7 +479,8 @@ function ProPresenterConnection(stateManager, host) {
 			// Change current presentation
 			if (currentPresentationPath === '' && currentPresentation) {
 				const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
-				if (ns && allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
+				if (ns && allPresentationSlides.length > 0
+					&& allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
 					const presentation = currentPresentation
 					if (nextStageDisplaySlide) {
 						// Update the one slide that is already in the presentation
@@ -494,7 +495,8 @@ function ProPresenterConnection(stateManager, host) {
 					stateManager.onNewPresentation(presentation, '', false)
 					stateManager.onNewSlideIndex('', 0, true)
 					return
-				} else if (allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid) {
+				} else if (allPresentationSlides.length > 0
+					&& allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid) {
 					const presentation = currentPresentation
 					// Update the one slide that is already in the presentation
 					const lastGroup = presentation.groups[presentation.groups.length - 1]
