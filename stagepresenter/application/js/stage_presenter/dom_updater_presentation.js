@@ -45,7 +45,7 @@ function PresentationDomUpdater() {
 	function initStyle() {
 		const imageFullScreenHeight = (presentationContainerElement.clientHeight
 			- (titleElement.scrollHeight * 2)) * 0.95
-		const imageLargerHeight = (imageFullScreenHeight / 2)
+		const imageLargerHeight = (presentationContainerElement.clientHeight / 2)
 		style.innerText =
 			'#presentationContainer.noText .group .imageContainer,' +
 			'#presentationContainer .group .showImageFullscreen .imageContainer {' +
