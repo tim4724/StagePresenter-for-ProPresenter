@@ -71,11 +71,26 @@ function ProPresenterDemoConnection(stateManager) {
 						"previewImage": "img/banner16x9.png"
 					}
 				],
-				"hasLongTextLines": true
+				"hasLongTextLines": false
 			}
 		]
 	}
-	const mediaPresentationName = 'Some Video.mp4'
+	const mediaPresentation = {
+		"name": "Some Video.mp4",
+		"groups": [
+			{
+				"name": "",
+				"slides": [
+					{
+						"rawText": "",
+						"lines": [],
+						"previewImage": "img/video_thumbnail.jpg"
+					}
+				],
+				"hasLongTextLines": false
+			}
+		]
+	}
 	const playlist = Playlist(
 		'Playlist',
 		[
@@ -83,7 +98,7 @@ function ProPresenterDemoConnection(stateManager) {
 			PlaylistItem(presentationSong.name, 'playlistItemTypePresentation', '0:1'),
 			PlaylistItem('Sermon', 'playlistItemTypeHeader', '0:2'),
 			PlaylistItem(presentationImageSlide.name, 'playlistItemTypePresentation', '0:3'),
-			PlaylistItem(mediaPresentationName, 'playlistItemTypeVideo', '0:4'),
+			PlaylistItem(mediaPresentation.name, 'playlistItemTypeVideo', '0:4'),
 			PlaylistItem(presentationBible.name, 'playlistItemTypePresentation', '0:5')
 		],
 		'0'
@@ -143,7 +158,7 @@ function ProPresenterDemoConnection(stateManager) {
 					}
 				}
 
-				if (scrollToSlideIndex) {
+				if (scrollToSlideIndex != undefined) {
 					// Scroll slide
 					const path = stateManager.getCurrentPresentationPath()
 					stateManager.onNewSlideIndex(path, scrollToSlideIndex, true)
@@ -158,13 +173,8 @@ function ProPresenterDemoConnection(stateManager) {
 							break
 						case '0:3':
 							timeout = 9000
-
-							const slide = Slide('', 'img/play_banner.png', [], undefined, undefined, "", false, [])
-							const group = Group('', '', [slide])
-							const p = Presentation(mediaPresentationName, [group])
-							stateManager.onNewPresentation(p, '0:4')
-
-							let videoCountDown = 8
+							loadPresentation('0:4')
+							let videoCountDown = 6
 							stateManager.onNewVideoCountdown('', '00:00:0' + videoCountDown)
 							let videoInterval = setInterval(function() {
 								videoCountDown -= 1
@@ -175,6 +185,7 @@ function ProPresenterDemoConnection(stateManager) {
 									stateManager.onNewVideoCountdown('', '')
 								}
 							}, 1000)
+							stateManager.forceShowVideoCountdown()
 							break
 						case '0:4':
 							timeout = 6000
@@ -198,12 +209,15 @@ function ProPresenterDemoConnection(stateManager) {
 			presentation = presentationSong
 		} else if(presentationPath == '0:3') {
 			presentation = presentationImageSlide
+		} else if (presentationPath == '0:4') {
+			presentation = mediaPresentation
 		} else if(presentationPath == '0:5') {
 			presentation = presentationBible
 		}
 		if (presentation) {
 			const oldPres = stateManager.getCurrentPresentation()
 			const animate = (!oldPres || oldPres.name !== presentation.name)
+			stateManager.onNewSlideIndex(presentationPath, 0, true)
 			stateManager.onNewPresentation(presentation, presentationPath, animate)
 		}
 	}

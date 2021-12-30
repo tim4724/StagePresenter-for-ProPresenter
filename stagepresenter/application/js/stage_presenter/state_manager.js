@@ -135,7 +135,6 @@ function StateManager(stateBroadcastChannel) {
 	function onNewSlideIndex(presentationPath, index, animate = true) {
 		currentSlideIndex = index
 		currentSlideCleared = false
-
 		if (currentPresentationPath === presentationPath) {
 			presentationDomUpdater.changeCurrentSlideAndScroll(index, animate)
 			if (stateBroadcastChannel) {
@@ -145,6 +144,7 @@ function StateManager(stateBroadcastChannel) {
 			// Wait till presentation is loaded...
 			console.log("Do not change current slide, first load presentation")
 		}
+		currentPresentationPath = presentationPath
 	}
 
 	function clearSlideIndex(animate = true) {
@@ -185,6 +185,10 @@ function StateManager(stateBroadcastChannel) {
 		errorDomUpdater.clearConnectionErrors()
 	}
 
+	function forceShowVideoCountdown() {
+		timerDomUpdater.forceShowVideo()
+	}
+
 	if (stateBroadcastChannel) {
 		const state = getState()
 		stateBroadcastChannel.postMessage({ action: 'stateUpdate', value: state })
@@ -199,6 +203,7 @@ function StateManager(stateBroadcastChannel) {
 		onNewClock: onNewClock,
 		onNewTimer: onNewTimer,
 		onNewVideoCountdown: onNewVideoCountdown,
+		forceShowVideoCountdown: forceShowVideoCountdown,
 		onNewConnectionErrors: onNewConnectionErrors,
 		clearConnectionErrors: clearConnectionErrors,
 		getPlaylist: getPlaylist,
