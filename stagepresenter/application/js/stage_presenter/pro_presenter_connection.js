@@ -17,8 +17,8 @@ function ProPresenterConnection(stateManager, host) {
 	const connectionStatusElement = document.getElementById("connectionStatus")
 	const proPresenterParser = ProPresenterParser()
 
-	const lowResolutionImageWidth = 57 // Image height 32px
-	const middleResolutionImageWidth = 426 // Image height 240px; Takes approx 10x as long to load compared to the low resolution image
+	const lowResolutionImageWidth = 32 // Image height 18px
+	const middleResolutionImageWidth = 640 // Image height 360px
 	const highResolutionImageWidth = 1280 // Image Height 720px
 
 	const Actions = {
@@ -45,6 +45,7 @@ function ProPresenterConnection(stateManager, host) {
 	let existingStageDisplayUid = undefined
 
 	let displaySlidesFromStageDisplayTimeout = undefined
+	let displayPresentationFromAudioTriggeredTimeout = undefined
 	let playlistRequestAllTimeout = undefined
 	let presentationRequestAfterSlideClickTimeout = undefined
 
@@ -266,7 +267,8 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
-				if (currentPresentationDataCache === data_string) {
+				const startDate = Date.now()
+				if (currentPresentationDataCache && isEqual(currentPresentationDataCache, data)) {
 					// Nothing changed in the presentation...
 					break
 				}
@@ -278,7 +280,8 @@ function ProPresenterConnection(stateManager, host) {
 					const groups = presentation.groups
 					if (groups.length > 0
 						&& groups[0].slides.length > 0
-						&& groups[0].slides[0].previewImage) {
+						&& groups[0].slides[0].previewImage
+						&& groups[0].slides[0].previewImage.length > 64) {
 						const image = new Image()
 						image.onload = function() {
 							callback(image.naturalWidth)
@@ -326,29 +329,36 @@ function ProPresenterConnection(stateManager, host) {
 					const currentPresentationPath = stateManager.getCurrentPresentationPath()
 					const presentationPath = data.presentationPath
 
-					if (!width || width <= lowResolutionImageWidth) {
-						currentPresentationDataCache = data_string
-						stateManager.onNewPresentation(presentation, presentationPath, shouldAnimate(presentation))
-
-						if (width) {
-							remoteWebSocket.send(Actions.presentationRequest(presentationPath, middleResolutionImageWidth))
-							const slides = presentation.groups.map(g => g.slides).flat()
-							if (slides.length < 16 && slides.every(s => s.rawText.length === 0)) {
-								// Load presentation with an even higher image resolution
-								remoteWebSocket.send(Actions.presentationRequest(presentationPath, highResolutionImageWidth))
-							}
-						}
-					} else if (!currentPresentationPath || currentPresentationPath == presentationPath) {
-						// The loaded presentation is just the current presentation with higher image resolution...
-						stateManager.onNewPresentation(presentation, presentationPath, false)
-					} else {
+					if (currentPresentationPath && currentPresentationPath != presentationPath) {
 						console.log("Not current presentation", {
 							firstSlideWidth: width,
 							currentPresentationPath: currentPresentationPath,
 							presentationPath: presentationPath,
 							presentation: presentation
 						})
+						return
 						// Not current presentation - ignore
+					}
+
+					const animate = shouldAnimate(presentation)
+					if (!width || width <= lowResolutionImageWidth) {
+						currentPresentationDataCache = data
+						stateManager.onNewPresentation(presentation, presentationPath, animate)
+
+						if (width) {
+							const slides = presentation.groups.map(g => g.slides).flat()
+							let resolution = undefined
+							if (slides.length > 16 || slides.some(s => s.rawText.length > 0)) {
+								resolution = middleResolutionImageWidth
+							} else {
+								// Load presentation with an even higher image resolution
+								resolution = highResolutionImageWidth
+							}
+							remoteWebSocket.send(Actions.presentationRequest(presentationPath, resolution))
+						}
+					} else {
+						// The loaded presentation is just the current presentation with higher image resolution...
+						stateManager.onNewPresentation(presentation, presentationPath, animate)
 					}
 				})
 				break
@@ -360,17 +370,18 @@ function ProPresenterConnection(stateManager, host) {
 
 				// Avoid that a presentation from stagedisplay-Api is displayed
 				clearTimeout(displaySlidesFromStageDisplayTimeout)
-
-				const presentationPath = data.presentationPath
-				const index = parseInt(data.slideIndex)
-				stateManager.onNewSlideIndex(presentationPath, index, true)
-
+				// Avoid that a presentation from "audioTriggered" action is displayed
+				clearTimeout(displayPresentationFromAudioTriggeredTimeout)
+				// Avoid that a presentation from earlier "presentationTriggerIndex" is requested
 				clearTimeout(presentationRequestAfterSlideClickTimeout)
 
+				const presentationPath = data.presentationPath
 				const action = Actions.presentationRequest(presentationPath)
 				if (presentationPath != stateManager.getCurrentPresentationPath()) {
-					// Request the presentation, as it probably changed...
+					// Request the presentation right now, as it probably changed...
 					remoteWebSocket.send(action)
+					// Ensure that new presentation will be displayed
+					currentPresentationDataCache = undefined
 				} else {
 					// Reload presentation in case something changed
 					// Instead of requesting current presentation,
@@ -378,19 +389,25 @@ function ProPresenterConnection(stateManager, host) {
 					// Because we can set presentationSlideQuality
 					// However reload after timeout to reduce the number of actions sent,
 					// if someone clicks many slides in a short timeframe.
-					presentationRequestAfterSlideClickTimeout = setTimeout(
-						function() { remoteWebSocket.send(action) },
-						800
-					)
+					presentationRequestAfterSlideClickTimeout = setTimeout(function() {
+						remoteWebSocket.send(action)
+					}, 800)
 				}
 
+				const index = parseInt(data.slideIndex)
+				stateManager.onNewSlideIndex(presentationPath, index, true)
 				break
 			case 'audioTriggered':
 				const name = data.audioName
-				const slide = Slide('', 'img/play_banner.png', [], undefined, undefined, "", false, [])
-				const group = Group('', '', [slide])
-				const p = Presentation(name, [group])
-				stateManager.onNewPresentation(p, '')
+				clearTimeout(displayPresentationFromAudioTriggeredTimeout)
+				// The timeout will be cancelled if these texts are part of a real presentation
+				displayPresentationFromAudioTriggeredTimeout = setTimeout(function() {
+					const slide = Slide('', 'img/play_banner.png', [], undefined, undefined, "", false, [])
+					const group = Group('', '', [slide])
+					const p = Presentation(name, [group])
+					stateManager.onNewPresentation(p, '')
+				}, 20)
+				stateManager.forceShowVideoCountdown()
 				break
 			case 'clearAudio':
 				// No use for that information at the moment
