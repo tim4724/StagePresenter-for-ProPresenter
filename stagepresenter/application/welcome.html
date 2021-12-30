@@ -28,14 +28,22 @@
 			<div class='settingGroupTitle'>ProPresenter Connection</div>
 
 			<div class='settingGroupHelpContainer'>
-				<div class='settingGroupHelpButton' onclick='settings.toggleSettingGroupHelp(this.parentElement); event.stopPropagation();'>?</div>
+				<div class='settingGroupHelpButton'
+					onclick='settings.toggleSettingGroupHelp(this.parentElement); event.stopPropagation();'>
+					?
+				</div>
 				<div class="settingGroupHelp" onclick='event.stopPropagation()'>
 					<span class="settingGroupTitle">ProPresenter Connection</span>
-					<div class="settingGroupHelpButton" onclick='settings.toggleSettingGroupHelp(this.parentElement.parentElement); event.stopPropagation();'>?</div><br>
+					<div class="settingGroupHelpButton"
+						onclick='settings.toggleSettingGroupHelp(this.parentElement.parentElement); event.stopPropagation();'>
+						?
+					</div>
+					<br>
 					Open the Preferences in ProPresenter and go to the Network tab.
-					<strong> Ensure that Network and the Remote Apps are enabled as shown in the screenshot.</strong>
+					<strong> Ensure that Network and the Remote Apps are enabled as shown in the screenshot.</strong><br>
 					<img src='img/pro_presenter_network_preferences.png'>
-					The port and the passwords need to be entered in StagePresenter.
+					The port and the passwords, if set, need to be entered in StagePresenter.
+					<strong>Note that you might need to close the ProPresenter Preferences window before connecting.</strong>
 				</div>
 			</div>
 
@@ -51,14 +59,14 @@
 					<input id='localMode' type='radio' name='localMode'
 						onchange='connectionSettings.selectModeLocal()'>
 					<span class='radio'></span>
-					Connect to ProPresenter instance on this computer
+					Connect to ProPresenter on <strong>this</strong> Computer
 					<span class="onlyChromeSupportedHint">(Only supported in Google Chrome)</span>
 				</label></div>
 				<div><label class='radioLabel'>
 					<input id='remoteMode' type='radio' name='remoteMode'
 						onchange='connectionSettings.selectModeRemote()'>
 					<span class='radio'></span>
-					Connect to ProPresenter instance on another computer
+					Connect to ProPresenter on <strong>another</strong> Computer
 					<span class="onlyChromeSupportedHint">(Only supported in Google Chrome)</span>
 				</label></div>
 			</div>
