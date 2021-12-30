@@ -404,6 +404,13 @@ app.whenReady().then(async () => {
 			features.push('doNotShowDisabledSlides')
 			await localStorageSet('features', features.join(' '))
 			await localStorageSet('localStorageVersion', '1')
+		} else if (parseInt(version) <= 1) {
+			const sidebarSize = await localStorageGet('sidebarMaxSize')
+			if (sidebarSize) {
+				await localStorageSet('sidebarSize', sidebarSize)
+				await localStorageSet('sidebarMaxSize', undefined)
+			}
+			await localStorageSet('localStorageVersion', '2')
 		}
 	} catch(e) {
 		console.log("localStorageVersionCheckFailed", e)

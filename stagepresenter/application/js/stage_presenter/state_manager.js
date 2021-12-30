@@ -38,7 +38,7 @@ function StateManager(stateBroadcastChannel) {
 	function updatePlaylist(playlistIndex) {
 		let playlist = getPlaylist(playlistIndex)
 
-		if (playlist == undefined) {
+		if (!playlist) {
 			// Clear Playlist and next presentation title
 			currentPlaylistIndex = -1
 			currentPlaylistItemIndex = -1
@@ -50,7 +50,7 @@ function StateManager(stateBroadcastChannel) {
 
 			const items = playlist.items
 			let playlistItemIndicesByName = []
-			if (currentPresentation != undefined) {
+			if (currentPresentation) {
 				playlistItemIndicesByName = getAllIndices(items, i => i.text === currentPresentation.name)
 			}
 			const playlistItemIndexByPath = items.findIndex(i => i.location === currentPresentationPath)
@@ -84,7 +84,7 @@ function StateManager(stateBroadcastChannel) {
 			}
 		}
 
-		if (stateBroadcastChannel !== undefined) {
+		if (stateBroadcastChannel) {
 			stateBroadcastChannel.postMessage({
 				action: 'playlistIndexAndItemIndex',
 				value: {
@@ -105,7 +105,7 @@ function StateManager(stateBroadcastChannel) {
 		currentPlaylists = playlists
 		currentPlaylistIndex = -1
 
-		if (stateBroadcastChannel !== undefined) {
+		if (stateBroadcastChannel) {
 			stateBroadcastChannel.postMessage({action: 'playlists', value: playlists})
 		}
 
@@ -121,23 +121,15 @@ function StateManager(stateBroadcastChannel) {
 
 		// Update presentation
 		presentationDomUpdater.displayPresentation(presentation, currentSlideIndex, animate)
-		if (stateBroadcastChannel !== undefined) {
-			stateBroadcastChannel.postMessage({action: 'presentationAndSlideIndex', value: {
-				presentation: presentation,
-				slideIndex: currentSlideIndex
-			}})
+		if (stateBroadcastChannel) {
+			stateBroadcastChannel.postMessage({
+				action: 'presentationAndSlideIndex',
+				value: {
+					presentation: presentation,
+					slideIndex: currentSlideIndex
+				}
+			})
 		}
-	}
-
-	function onNewMediaPresentation(name, presentationPath) {
-		renderPreviewImage('Media', name, 1920, 1080, (previewImage => {
-			const slide = Slide('', previewImage, [], undefined, undefined, "", false, [])
-			const group = Group('', '', [slide])
-			const animate = currentPresentation == undefined || currentPresentation.name !== name
-			currentSlideIndex = 0
-			onNewPresentation(Presentation('', [group]), presentationPath, animate)
-		}))
-		timerDomUpdater.forceShowVideo()
 	}
 
 	function onNewSlideIndex(presentationPath, index, animate = true) {
@@ -146,7 +138,7 @@ function StateManager(stateBroadcastChannel) {
 
 		if (currentPresentationPath === presentationPath) {
 			presentationDomUpdater.changeCurrentSlideAndScroll(index, animate)
-			if (stateBroadcastChannel !== undefined) {
+			if (stateBroadcastChannel) {
 				stateBroadcastChannel.postMessage({action: 'slideIndex', value: index})
 			}
 		} else {
@@ -156,7 +148,7 @@ function StateManager(stateBroadcastChannel) {
 	}
 
 	function clearSlideIndex(animate = true) {
-		if (stateBroadcastChannel !== undefined) {
+		if (stateBroadcastChannel) {
 			stateBroadcastChannel.postMessage({action: 'clearSlideIndex', value: undefined})
 		}
 		currentSlideCleared = true
@@ -193,7 +185,7 @@ function StateManager(stateBroadcastChannel) {
 		errorDomUpdater.clearConnectionErrors()
 	}
 
-	if (stateBroadcastChannel !== undefined) {
+	if (stateBroadcastChannel) {
 		const state = getState()
 		stateBroadcastChannel.postMessage({ action: 'stateUpdate', value: state })
 	}
@@ -201,7 +193,6 @@ function StateManager(stateBroadcastChannel) {
 	return {
 		onNewPlaylists: onNewPlaylists,
 		onNewPresentation: onNewPresentation,
-		onNewMediaPresentation: onNewMediaPresentation,
 		onNewSlideIndex: onNewSlideIndex,
 		clearSlideIndex: clearSlideIndex,
 		onNewMessage: onNewMessage,

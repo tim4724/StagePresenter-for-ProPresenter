@@ -8,7 +8,7 @@ function StageMonitorSettings() {
 	const showSlideNotes = document.getElementById('showSlideNotes')
 	const previewCheckboxInput = document.getElementById('showSmallSlidePreview')
 	const playlistCheckboxInput = document.getElementById('showPlaylist')
-	const sidebarMaxSizeInput = document.getElementById('sidebarMaxSize')
+	const sidebarSizeInput = document.getElementById('sidebarSize')
 	const slideNotesHeightInput = document.getElementById('slideNotesHeight')
 	const clockModeInput = document.getElementById('clockMode')
 	const minimumVideoLengthForTimer = document.getElementById('minimumVideoLengthForTimer')
@@ -74,8 +74,8 @@ function StageMonitorSettings() {
 			// as also defined in observer local storage
 			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides doNotShowSlideNotes'
 		}
-		if (localStorage.sidebarMaxSize === undefined) {
-			localStorage.sidebarMaxSize = 150
+		if (localStorage.sidebarSize === undefined) {
+			localStorage.sidebarSize = 150
 		}
 		if (localStorage.slideNotesHeight === undefined) {
 			localStorage.slideNotesHeight = 180
@@ -120,9 +120,9 @@ function StageMonitorSettings() {
 
 		if (!features.includes('showPlaylist') && !features.includes('showSmallSlidePreview')
 			|| !features.includes('showSidebarBottom') && !features.includes('showSidebarLeft')) {
-			sidebarMaxSizeInput.disabled = true
+			sidebarSizeInput.disabled = true
 		} else {
-			sidebarMaxSizeInput.disabled = false
+			sidebarSizeInput.disabled = false
 		}
 
 		slideNotesHeightInput.disabled = !features.includes('showSlideNotes')
@@ -175,10 +175,10 @@ function StageMonitorSettings() {
 
 		if(select.id === 'showSidebar' && changedFeature) {
 			if (features.includes('showSidebarBottom')) {
-				localStorage.sidebarMaxSize = 150
+				localStorage.sidebarSize = 150
 				features = features.filter(f => !['showSmallSlidePreview','showPlaylist'].includes(f))
 			} else if(features.includes('showSidebarLeft')) {
-				localStorage.sidebarMaxSize = 340
+				localStorage.sidebarSize = 340
 				if (!features.includes('showSmallSlidePreview')) {
 					features.push('showSmallSlidePreview')
 				}

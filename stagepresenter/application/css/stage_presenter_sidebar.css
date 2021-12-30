@@ -120,14 +120,16 @@ body:not(.showPlaylist):not(.showSmallSlidePreview) #timerContainer {
 
 .showSidebarBottom #preview {
 	order: -1;
+	height: 100%;
 }
 
 #preview {
 	display: none;
-	max-width: 100%;
-	max-height: 100%;
+	width: 100%;
 	object-fit: contain;
 	font-size: 2em;
+	background: #202020;
+	aspect-ratio: 16 / 9;
 }
 
 #timerContainer {

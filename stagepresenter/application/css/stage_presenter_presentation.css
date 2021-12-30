@@ -12,6 +12,9 @@
 	color: #ff7c00;
 	font-weight: normal;
 	font-size: 0.8em;
+	white-space:nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .group {
@@ -37,29 +40,25 @@
 	color: #ffde3b;
 	font-size: 0.5em;
 	margin-bottom: -0.1em;
+	background: #000000;
+	padding: 4px;
+}
+
+.group .imageContainer {
+	text-align: center;
+	height: 240px;
 }
 
 .group img {
-	height: 240px;
+	width: 100%;
+	height: 100%;
 	opacity: 0.25;
-	display: block;
-	margin: auto;
+	object-fit: contain;
+	object-position: center;
 }
 
 .currentGroup .currentSlide img {
 	opacity: 1;
-}
-
-#presentationContainer.noText .group img,
-#presentationContainer .group .showImageFullscreen img {
-	width: 100%;
-	height: auto;
-	max-height: 100vh;
-}
-
-#presentationContainer .group .showImageLarger img {
-	width: auto;
-	height: calc(50vh);
 }
 
 #presentationContainer.noText .currentSlide,

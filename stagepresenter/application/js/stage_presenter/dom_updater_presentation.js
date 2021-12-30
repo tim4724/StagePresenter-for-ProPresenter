@@ -8,6 +8,9 @@ function PresentationDomUpdater() {
 	const groupElements = presentationContainerElement.getElementsByClassName('group')
 	const slideNotesElement = document.getElementById('slideNotes')
 	const slideNotesContentElement = document.getElementById('slideNotesContent')
+	const style = document.createElement("style")
+	document.head.appendChild(style)
+	initStyle()
 
 	const previewElement = document.getElementById('preview')
 	let slideImagesCache = []
@@ -18,25 +21,14 @@ function PresentationDomUpdater() {
 
 	if (ResizeObserver) {
 		new ResizeObserver(entries => {
-			if (slideNotes.length <= 0) {
-				return
-			}
 			// Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
 			requestAnimationFrame(() => {
 				if (!Array.isArray(entries) || !entries.length) {
 					return
 				}
-				fixSlideNotesTextSize()
+				onresize()
 			})
 		}).observe(presentationContainerElement)
-		new ResizeObserver(entries => {
-			// Wrap in requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
-			requestAnimationFrame(() => {
-				if (!Array.isArray(entries) || !entries.length) {
-					return
-				}
-			})
-		}).observe(slideNotesElement)
 	} else {
 		window.onresize = onresize
 	}
@@ -44,10 +36,24 @@ function PresentationDomUpdater() {
 
 	let issueScrollTimeout = undefined
 	function onresize() {
+		initStyle()
 		clearTimeout(issueScrollTimeout)
 		fixGroupNameElementPosition()
 		fixSlidesTextSize()
 		issueScrollTimeout = setTimeout(scrollToCurrentSlide, 500)
+	}
+	function initStyle() {
+		const imageFullScreenHeight = (presentationContainerElement.clientHeight
+			- (titleElement.scrollHeight * 2)) * 0.95
+		const imageLargerHeight = (imageFullScreenHeight / 2)
+		style.innerText =
+			'#presentationContainer.noText .group .imageContainer,' +
+			'#presentationContainer .group .showImageFullscreen .imageContainer {' +
+			 	'height: ' + imageFullScreenHeight + 'px;' +
+			'}\n' +
+			'#presentationContainer .group .showImageLarger .imageContainer {' +
+				' height: ' + imageLargerHeight + 'px;'+
+			'}\n'
 	}
 
 	function displayPresentation(presentation, slideIndex, animate) {
@@ -108,8 +114,9 @@ function PresentationDomUpdater() {
 			} else {
 				presentationContainerElement.classList.remove('noText')
 			}
-			titleElement.innerHTML = presentation.name
+			titleElement.innerText = presentation.name
 			titleElement.style.display = presentation.name ? 'block' : 'none'
+			initStyle()
 
 			// Insert new elements
 			for (const group of presentation.groups) {
@@ -231,15 +238,17 @@ function PresentationDomUpdater() {
 				}
 			}
 
-			if (slide.lines.length <= 0 && slide.previewImage != undefined
-				&& slide.previewImage.length > 0) {
+			if (slide.lines.length <= 0 && slide.previewImage && slide.previewImage.length > 0) {
 				const image = new Image()
 				if (slide.previewImage.length > 64) {
 					image.src = 'data:image/jpeg;base64,' + slide.previewImage
 				} else {
 					image.src = slide.previewImage
 				}
-				slideElement.appendChild(image)
+				const imageContainer = document.createElement("div")
+				imageContainer.classList.add('imageContainer')
+				imageContainer.appendChild(image)
+				slideElement.appendChild(imageContainer)
 			}
 			if (slide.lines.length > 0 && slide.isBiblePassage) {
 				slideElement.classList.add('biblePassage')
@@ -325,15 +334,30 @@ function PresentationDomUpdater() {
 		const isLastSlideOfPresentation = slideElement === slideElements[slideElements.length - 1]
 		let scrollDeltaY = undefined
 
-		const groupTop = groupElement.getBoundingClientRect().top
-		if (isFirstSlideInGroup || groupElement.scrollHeight < (availableHeight * 0.8)) {
-			if (slideElements[0] === slideElement && titleElement.style.display != 'none' && slideElement.scrollHeight < (availableHeight * 0.5)) {
+
+		const slideElementHasImage = slideElement.getElementsByTagName('img').length > 0
+		const slideElementIsLarge = slideElement.scrollHeight > (availableHeight * 0.7)
+
+		if (slideElementHasImage && slideElementIsLarge) {
+			// Slide with a large image
+			// Scroll, so the image is at the center of the presentationContainer
+			const slideTop = slideElement.getBoundingClientRect().top
+			const slideHeight = slideElement.scrollHeight
+			scrollDeltaY = slideTop - ((availableHeight - slideHeight) / 2)
+		} else if (isFirstSlideInGroup || groupElement.scrollHeight < (availableHeight * 0.8)) {
+			const titleExists = titleElement.scrollHeight > 0
+			const isVeryFirstSlide = slideElements[0] === slideElement
+			if (titleExists && isVeryFirstSlide && !slideElementIsLarge) {
+				// Scroll to title element
 				scrollDeltaY = titleElement.getBoundingClientRect().top
 			} else {
 				// Whole group is fits on the screen or this is the first slide
+				// Scroll to Group Top
+				const groupTop = groupElement.getBoundingClientRect().top
 				scrollDeltaY = groupTop
 			}
 		} else {
+			const groupTop = groupElement.getBoundingClientRect().top
 			const slideTop = slideElement.getBoundingClientRect().top
 			const slideHeight = slideElement.scrollHeight
 			if (isLastSlideOfPresentation || slideHeight > (availableHeight * 0.8)) {

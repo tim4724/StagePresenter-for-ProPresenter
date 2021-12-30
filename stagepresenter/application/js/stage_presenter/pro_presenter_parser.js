@@ -97,8 +97,14 @@ function ProPresenterParser() {
 		return newPlaylists
 	}
 
-	function parseSlide(rawText, label, color, previewImage = undefined,
-						assumeIsBiblePassage = false, enabled = true, slideNotes = "") {
+	function parseSlide(rawText,
+						label,
+						color,
+						previewImage = undefined,
+						assumeIsBiblePassage = false,
+						enabled = true,
+						slideNotes = "",
+						playlistItemType = undefined) {
 		let keepLinebreaks = false
 		const features = localStorage.features.split(' ')
 		const slideNotesReplaceSlideContent = features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0
@@ -110,19 +116,23 @@ function ProPresenterParser() {
 			slideNotes = ""
 		}
 
-		if (label != undefined && (/\$stagepresenter:keepLinebreaks/i).test(label)) {
+		if (playlistItemType == "playlistItemTypeAudio" && !previewImage) {
+			previewImage = "img/play_banner.png"
+		}
+
+		if (label && (/\$stagepresenter:keepLinebreaks/i).test(label)) {
 			label = label.replace(/\$stagepresenter:keepLinebreaks/i, "")
 			keepLinebreaks = true
 		}
-		if (label != undefined && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
+		if (label && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImageFullscreen/i, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, true, false)
 		}
-		if (label != undefined && (/\$stagepresenter:showImageLarger/i).test(label)) {
+		if (label && (/\$stagepresenter:showImageLarger/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImageLarger/i, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, true)
 		}
-		if (label != undefined && (/\$stagepresenter:showImage/i).test(label)) {
+		if (label && (/\$stagepresenter:showImage/i).test(label)) {
 			label = label.replace(/\$stagepresenter:showImage/i, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, false)
 		}
@@ -130,12 +140,11 @@ function ProPresenterParser() {
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
-		const isBiblePassage = assumeIsBiblePassage || 
-			(label !== undefined && bibleRegex.test(label))
+		const isBiblePassage = assumeIsBiblePassage || (label && bibleRegex.test(label))
 
 		let bibleReferenceRegex
 		if (isBiblePassage) {
-			if (label === undefined || label.length === 0) {
+			if (!label) {
 				bibleReferenceRegex = bibleRegex
 			} else {
 				let bookAndChapter = label
@@ -144,9 +153,7 @@ function ProPresenterParser() {
 				if (colonIndex > 0) {
 					bookAndChapter = bookAndChapter.substr(0, colonIndex)
 				}
-				bibleReferenceRegex = new RegExp('^' +
-					escapeRegExp(bookAndChapter) +
-					':\\d+(-\\d+)?(\\s\\(.+\\))?$')
+				bibleReferenceRegex = new RegExp('^' + escapeRegExp(bookAndChapter) + ':\\d+(-\\d+)?(\\s\\(.+\\))?$')
 			}
 		} else {
 			// Always false...
@@ -164,7 +171,7 @@ function ProPresenterParser() {
 		function removeBibleReference(strings) {
 			if (strings.length > 1) {
 				const stringsWithoutBibleRef = strings.filter(s => !bibleReferenceRegex.test(s))
-				if (label === undefined || label.length === 0) {
+				if (!label) {
 					label = strings.find(s => bibleReferenceRegex.test(s))
 				}
 				if (stringsWithoutBibleRef.length > 0) {
@@ -202,7 +209,7 @@ function ProPresenterParser() {
 		const improveBiblePassages = features.includes('improveBiblePassages')
 
 		// Remove a textbox that only contains the label of the slide
-		if (label !== undefined && label.length > 5 && textBoxes.length > 1) {
+		if (label && label.length > 5 && textBoxes.length > 1) {
 			// We search the label in the textBoxes
 			let sortedTextBoxes = textBoxes.filter(
 				t => t.length > label.length + 8
@@ -301,7 +308,7 @@ function ProPresenterParser() {
 					if (match) {
 						const verseNumber = parseInt(match[1])
 						lines[i] = match[2]
-						if (firstVerseNumber === undefined) {
+						if (!firstVerseNumber) {
 							firstVerseNumber = verseNumber - (i > 0 ? 1 : 0)
 						}
 						lastVerseNumber = verseNumber
@@ -356,7 +363,7 @@ function ProPresenterParser() {
 
 	function parsePresentation(data) {
 		function asCSSColor(color) {
-			if (color === undefined || color.length === 0) {
+			if (!color || color.length === 0) {
 				return ''
 			} else {
 				return 'rgba(' + color.split(' ').map(c => c * 255).join(', ') + ')'
@@ -386,9 +393,9 @@ function ProPresenterParser() {
 
 			let newSlides = []
 			for (const slide of group.groupSlides) {
-				const features = localStorage.features.split(' ')
-				let slideNotes = slide.slideNotes
-				let slideText = slide.slideText
+				const slideText = slide.slideText
+				const slideNotes = slide.slideNotes
+				const playlistItemType = slide.playlistItemType
 
 				const newSlide = parseSlide(
 					slideText,
@@ -397,7 +404,8 @@ function ProPresenterParser() {
 					slide.slideImage,
 					isBiblePresentation || isBibleGroup,
 					slide.slideEnabled,
-					slideNotes
+					slideNotes,
+					playlistItemType
 				)
 
 				if (splitSlidesInGroups) {
@@ -471,7 +479,7 @@ function ProPresenterParser() {
 	}
 
 	function parseGroupName(groupName) {
-		if(groupName === undefined) {
+		if(!groupName) {
 			return ''
 		}
 		groupName = (groupName || '').trim().normalize()

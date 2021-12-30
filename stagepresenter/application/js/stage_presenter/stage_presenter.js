@@ -66,16 +66,31 @@ function StagePresenter() {
 						break
 					}
 					const presentationPath = item.location
-					if (item.type == 'playlistItemTypePresentation') {
-						stateManager.onNewSlideIndex(presentationPath, -1, true)
-						proPresenterConnection.loadPresentation(presentationPath)
-					} else {
-						// Only other known item type is
-						// playlistItemTypeVideo (also for images)
-						// Therefore show a media presentation
+
+					if (item.type != 'playlistItemTypePresentation') {
 						const name = item.text
-						stateManager.onNewMediaPresentation(name, presentationPath)
+						let previewImage = ''
+						switch (item.type) {
+							// "playlistItemTypeImage" does not exist, tough it should??
+							// Images are "playlistItemTypeVideo"
+							case 'playlistItemTypeVideo':
+							case 'playlistItemTypeAudio':
+							case 'playlistItemTypeImage':
+								previewImage = 'img/play_banner.png'
+								break
+							case 'playlistItemTypePlaceHolder':
+							default:
+								previewImage = 'img/circle_banner.png'
+								break
+						}
+						const slide = Slide('', previewImage, [], undefined, undefined, "", false, [])
+						const group = Group('', '', [slide])
+						const p = Presentation(name, [group])
+						stateManager.onNewPresentation(p, presentationPath)
 					}
+
+					stateManager.onNewSlideIndex(presentationPath, -1, true)
+					proPresenterConnection.loadPresentation(presentationPath)
 					break
 
 				case 'presentationAndSlideIndex':

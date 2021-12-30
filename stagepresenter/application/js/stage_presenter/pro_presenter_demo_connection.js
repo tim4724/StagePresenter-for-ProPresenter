@@ -136,14 +136,14 @@ function ProPresenterDemoConnection(stateManager) {
 				const currentPresentation = stateManager.getCurrentPresentation()
 
 				let scrollToSlideIndex = undefined
-				if (currentPresentation != undefined) {
+				if (currentPresentation) {
 					const nextSlideIndex = stateManager.getCurrentSlideIndex() + 1
 					if (nextSlideIndex < currentPresentation.groups.map(g => g.slides).flat().length) {
 						scrollToSlideIndex = nextSlideIndex
 					}
 				}
 
-				if (scrollToSlideIndex != undefined) {
+				if (scrollToSlideIndex) {
 					// Scroll slide
 					const path = stateManager.getCurrentPresentationPath()
 					stateManager.onNewSlideIndex(path, scrollToSlideIndex, true)
@@ -158,7 +158,11 @@ function ProPresenterDemoConnection(stateManager) {
 							break
 						case '0:3':
 							timeout = 9000
-							stateManager.onNewMediaPresentation(mediaPresentationName, '0:4')
+
+							const slide = Slide('', 'img/play_banner.png', [], undefined, undefined, "", false, [])
+							const group = Group('', '', [slide])
+							const p = Presentation(mediaPresentationName, [group])
+							stateManager.onNewPresentation(p, '0:4')
 
 							let videoCountDown = 8
 							stateManager.onNewVideoCountdown('', '00:00:0' + videoCountDown)
@@ -197,9 +201,9 @@ function ProPresenterDemoConnection(stateManager) {
 		} else if(presentationPath == '0:5') {
 			presentation = presentationBible
 		}
-		if (presentation != undefined) {
+		if (presentation) {
 			const oldPres = stateManager.getCurrentPresentation()
-			const animate = (oldPres == undefined || oldPres.name !== presentation.name)
+			const animate = (!oldPres || oldPres.name !== presentation.name)
 			stateManager.onNewPresentation(presentation, presentationPath, animate)
 		}
 	}

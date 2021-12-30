@@ -20,16 +20,16 @@ function LocalStorageObserver(localStorageChanged,
 	let reloadPresentationTimeout = undefined
 	let localStorageChangedCallbackTimeout = undefined
 
-	const style = document.createElement("style");
-	document.head.appendChild(style);
+	const style = document.createElement("style")
+	document.head.appendChild(style)
 
 	function update() {
 		if (localStorage.features === undefined) {
 			// as also defined in settings_stagemonitor.js
 			localStorage.features = 'flexibleSlides improveBiblePassages showSidebarBottom onlyFirstTextInSlide doNotShowDisabledSlides doNotShowSlideNotes'
 		}
-		if (localStorage.sidebarMaxSize === undefined) {
-			localStorage.sidebarMaxSize = 150
+		if (localStorage.sidebarSize === undefined) {
+			localStorage.sidebarSize = 150
 		}
 		if (localStorage.slideNotesHeight === undefined) {
 			localStorage.slideNotesHeight = 180
@@ -50,18 +50,18 @@ function LocalStorageObserver(localStorageChanged,
 
 		if (getComputedStyle(sidebarContainerElement).position === 'absolute') {
 			const clockWidth = clockElement.scrollWidth
-			sidebarContainerElement.style.maxWidth = ''
-			sidebarContainerElement.style.maxHeight = ''
+			sidebarContainerElement.style.width = ''
+			sidebarContainerElement.style.height = ''
 		} else {
 			if (features.includes('showSidebarBottom')) {
-				sidebarContainerElement.style.maxWidth = ''
-				sidebarContainerElement.style.maxHeight = localStorage.sidebarMaxSize + 'px'
+				sidebarContainerElement.style.width = ''
+				sidebarContainerElement.style.height = localStorage.sidebarSize + 'px'
 			} else if (features.includes('showSidebarLeft')) {
-				sidebarContainerElement.style.maxWidth = localStorage.sidebarMaxSize + 'px'
-				sidebarContainerElement.style.maxHeight = ''
+				sidebarContainerElement.style.width = localStorage.sidebarSize + 'px'
+				sidebarContainerElement.style.height = ''
 			} else {
-				sidebarContainerElement.style.maxWidth = ''
-				sidebarContainerElement.style.maxHeight = ''
+				sidebarContainerElement.style.width = ''
+				sidebarContainerElement.style.height = ''
 			}
 		}
 
@@ -93,7 +93,7 @@ function LocalStorageObserver(localStorageChanged,
 			const heightInPx = parseInt(localStorage.previewImageHeight)
 			if(Number.isInteger(heightInPx)) {
 				style.appendChild(document.createTextNode(
-					".group img {height: " + heightInPx + "px;}"))
+					".group .imageContainer { height: " + heightInPx + "px; }"))
 			}
 		}
 		if (localStorage.customCSS) {
