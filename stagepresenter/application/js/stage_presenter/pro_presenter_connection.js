@@ -553,7 +553,9 @@ function ProPresenterConnection(stateManager, host) {
 			stateManager.onNewPresentation(presentation, '', true)
 		}
 
-		if (currentPresentationPath === '' || !currentPresentation) {
+		if (currentPresentationPath === '' && currentPresentation && !currentPresentation.name) {
+			// Assumably, a stage display presentation is already displayed
+			// Update that presentation right away and display new slides
 			displaySlides()
 		} else {
 			clearTimeout(displaySlidesFromStageDisplayTimeout)

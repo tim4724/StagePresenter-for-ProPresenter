@@ -2,8 +2,20 @@
 
 function Operator() {
 	const emptyPresentation = {
-		name: "No Presentation selected",
-		groups: [],
+		"name": "No Presentation selected",
+		"groups": [
+			{
+				"name": "",
+				"slides": [
+					{
+						"rawText": "",
+						"lines": [],
+						"previewImage": "img/stagepresenter_banner.png"
+					}
+				],
+				"hasLongTextLines": false
+			}
+		]
 	}
 
 	if (window.BroadcastChannel == undefined) {
@@ -160,6 +172,7 @@ function Operator() {
 
 		let currentOptGroupElement = undefined
 		if (playlist != undefined && playlist.items != undefined) {
+			presentationSelect.disabled = false
 			for (let i = 0; i < playlist.items.length; i++) {
 				const item = playlist.items[i]
 				if (item.type == 'playlistItemTypeHeader') {
@@ -173,6 +186,8 @@ function Operator() {
 					parent.appendChild(optionElement)
 				}
 			}
+		} else {
+			presentationSelect.disabled = true
 		}
 	}
 
@@ -185,7 +200,8 @@ function Operator() {
 			return buildOptionElement("Slide " + (i + 1), i, i === slideIndex)
 		}
 
-		if (presentation != undefined) {
+		if (presentation && !isEqual(presentation, emptyPresentation)) {
+			slideSelect.disabled = false
 			let i = 0;
 			for (const group of presentation.groups) {
 				if (group.name.length > 0 && presentation.groups.length > 1) {
@@ -205,6 +221,8 @@ function Operator() {
 					}
 				}
 			}
+		} else {
+			slideSelect.disabled = true
 		}
 	}
 
@@ -318,6 +336,7 @@ function Operator() {
 			}
 		},
 		clearPresentation: () => {
+			changePlaylistItemIndex('-1')
 			broadcastChannel.postMessage({
 				action: 'presentationAndSlideIndex',
 				value: { presentation: emptyPresentation, slideIndex: -1 }

@@ -50,6 +50,7 @@ table button, table select {
 
 /* Tooltip text */
 .tooltip .tooltiptext {
+	pointer-events: none;
 	visibility: hidden;
 	width: 140px;
 	background-color: #414141;
