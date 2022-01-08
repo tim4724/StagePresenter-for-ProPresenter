@@ -180,7 +180,7 @@ function StageMonitorSettings() {
 		updateZoom()
 		setInterval(updateZoom, 1000)
 	} else {
-		zoomInput.style.display = 'none'
+		document.getElementById('zoomSetting').style.display = 'none'
 	}
 	initInputs()
 	return {
