@@ -38,7 +38,6 @@ Extensive settings ![](/readme_res/StagePresenter_Settings.png?raw=true) | Small
 - Operator Preview window
 - Add Descriptions, help and tips in the settings
 - Windows and Linux support?
-- Native Apple-M1 support
 
 ## I noticed a bug / I have an idea for an awesome feature
 Please let me know if you notice a bug.
