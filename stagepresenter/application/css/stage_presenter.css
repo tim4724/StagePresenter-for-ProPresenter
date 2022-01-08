@@ -102,10 +102,11 @@ main {
 #demoMode {
 	position: absolute;
 	bottom: 0;
-    left: 50%;
+	left: 50%;
 	transform: translate(-50%, 0);
 	padding: 16px;
 	opacity: 0.8;
 	background: #ff7c00;
 	font-size: 2em;
+	z-index: 50001;
 }

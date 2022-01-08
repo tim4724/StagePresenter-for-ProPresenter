@@ -15,57 +15,22 @@ function StageMonitorSettings() {
 	const alignLeftCharactersThreshold = document.getElementById('alignLeftCharactersThreshold')
 	const inputs = stagePresenterSettings.querySelectorAll('input, textarea')
 
-	let zoomValue = 1
-
-	let BrowserWindow
+	let zoomValue = 100
+	let ipcRenderer = undefined
 	try {
-		const { remote } = require('electron')
-		BrowserWindow = remote.BrowserWindow
+		({ ipcRenderer } = require('electron'))
 	} catch (e) {
-		document.getElementById('zoomSetting').style.display = 'none'
+		console.log(e)
 	}
 
-	let getZoomValueInterval = undefined
-	let webContents = undefined
-	let width = 1920
-	let height = 1080
-
-	function listenToZoomChanges() {
-		const wins = BrowserWindow.getAllWindows()
-		const stagemonitorWindow = wins.find(w => w.title === 'StagePresenter')
-		if (stagemonitorWindow
-				&& !stagemonitorWindow.isDestroyed()
-				&& stagemonitorWindow.isVisible()
-				&& stagemonitorWindow.webContents) {
-			webContents = stagemonitorWindow.webContents
-			const size = stagemonitorWindow.getContentSize()
-			width = size[0]
-			height = size[1]
-
-			function reset() {
-				webContents = undefined
-				clearInterval(getZoomValueInterval)
-				setTimeout(listenToZoomChanges, 1000)
-			}
-
-			function getZoomValue() {
-				try {
-					if (!stagemonitorWindow.isDestroyed() && stagemonitorWindow.isVisible()) {
-						zoomInput.value = 0 | (webContents.zoomFactor * 100)
-						zoomValue = webContents.zoomFactor
-						// updateZoomPreviewIFrame()
-					} else {
-						reset()
-					}
-				} catch(e) {
-					reset()
-				}
-			}
-			clearInterval(getZoomValueInterval)
-			getZoomValueInterval = setInterval(getZoomValue, 1000)
-		}  else {
-			webContents = undefined
-			setTimeout(listenToZoomChanges, 1000)
+	async function updateZoom() {
+		const zoomFactor = await ipcRenderer.invoke('get-stage-presenter-window-zoom-factor')
+		if (zoomFactor >= 0) {
+			zoomValue = (0 | (zoomFactor * 100))
+			zoomInput.disabled = false
+			zoomInput.value = zoomValue
+		} else {
+			zoomInput.disabled = true
 		}
 	}
 
@@ -137,12 +102,17 @@ function StageMonitorSettings() {
 		}
 	}
 
-	function zoomInputChanged() {
-		zoomValue = zoomInput.value / 100.0
-		if (webContents) {
-			webContents.setZoomFactor(zoomValue)
+	async function zoomInputChanged() {
+		if (ipcRenderer) {
+			let z = zoomInput.value
+			const success = await ipcRenderer.invoke('set-stage-presenter-window-zoom-factor', z / 100.0)
+			if (success) {
+				zoomValue = z
+			} else {
+				zoomInput.value = zoomValue
+				zoomInput.disabled = true
+			}
 		}
-		// updateZoomPreviewIFrame()
 	}
 
 	function checkBoxChanged(element) {
@@ -202,30 +172,17 @@ function StageMonitorSettings() {
 		localStorage.minimumVideoLengthForTimer = minimumVideoLength
 	}
 
-	/*
-	function updateZoomPreviewIFrame() {
-		const previewIFrameWidth = previewIframe.clientWidth
-		previewIframe.height = previewIFrameWidth * height / width
-		let scale = previewIFrameWidth / width * zoomValue
-
-		const contentWindow = previewIframe.contentWindow
-		if(contentWindow) {
-			const body = contentWindow.window.document.body
-
-			body.style.zoom = scale
-			body.style.height = 1 / scale * 100 + 'vh'
-		}
-	}*/
-
 	function inputChanged(element) {
 		localStorage[element.id] = element.value
 	}
 
-	if (BrowserWindow) {
-		listenToZoomChanges()
+	if (ipcRenderer) {
+		updateZoom()
+		setInterval(updateZoom, 1000)
+	} else {
+		zoomInput.style.display = 'none'
 	}
 	initInputs()
-	// updateZoomPreviewIFrame()
 	return {
 		zoomChanged: zoomInputChanged,
 		checkBoxChanged: checkBoxChanged,

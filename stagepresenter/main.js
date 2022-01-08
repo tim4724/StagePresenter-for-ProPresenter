@@ -60,7 +60,7 @@ ipcMain.handle('get-open-at-login', (event) => {
 })
 ipcMain.handle('is-stagepresenter-window-visible', (event) => {
 	return stagePresenterWindow != undefined &&
-		stagePresenterWindow.isVisible()
+		!stagePresenterWindow.isDestroyed() && stagePresenterWindow.isVisible()
 })
 ipcMain.handle('get-all-displays', (event) => {
 	return screen.getAllDisplays()
@@ -70,6 +70,24 @@ ipcMain.handle('get-primary-display-id', (event) => {
 })
 ipcMain.handle('set-login-item-settings', (event, settings) => {
 	app.setLoginItemSettings(settings)
+})
+ipcMain.handle('get-stage-presenter-window-zoom-factor', (event) => {
+	if (stagePresenterWindow &&
+		!stagePresenterWindow.isDestroyed() &&
+		stagePresenterWindow.webContents) {
+		return stagePresenterWindow.webContents.zoomFactor
+	} else {
+		return -1
+	}
+})
+ipcMain.handle('set-stage-presenter-window-zoom-factor', (event, zoomFactor) => {
+	if (stagePresenterWindow &&
+		!stagePresenterWindow.isDestroyed() &&
+		stagePresenterWindow.webContents) {
+		stagePresenterWindow.webContents.setZoomFactor(zoomFactor)
+		return true
+	}
+	return false
 })
 
 async function createStagePresenterWindow(displayBounds) {

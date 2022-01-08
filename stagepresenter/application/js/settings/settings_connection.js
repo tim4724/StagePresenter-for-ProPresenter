@@ -22,7 +22,6 @@ function ConnectionSettings() {
 	const electronAppSettingsElement = document.getElementById('electronAppSettings')
 	const useChromeWarningElement = document.getElementById("useChromeWarning")
 
-
 	if (!runningInElectron) {
 		document.body.classList.add("nonElectron")
 		if (!isSettingsWindow) {
