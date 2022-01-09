@@ -80,6 +80,9 @@ icns:
 	convert icon.png -resize 512x512 build/icon.iconset/icon512x512.png
 	iconutil -c icns build/icon.iconset
 
+ico:
+	convert icon.png -define icon:auto-resize=256,128,64,32,16 "build/icon.ico"
+
 favicon:
 	convert icon.png -crop 896x896+64+64 -define icon:auto-resize=256,128,64,32,16 "www/favicon.ico"
 
