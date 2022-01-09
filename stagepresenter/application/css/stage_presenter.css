@@ -26,7 +26,7 @@ span, div, h1 {
 	cursor: default;
 }
 
-body:hover #settingsButton, body:hover #closeButton {
+body:hover #settingsButton, body:hover #closeButton, body:hover #controllerButton {
 	display: inline;
 }
 
@@ -34,16 +34,24 @@ body:hover #demoMode {
 	opacity: 0.95;
 }
 
-#settingsButton, #closeButton {
+#settingsButton, #closeButton, #controllerButton {
 	display: none;
 	position: absolute;
 	font-size: 2em;
 	z-index: 99999999;
 }
 
+#controllerButton, #settingsButton {
+	left: 16px;
+	min-width: 160px;
+}
+
 #settingsButton {
 	top: 16px;
-	left: 16px;
+}
+
+#controllerButton {
+	top: calc(24px + 1.5em);
 }
 
 #closeButton {

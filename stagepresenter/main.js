@@ -2,6 +2,46 @@
 const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu, shell }
 	= require('electron')
 
+const additionalData = { open: app.commandLine.getSwitchValue('open') }
+if (!app.requestSingleInstanceLock(additionalData)) {
+	app.quit()
+} else {
+	app.on('second-instance', (event, commandLine, workingDirectory, additionalData) => {
+		if (additionalData.open) {
+			if (additionalData.open == "settings"){
+				createSettingsWindow()
+			} else if (additionalData.open == "controller") {
+				createOperatorWindow()
+			} else {
+				console.log("Unexpected additionalData", additionalData)
+			}
+		} else {
+			console.log("Unexpected additionalData", additionalData)
+		}
+	})
+}
+if (app.setUserTasks) {
+	// Windows menu when right click on app icon
+	app.setUserTasks([
+		{
+			program: process.execPath,
+			arguments: '--open=settings',
+			iconPath: process.execPath,
+			iconIndex: 0,
+			title: 'Open Settings',
+			description: 'Open the settings window'
+		},
+		{
+			program: process.execPath,
+			arguments: '--open=controller',
+			iconPath: process.execPath,
+			iconIndex: 0,
+			title: 'Open Controller',
+			description: 'Open the controller window'
+		}
+	])
+}
+
 // App Icon color: #3478F6 - #53B6F9
 // App Icon middle color: #4497f8
 
@@ -103,10 +143,11 @@ async function createStagePresenterWindow(displayBounds) {
 			y: displayBounds.y,
 			width: displayBounds.width,
 			height: displayBounds.height,
-			fullscreen: true,
 			backgroundColor: '#000000',
 			darkTheme: true,
+			fullscreen: true,
 			title: 'StagePresenter',
+			titleBarStyle: 'hidden', // For Windows, to not show File, Edit, ... bar
 			show: false
 		})
 	} else {
@@ -135,7 +176,6 @@ async function createStagePresenterWindow(displayBounds) {
 			height: bounds.height,
 			minWidth: 640,
 			minHeight: 360,
-			fullscreen: false,
 			backgroundColor: '#000000',
 			darkTheme: true,
 			fullscreenable: true,
@@ -146,7 +186,8 @@ async function createStagePresenterWindow(displayBounds) {
 	}
 	stagePresenterWindow.webContents.setMaxListeners(100)
 
-	if (displayBounds != undefined) {
+	const isMac = process.platform === 'darwin'
+	if (isMac && displayBounds != undefined) {
 		// When showing the operator window, this line is important to keep the
 		// stagePresenterWindow always in fullscreen always on top on mac os
 		stagePresenterWindow.setAlwaysOnTop(true, "pop-up-menu")
@@ -165,7 +206,7 @@ async function createStagePresenterWindow(displayBounds) {
 	stagePresenterWindow.once('close', function (ev) {
 		try {
 			if (ev.sender === stagePresenterWindow) {
-				if (displayBounds != undefined) {
+				if (move && displayBounds != undefined) {
 					stagePresenterWindow.removeListener('move', move)
 				} else {
 					const b = stagePresenterWindow.getBounds()
@@ -181,7 +222,7 @@ async function createStagePresenterWindow(displayBounds) {
 				}
 			}
 		} catch (e) {
-			console.log('stagePresenterWindow close did not work')
+			console.log('stagePresenterWindow close did not work', e)
 		}
 	})
 	stagePresenterWindow.once('closed', function (ev) {
@@ -192,6 +233,9 @@ async function createStagePresenterWindow(displayBounds) {
 		if (welcomeWindow && !welcomeWindow.isDestroyed()) {
 			welcomeWindow.webContents.send('updateDisplays')
 		}
+		if(operatorWindow && !operatorWindow.isDestroyed()) {
+			operatorWindow.close()
+		}
 	})
 	stagePresenterWindow.webContents.setWindowOpenHandler(
 		details => {
@@ -200,13 +244,19 @@ async function createStagePresenterWindow(displayBounds) {
 				const display = screen.getDisplayMatching(b)
 				const primaryDisplay = screen.getPrimaryDisplay()
 				if (display.id == primaryDisplay.id) {
+					// TODO: Not if not fullscreen!
 					stagePresenterWindow.close()
 				}
 				createSettingsWindow()
+			} else if (details.url.endsWith("operator.html")) {
+				createOperatorWindow()
 			}
 			return { action: 'deny' }
 		}
 	)
+
+	// TODO: Windows Set Overlay Icon based on connection status?
+	// TODO: Windows Set Thumbbar Icons
 	stagePresenterWindow.show()
 
 	localStorageGet("showOperatorWindow").then(showOperatorWindow => {
@@ -225,7 +275,7 @@ function createSettingsWindow () {
 		backgroundColor: '#000000',
 		darkTheme: true,
 		title: 'StagePresenter Settings',
-		width: 1200,
+		width: 1024,
 		height: 800,
 		fullscreenable: false,
 		maximizable: false,
@@ -254,14 +304,14 @@ function createWelcomeWindow () {
 		darkTheme: true,
 		title: 'Welcome to StagePresenter',
 		width: 1024,
-		height: 860,
+		height: 900,
 		center: true,
 		fullscreenable: false,
 		maximizable: false,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false
-		},
+		}
 	})
 	welcomeWindow.loadFile(`${__dirname}/application/welcome.html`)
 	welcomeWindow.once('closed', function (ev) {
@@ -276,7 +326,12 @@ async function createOperatorWindow () {
 
 	const boundsValue = await localStorageGet("operatorWindowBounds")
 
-	let bounds = { x: undefined, y: undefined, width: 350, height: 108 }
+	let bounds = { x: undefined, y: undefined, width: 350, height: 124 }
+	const isMac = process.platform === 'darwin'
+	if (isMac) {
+		bounds.height = 108
+	}
+
 	if (boundsValue != undefined && boundsValue.length > 0) {
 		// TODO: avoid controller is behind Stagemonitor
 		const v = boundsValue.split(';')
@@ -312,10 +367,12 @@ async function createOperatorWindow () {
 		alwaysOnTop: true,
 		fullscreen: false,
 		maximizable: false,
+		autoHideMenuBar: true
 	})
 	// Important to set visible on all workspaces with visibleOnFullScreen
 	operatorWindow.setVisibleOnAllWorkspaces(true, {visibleOnFullScreen: true})
 	operatorWindow.loadFile(`${__dirname}/application/operator.html`)
+	// operatorWindow.setMenu()
 
 	// Show window after setting things up
 	operatorWindow.show()
@@ -325,21 +382,29 @@ async function createOperatorWindow () {
 	if (bounds.x == undefined || bounds.y == undefined) {
 		const pos = operatorWindow.getPosition()
 		const display = screen.getDisplayNearestPoint({x: pos[0], y: pos[1]})
-		bounds.x = display.bounds.x + display.bounds.width - bounds.width
-		bounds.y = display.bounds.y + display.bounds.height - bounds.height
+		const isMac = process.platform === 'darwin'
+		const workArea = isMac ? display.bounds : display.workArea
+		bounds.x = workArea.x + workArea.width - bounds.width
+		bounds.y = workArea.y + workArea.height - bounds.height
 	}
 	// Always set the position explicitly, because mac is reluctant sometimes
 	operatorWindow.setPosition(bounds.x, bounds.y, true)
 
 	// Gets automatically hidden for any reason, therefore show dock again
-	app.dock.show()
+	if (app.dock) {
+		app.dock.show()
+	}
 
 	function focus() {
-		operatorWindow.setOpacity(1.0)
+		if (operatorWindow && !operatorWindow.isDestroyed()) {
+			operatorWindow.setOpacity(1)
+		}
 	}
 	operatorWindow.on('focus', focus)
 	function blur() {
-		operatorWindow.setOpacity(0.7)
+		if (operatorWindow && !operatorWindow.isDestroyed()) {
+			operatorWindow.setOpacity(0.7)
+		}
 	}
 	operatorWindow.on('blur', blur)
 
@@ -376,16 +441,16 @@ function screenConfigChanged() {
 		if (waitingForDisplay) {
 			const displayId = await localStorageGet('showOnDisplay')
 			const allDisplays = screen.getAllDisplays()
-			if (displayId !== undefined && displayId !== '-1' && allDisplays.length > 1) {
+			if (displayId && displayId !== '-1' && allDisplays.length > 1) {
 				const display = getDisplayById(displayId, allDisplays)
 				if (display) {
 					waitingForDisplay = false
 					createStagePresenterWindow(display.bounds)
 				} else {
-					console.log('Still waiting for display')
+					console.log('Still waiting for display (a)')
 				}
 			} else {
-				console.log('Still waiting for display')
+				console.log('Still waiting for display (b)')
 			}
 		}
 	}, 2000)
@@ -398,7 +463,9 @@ app.whenReady().then(async () => {
 	const initApplicationMenu = require('./init_application_menu');
 	initApplicationMenu.initApplicationMenu(app, Menu)
 
-	app.dock.setMenu(dockMenu)
+	if (app.dock) {
+		app.dock.setMenu(dockMenu)
+	}
 
 	dummyWindow = new BrowserWindow({
 		show: false,
@@ -418,7 +485,8 @@ app.whenReady().then(async () => {
 	try {
 		const version = await localStorageGet('localStorageVersion')
 		if (version == undefined || version.length <= 0) {
-			let features = (await localStorageGet('features')).split(' ')
+			const featuresString = await localStorageGet('features')
+			let features = featuresString.split(' ')
 			features.push('doNotShowDisabledSlides')
 			await localStorageSet('features', features.join(' '))
 			await localStorageSet('localStorageVersion', '1')
@@ -471,8 +539,13 @@ function checkIfShouldQuit() {
 		return
 	}
 	const wins = BrowserWindow.getAllWindows()
-	if (wins.length === 0 || wins.length === 1 && wins[0] === dummyWindow) {
+	if (wins.length === 0 || (wins.length == 1 && wins[0] === dummyWindow)) {
 		app.quit()
+	} else if (wins.length === 2) {
+		if (wins[0] === dummyWindow && wins[1] === operatorWindow ||
+				wins[1] === dummyWindow && wins[0] === operatorWindow) {
+			app.quit()
+		}
 	}
 }
 
@@ -486,6 +559,10 @@ function localStorageSet(key, value) {
 		return dummyWindow.webContents.executeJavaScript(script)
 	} else {
 		console.log("localStorageSet failed; Dummy window is undefined or destroyed...")
+		console.log("dummyWindow", dummyWindow)
+		if (dummyWindow) {
+			console.log("dummyWindow.isDestroyed()", dummyWindow.isDestroyed())
+		}
 	}
 }
 
