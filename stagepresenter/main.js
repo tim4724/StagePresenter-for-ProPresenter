@@ -240,12 +240,13 @@ async function createStagePresenterWindow(displayBounds) {
 	stagePresenterWindow.webContents.setWindowOpenHandler(
 		details => {
 			if (details.url.endsWith("settings.html")) {
-				const b = stagePresenterWindow.getBounds()
-				const display = screen.getDisplayMatching(b)
-				const primaryDisplay = screen.getPrimaryDisplay()
-				if (display.id == primaryDisplay.id) {
-					// TODO: Not if not fullscreen!
-					stagePresenterWindow.close()
+				if (stagePresenterWindow.isFullScreen()) {
+					const b = stagePresenterWindow.getBounds()
+					const display = screen.getDisplayMatching(b)
+					const primaryDisplay = screen.getPrimaryDisplay()
+					if (display.id == primaryDisplay.id) {
+						stagePresenterWindow.close()
+					}
 				}
 				createSettingsWindow()
 			} else if (details.url.endsWith("operator.html")) {
