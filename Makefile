@@ -12,12 +12,6 @@ package: icns
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
 
-packageAll: icns
-	electron-packager stagepresenter  --platform=all --arch=x64 --overwrite \
-		--icon build/icon.icns \
-		--app-bundle-id="com.stagepresenter" \
-		--out "build"
-
 appstore: icns
 	@echo "--- Installing required npm modules  ---"
 	npm i -g electron-packager electron-osx-sign
@@ -81,10 +75,10 @@ icns:
 	iconutil -c icns build/icon.iconset
 
 ico:
-	convert icon.png -define icon:auto-resize=256,128,64,32,16 "build/icon.ico"
+	magick convert icon.png -define icon:auto-resize=256,128,64,32,16 "build/icon.ico"
 
 favicon:
-	convert icon.png -crop 896x896+64+64 -define icon:auto-resize=256,128,64,32,16 "www/favicon.ico"
+	magick convert icon.png -crop 896x896+64+64 -define icon:auto-resize=256,128,64,32,16 "www/favicon.ico"
 
 resize:
-	convert readme_res/StagePresenter_Welcome_mac.png -resize 2880x1800 readme_res/StagePresenter_Welcome_mac.png
+	magick convert readme_res/StagePresenter_Welcome_mac.png -resize 2880x1800 readme_res/StagePresenter_Welcome_mac.png
