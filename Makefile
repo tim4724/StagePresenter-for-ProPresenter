@@ -12,6 +12,18 @@ package: icns
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
 
+microsoftStore: ico
+	@echo "--- Installing required npm modules  ---"
+	npm i -g electron-packager electron-windows-store
+	@echo "--- Packaging x64 application ---"
+	electron-packager stagepresenter --overwrite --icon build/icon.ico \
+		--app-bundle-id="com.stagepresenter" \
+		--out "build"
+	@echo "--- Creating appx for Microsoft Store ---"
+	electron-windows-store --input-directory build\StagePresenter-win32-x64 --output-directory build \
+		--windows-kit "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64" \
+		--desktop-converter undefined --package-name "StagePresenter" --publisher CN=timvogel --dev-cert undefined 
+
 appstore: icns
 	@echo "--- Installing required npm modules  ---"
 	npm i -g electron-packager electron-osx-sign
@@ -75,6 +87,7 @@ icns:
 	iconutil -c icns build/icon.iconset
 
 ico:
+	mkdir build
 	magick convert icon.png -define icon:auto-resize=256,128,64,32,16 "build/icon.ico"
 
 favicon:

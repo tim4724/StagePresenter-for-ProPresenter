@@ -2,3 +2,4 @@ stagepresenter/node_modules
 build/
 *.provisionprofile
 entitlements.distribution.plist
+.vs/
