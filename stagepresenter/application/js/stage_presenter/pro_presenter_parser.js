@@ -366,7 +366,9 @@ function ProPresenterParser() {
 			if (!color || color.length === 0) {
 				return ''
 			} else {
-				return 'rgba(' + color.split(' ').map(c => c * 255).join(', ') + ')'
+				// ProPresenter on windows uses "," instead of "." for floating point values
+				const rgba = color.split(' ').map(s => s.replace(',', '.')).map(c => 0 | (c * 255))
+				return 'rgba(' + rgba.join(', ') + ')'
 			}
 		}
 
