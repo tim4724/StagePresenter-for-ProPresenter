@@ -8,6 +8,7 @@ clean:
 	rm -r build
 
 package: icns
+	npm i -g electron-packager 
 	electron-packager stagepresenter --overwrite --icon build/icon.icns \
 		--app-bundle-id="com.stagepresenter" \
 		--out "build"
