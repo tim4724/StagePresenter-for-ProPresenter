@@ -321,6 +321,13 @@ function createWelcomeWindow () {
 }
 
 async function createOperatorWindow () {
+	// It is required to hide the dock, to show the Operator Window above other Fullscreen Windows
+	// https://syobochim.medium.com/electron-keep-apps-on-top-whether-in-full-screen-mode-or-on-other-desktops-d7d914579fce
+	// Needs to be done before operatorWindow is created
+	if (app.dock) {
+		app.dock.hide()
+	}
+
 	if (operatorWindow && !operatorWindow.isDestroyed()) {
 		operatorWindow.close()
 	}
@@ -352,6 +359,7 @@ async function createOperatorWindow () {
 			}
 		}
 	}
+
 	operatorWindow = new BrowserWindow({
 		backgroundColor: '#000000',
 		opacity: 0.7,
@@ -373,8 +381,6 @@ async function createOperatorWindow () {
 	// Important to set visible on all workspaces with visibleOnFullScreen
 	operatorWindow.setVisibleOnAllWorkspaces(true, {visibleOnFullScreen: true})
 	operatorWindow.loadFile(`${__dirname}/application/operator.html`)
-	// operatorWindow.setMenu()
-
 	// Show window after setting things up
 	operatorWindow.show()
 	localStorageSet("showOperatorWindow", true)
@@ -391,24 +397,21 @@ async function createOperatorWindow () {
 	// Always set the position explicitly, because mac is reluctant sometimes
 	operatorWindow.setPosition(bounds.x, bounds.y, true)
 
-	// Gets automatically hidden for any reason, therefore show dock again
+	// Show dock again
 	if (app.dock) {
 		app.dock.show()
 	}
 
-	function focus() {
+	operatorWindow.on('focus', function() {
 		if (operatorWindow && !operatorWindow.isDestroyed()) {
 			operatorWindow.setOpacity(1)
 		}
-	}
-	operatorWindow.on('focus', focus)
-	function blur() {
+	})
+	operatorWindow.on('blur', function() {
 		if (operatorWindow && !operatorWindow.isDestroyed()) {
 			operatorWindow.setOpacity(0.7)
 		}
-	}
-	operatorWindow.on('blur', blur)
-
+	})
 	operatorWindow.once('close', function (ev) {
 		if (ev.sender === operatorWindow) {
 			const b = operatorWindow.getBounds()
@@ -483,7 +486,7 @@ app.whenReady().then(async () => {
 	screen.on('display-added', screenConfigChanged)
 	screen.on('display-metrics-changed', screenConfigChanged)
 
-	try {
+	try {
 		const version = await localStorageGet('localStorageVersion')
 		if (version == undefined || version.length <= 0) {
 			const featuresString = await localStorageGet('features')
