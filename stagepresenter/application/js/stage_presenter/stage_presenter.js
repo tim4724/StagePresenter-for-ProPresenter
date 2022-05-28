@@ -38,8 +38,7 @@ function StagePresenter() {
 		}
 	}
 
-	const localStorageObserver = LocalStorageObserver(localStorageChangedCallback,
-													  issuePresentationReload)
+	const localStorageObserver = LocalStorageObserver(localStorageChangedCallback, issuePresentationReload)
 	// No broadcast if not running in electron
 	if (stateBroadcastChannel !== undefined) {
 		stateBroadcastChannel.onmessage = (ev) => {

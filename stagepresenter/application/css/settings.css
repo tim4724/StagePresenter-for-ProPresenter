@@ -140,6 +140,7 @@ main {
 #proPresenterVersionWarning {
 	margin: 8px;
 	color: #b98b00;
+	display: none;
 }
 
 .nonElectron #useChromeWarning {

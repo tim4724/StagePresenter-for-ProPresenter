@@ -19,8 +19,9 @@ function ConnectionSettings() {
 	const testConnectionButton = document.getElementById('connectButton')
 	const resetButton = document.getElementById('resetButton')
 
-	const electronAppSettingsElement = document.getElementById('electronAppSettings')
 	const useChromeWarningElement = document.getElementById("useChromeWarning")
+	const proPresenterVersionWarningElement = document.getElementById("proPresenterVersionWarning")
+
 
 	if (!runningInElectron) {
 		document.body.classList.add("nonElectron")
@@ -31,8 +32,6 @@ function ConnectionSettings() {
 		const doneButton = document.getElementById("doneButton")
 		doneButton.style.display = "none"
 	}
-	let connectTimeout = undefined
-	let changed = false
 
 	initInputsFromStorage()
 
@@ -179,8 +178,12 @@ function ConnectionSettings() {
 				}
 
 				const version = data.majorVersion
-				const msg = 'Pro Presenter Version ' + version
+				const msg = 'Pro Presenter ' + version
 				showResult(proPresenterVersionElement, true, msg)
+
+				if (parseInt(data.majorVersion) == 7 && parseInt(data.minorVersion) <= 7 && parseInt(data.patchVersion) < 1) {
+					proPresenterVersionWarningElement.style.display = "block"
+				}
 			} else if (data.acn === 'ath') {
 				const hasAuthenticated = data.ath === 1 || data.ath === true
 				if (hasAuthenticated) {

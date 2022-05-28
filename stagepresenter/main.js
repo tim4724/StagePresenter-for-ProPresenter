@@ -1,6 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu, shell }
-	= require('electron')
+const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu, shell } = require('electron')
 
 const additionalData = { open: app.commandLine.getSwitchValue('open') }
 if (!app.requestSingleInstanceLock(additionalData)) {
