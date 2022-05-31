@@ -1,25 +1,18 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, BrowserView, screen, ipcMain, Menu, shell } = require('electron')
+let dummyWindow = undefined
+let waitingForDisplay = undefined
+let stagePresenterWindow = undefined
+let settingsWindow = undefined
+let operatorWindow = undefined
+let welcomeWindow = undefined
+let screenConfigChangedTimeout = undefined
 
-const additionalData = { open: app.commandLine.getSwitchValue('open') }
-if (!app.requestSingleInstanceLock(additionalData)) {
-	app.quit()
-} else {
-	app.on('second-instance', (event, commandLine, workingDirectory, additionalData) => {
-		if (additionalData.open) {
-			if (additionalData.open == "settings"){
-				createSettingsWindow()
-			} else if (additionalData.open == "controller") {
-				createOperatorWindow()
-			} else {
-				console.log("Unexpected additionalData", additionalData)
-			}
-		} else {
-			console.log("Unexpected additionalData", additionalData)
-		}
-	})
-}
-if (app.setUserTasks) {
+// App Icon color: #3478F6 - #53B6F9
+// App Icon middle color: #4497f8
+
+// setUserTasks is only available on windows
+if (app.setUserTasks) {	
 	// Windows menu when right click on app icon
 	app.setUserTasks([
 		{
@@ -39,28 +32,33 @@ if (app.setUserTasks) {
 			description: 'Open the controller window'
 		}
 	])
-}
 
-// App Icon color: #3478F6 - #53B6F9
-// App Icon middle color: #4497f8
-
-const dockMenu = Menu.buildFromTemplate([
-	{
-		label: 'Open Settings',
-		click () { createSettingsWindow() }
-	},
-	{
-		label: 'Open Controller',
-		click () { createOperatorWindow() }
+	const additionalData = { open: app.commandLine.getSwitchValue('open') }
+	if (!app.requestSingleInstanceLock(additionalData)) {
+		// This is not the first instance of this application
+		// The first instance of this application has been notified.
+		console.log("Another instance of this application is already running. Quitting now.")
+		app.quit()
+	} else {
+		app.on("second-instance", (event, commandLine, workingDirectory, additionalData) => {
+			console.log("second-instance")
+			if (app.dock) {
+				app.dock.bounce()
+			}
+			if (additionalData.open) {
+				if (additionalData.open == "settings") {
+					createSettingsWindow()
+				} else if (additionalData.open == "controller") {
+					createOperatorWindow()
+				} else {
+					console.log("Unexpected additionalData.open", additionalData.open)
+				}
+			} else {
+				console.log("Unexpected additionalData", additionalData)
+			}
+		})
 	}
-])
-
-let dummyWindow = undefined
-let waitingForDisplay = undefined
-let stagePresenterWindow = undefined
-let settingsWindow = undefined
-let operatorWindow = undefined
-let welcomeWindow = undefined
+}
 
 if (!app.isPackaged) {
 	// Enable live reload for Electron too
@@ -70,9 +68,7 @@ if (!app.isPackaged) {
 	})
 }
 
-app.setAboutPanelOptions({
-	authors: ['Tim Vogel']
-})
+app.setAboutPanelOptions({authors: ['Tim Vogel']})
 
 ipcMain.on('displaySelected', (event) => {
 	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed()) {
@@ -94,35 +90,21 @@ ipcMain.on('displaySelected', (event) => {
 		}
 	})
 })
-ipcMain.handle('get-open-at-login', (event) => {
-	return app.getLoginItemSettings().openAtLogin
-})
+ipcMain.handle('get-open-at-login', (event) => app.getLoginItemSettings().openAtLogin)
 ipcMain.handle('is-stagepresenter-window-visible', (event) => {
-	return stagePresenterWindow != undefined &&
-		!stagePresenterWindow.isDestroyed() && stagePresenterWindow.isVisible()
+	return stagePresenterWindow != undefined && !stagePresenterWindow.isDestroyed() && stagePresenterWindow.isVisible()
 })
-ipcMain.handle('get-all-displays', (event) => {
-	return screen.getAllDisplays()
-})
-ipcMain.handle('get-primary-display-id', (event) => {
-	return screen.getPrimaryDisplay().id
-})
-ipcMain.handle('set-login-item-settings', (event, settings) => {
-	app.setLoginItemSettings(settings)
-})
+ipcMain.handle('get-all-displays', (event) => screen.getAllDisplays())
+ipcMain.handle('get-primary-display-id', (event) => screen.getPrimaryDisplay().id)
+ipcMain.handle('set-login-item-settings', (event, settings) => app.setLoginItemSettings(settings))
 ipcMain.handle('get-stage-presenter-window-zoom-factor', (event) => {
-	if (stagePresenterWindow &&
-		!stagePresenterWindow.isDestroyed() &&
-		stagePresenterWindow.webContents) {
+	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed() && stagePresenterWindow.webContents) {
 		return stagePresenterWindow.webContents.zoomFactor
-	} else {
-		return -1
 	}
+	return -1
 })
 ipcMain.handle('set-stage-presenter-window-zoom-factor', (event, zoomFactor) => {
-	if (stagePresenterWindow &&
-		!stagePresenterWindow.isDestroyed() &&
-		stagePresenterWindow.webContents) {
+	if (stagePresenterWindow && !stagePresenterWindow.isDestroyed() && stagePresenterWindow.webContents) {
 		stagePresenterWindow.webContents.setZoomFactor(zoomFactor)
 		return true
 	}
@@ -288,7 +270,7 @@ function createSettingsWindow () {
 	settingsWindow.webContents.setWindowOpenHandler(({ url }) => {
 		shell.openExternal(url)
 		return { action: 'deny' }
-	});
+	})
 	settingsWindow.once('closed', function (ev) {
 		checkIfShouldQuit()
 	})
@@ -304,7 +286,7 @@ function createWelcomeWindow () {
 		darkTheme: true,
 		title: 'Welcome to StagePresenter',
 		width: 1024,
-		height: 900,
+		height: 800,
 		center: true,
 		fullscreenable: false,
 		maximizable: false,
@@ -433,7 +415,6 @@ async function createOperatorWindow () {
 	})
 }
 
-let screenConfigChangedTimeout = undefined
 function screenConfigChanged() {
 	clearTimeout(screenConfigChangedTimeout)
 	screenConfigChangedTimeout = setTimeout(async () => {
@@ -463,10 +444,20 @@ function screenConfigChanged() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-	const initApplicationMenu = require('./init_application_menu');
-	initApplicationMenu.initApplicationMenu(app, Menu)
+	const { initApplicationMenu } = require('./init_application_menu')
+	initApplicationMenu(app, Menu)
 
 	if (app.dock) {
+		const dockMenu = Menu.buildFromTemplate([
+			{
+				label: 'Open Settings',
+				click () { createSettingsWindow() }
+			},
+			{
+				label: 'Open Controller',
+				click () { createOperatorWindow() }
+			}
+		])
 		app.dock.setMenu(dockMenu)
 	}
 
@@ -489,9 +480,11 @@ app.whenReady().then(async () => {
 		const version = await localStorageGet('localStorageVersion')
 		if (version == undefined || version.length <= 0) {
 			const featuresString = await localStorageGet('features')
-			let features = featuresString.split(' ')
-			features.push('doNotShowDisabledSlides')
-			await localStorageSet('features', features.join(' '))
+			if (featuresString) {
+				let features = featuresString.split(' ')
+				features.push('doNotShowDisabledSlides')
+				await localStorageSet('features', features.join(' '))
+			}
 			await localStorageSet('localStorageVersion', '1')
 		} else if (parseInt(version) <= 1) {
 			const sidebarSize = await localStorageGet('sidebarMaxSize')
