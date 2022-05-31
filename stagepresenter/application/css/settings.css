@@ -175,6 +175,7 @@ main {
 
 #doneButton {
 	float: right;
+	margin-bottom: 12px;
 }
 
 select {
