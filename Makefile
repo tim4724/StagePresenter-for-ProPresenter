@@ -1,3 +1,7 @@
+APPSTORE_PROV_PROFILE=StagePresenter_AppStore.provisionprofile
+APPSTORE_APP_IDENTITY=3rd Party Mac Developer Application: Tim Vogel (5ZH48MPAM3)
+APPSTORE_INST_IDENTITY=3rd Party Mac Developer Installer: Tim Vogel (5ZH48MPAM3)
+
 install:
 	cd stagepresenter && npm install
 
@@ -8,14 +12,12 @@ clean:
 	rm -r build
 
 package: icns
-	npm i -g electron-packager 
-	electron-packager stagepresenter --overwrite --icon build/icon.icns \
-		--app-bundle-id="com.stagepresenter" \
-		--out "build"
+	npm i --location=global electron-packager 
+	electron-packager stagepresenter --overwrite --icon build/icon.icns --app-bundle-id="com.stagepresenter" --out "build"
 
 microsoftStore: ico
 	@echo "--- Installing required npm modules  ---"
-	npm i -g electron-packager electron-windows-store
+	npm i --location=global electron-packager electron-windows-store
 	@echo "--- Packaging x64 application ---"
 	electron-packager stagepresenter --overwrite --icon build/icon.ico \
 		--app-bundle-id="com.stagepresenter" \
@@ -27,7 +29,7 @@ microsoftStore: ico
 
 appstore: icns
 	@echo "--- Installing required npm modules  ---"
-	npm i -g electron-packager electron-osx-sign
+	npm i --location=global electron-packager electron-osx-sign
 	cd build && npm i @electron/universal
 	@echo "--- Packaging x64 application ---"
 	electron-packager stagepresenter \
@@ -56,11 +58,12 @@ appstore: icns
 		--platform=mas \
 		--type=distribution \
 		--entitlements="entitlements.mas.plist" \
-		--provisioning-profile="StagePresenter_AppStore.provisionprofile"
+		--identity="$(APPSTORE_APP_IDENTITY)" \
+		--provisioning-profile=$(APPSTORE_PROV_PROFILE)
 	@echo "--- Creating signed installer for universal application ---"
 	productbuild --component "build/StagePresenter-mas-universal/StagePresenter.app" \
 		/Applications \
-		--sign "3rd Party Mac Developer Installer: Tim Vogel (5ZH48MPAM3)" \
+		--sign "$(APPSTORE_INST_IDENTITY)" \
 		"build/StagePresenter-mas-universal/StagePresenter.pkg"
 	@echo "--- Remove node_modules and package json in dir build ---"
 		rm -r build/node_modules
