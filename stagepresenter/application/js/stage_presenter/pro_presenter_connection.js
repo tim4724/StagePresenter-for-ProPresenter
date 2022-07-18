@@ -341,7 +341,7 @@ function ProPresenterConnection(stateManager, host) {
 					}
 
 					const animate = shouldAnimate(presentation)
-					if (!width || width <= lowResolutionImageWidth) {
+					if (!width || width <= lowResolutionImageWidth) {
 						currentPresentationDataCache = data
 						stateManager.onNewPresentation(presentation, presentationPath, animate)
 
@@ -366,8 +366,14 @@ function ProPresenterConnection(stateManager, host) {
 			case 'presentationSlideIndex':
 				// This action only will be received, when queried first, which does not happen at the moment.
 			case 'presentationTriggerIndex':
+				if (!data.presentationPath) {
+					// No "real" presentation was clicked. Therefore ignore event.
+					// E.g. A quick bible text was clicked.
+					// Fix necessary for ProPresenter 7.9.2. As far as I am aware, this wasn't necessary in earlier versions.
+					break
+				}
 				// Slide of a presentation was clicked in pro presenter...
-
+				
 				// Avoid that a presentation from stagedisplay-Api is displayed
 				clearTimeout(displaySlidesFromStageDisplayTimeout)
 				// Avoid that a presentation from "audioTriggered" action is displayed
@@ -393,7 +399,6 @@ function ProPresenterConnection(stateManager, host) {
 						remoteWebSocket.send(action)
 					}, 800)
 				}
-
 				const index = parseInt(data.slideIndex)
 				stateManager.onNewSlideIndex(presentationPath, index, true)
 				break
@@ -442,18 +447,21 @@ function ProPresenterConnection(stateManager, host) {
 		const currentPresentationPath = stateManager.getCurrentPresentationPath()
 		const currentPresentation = stateManager.getCurrentPresentation()
 
-		if (currentPresentationPath !== '') {
+		if (currentPresentationPath !== '' && currentPresentation) {
 			const currentSlideIndex = stateManager.getCurrentSlideIndex()
-			if (currentPresentation && currentSlideIndex) {
+			if (currentSlideIndex >= 0) {
 				const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
 				const currentSlide = allPresentationSlides[currentSlideIndex]
 				const nextSlide = allPresentationSlides[currentSlideIndex + 1]
-				if (currentSlide && currentSlideIndex.rawText === cs.text &&
+				if (currentSlide && currentSlide.rawText === cs.text &&
 					(!nextSlide && !ns.text || (nextSlide && nextSlide.rawText === ns.text)) ) {
-					// TODO: Test this code path
-					// This text is already currently as a normal presentation displayed
-					// Code not reached in pro presenter 7.3.1
-					// Just to be sure, an active presentation will never be replaced by stagedisplay texts
+					// The cs.text is already displayed at the moment. 
+					// Dirty hack as just the texts are compared. 
+
+					// Avoid that a presentation from Stage Display WebSocket API is displayed.
+					clearTimeout(displaySlidesFromStageDisplayTimeout)
+
+					// And simply do nothing with this event.
 					return
 				}
 			}
@@ -466,8 +474,7 @@ function ProPresenterConnection(stateManager, host) {
 			currentStageDisplaySlide.stageDisplayApiPresentationUid = cs.uid
 
 			let nextStageDisplaySlide = undefined
-			if (ns && ns.uid === '00000000-0000-0000-0000-000000000000'
-					&& undefinedToEmpty(ns.text).length === 0) {
+			if (ns && ns.uid === '00000000-0000-0000-0000-000000000000' && undefinedToEmpty(ns.text).length === 0) {
 				nextStageDisplaySlide = undefined
 			} else if (ns) {
 				nextStageDisplaySlide = proPresenterParser.parseSlide(ns.text, undefined, undefined, undefined, true)
@@ -553,7 +560,7 @@ function ProPresenterConnection(stateManager, host) {
 			stateManager.onNewPresentation(presentation, '', true)
 		}
 
-		if (currentPresentationPath === '' && currentPresentation && !currentPresentation.name) {
+		if (currentPresentationPath === '' && currentPresentation && currentPresentation.name === '') {
 			// Assumably, a stage display presentation is already displayed
 			// Update that presentation right away and display new slides
 			displaySlides()
@@ -594,6 +601,7 @@ function ProPresenterConnection(stateManager, host) {
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}
 	}
+
 	return {
 		connect: connect,
 		loadPresentation: loadPresentation,
