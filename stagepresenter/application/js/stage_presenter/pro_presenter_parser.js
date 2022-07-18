@@ -105,6 +105,9 @@ function ProPresenterParser() {
 						enabled = true,
 						slideNotes = "",
 						playlistItemType = undefined) {
+		if (!rawText) {
+			rawText = ""
+		}
 		let keepLinebreaks = false
 		const features = localStorage.features.split(' ')
 		const slideNotesReplaceSlideContent = features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0
