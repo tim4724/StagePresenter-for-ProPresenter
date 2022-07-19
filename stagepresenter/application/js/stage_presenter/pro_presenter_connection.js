@@ -27,11 +27,14 @@ function ProPresenterConnection(stateManager, host) {
 		ath: (p) => JSON.stringify({ acn: 'ath', pwd: p, ptl: 610 }),
 		stageDisplaySets: JSON.stringify({action: "stageDisplaySets"}),
 		fv: (uid) => JSON.stringify({acn:"fv", uid: uid}),
-		presentationRequest: (path, imageWidth=lowResolutionImageWidth) => JSON.stringify({
-			action: 'presentationRequest',
-			presentationPath: path,
-			presentationSlideQuality: imageWidth
-		})
+		presentationRequest: (path, imageWidth=lowResolutionImageWidth) => {
+			lastUsedResolutionImageWidth = imageWidth
+			return JSON.stringify({
+				action: 'presentationRequest',
+				presentationPath: path,
+				presentationSlideQuality: imageWidth
+			})
+		}
 	}
 	let onceConnected = false
 	let remoteWebsocketConnectionState = WebSocketConnectionState()
@@ -48,6 +51,7 @@ function ProPresenterConnection(stateManager, host) {
 	let displayPresentationFromAudioTriggeredTimeout = undefined
 	let playlistRequestAllTimeout = undefined
 	let presentationRequestAfterSlideClickTimeout = undefined
+	let lastUsedResolutionImageWidth = lowResolutionImageWidth
 
 	function disconnect() {
 		if (remoteWebSocket) {
@@ -269,9 +273,11 @@ function ProPresenterConnection(stateManager, host) {
 			case 'presentationRequest':
 				if (currentPresentationDataCache && isEqual(currentPresentationDataCache, data)) {
 					// Nothing changed in the presentation...
+					// Condition does not really work well, 
+					// because the JPEG images sometimes different even if nothing change...
 					break
 				}
-
+				currentPresentationDataCache = data
 				clearTimeout(playlistRequestAllTimeout)
 				remoteWebSocket.send(Actions.playlistRequestAll)
 
@@ -339,8 +345,6 @@ function ProPresenterConnection(stateManager, host) {
 						return
 					}
 
-					currentPresentationDataCache = data
-
 					const animate = shouldAnimate(presentation)
 					stateManager.onNewPresentation(presentation, presentationPath, animate)
 					// Sometimes (Video-Presentations) the width is twice than the requested `lowResolutionImageWidth`
@@ -378,10 +382,9 @@ function ProPresenterConnection(stateManager, host) {
 				clearTimeout(presentationRequestAfterSlideClickTimeout)
 
 				const presentationPath = data.presentationPath
-				const action = Actions.presentationRequest(presentationPath)
 				if (presentationPath != stateManager.getCurrentPresentationPath()) {
 					// Request the presentation right now, as it probably changed...
-					remoteWebSocket.send(action)
+					remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 					// Ensure that new presentation will be displayed
 					currentPresentationDataCache = undefined
 				} else {
@@ -392,8 +395,9 @@ function ProPresenterConnection(stateManager, host) {
 					// However reload after timeout to reduce the number of actions sent,
 					// if someone clicks many slides in a short timeframe.
 					presentationRequestAfterSlideClickTimeout = setTimeout(function() {
+						const action = Actions.presentationRequest(presentationPath, lastUsedResolutionImageWidth)
 						remoteWebSocket.send(action)
-					}, 800)
+					}, 1000)
 				}
 				const index = parseInt(data.slideIndex)
 				stateManager.onNewSlideIndex(presentationPath, index, true)
