@@ -300,7 +300,7 @@ function ProPresenterConnection(stateManager, host) {
 				function shouldAnimate(newPresentation) {
 					const oldPresentation = stateManager.getCurrentPresentation()
 
-					if (!oldPresentation || 
+					if (!oldPresentation || 
 						oldPresentation.name !== newPresentation.name ||
 						oldPresentation.groups.length !== newPresentation.groups.length) {
 						return true
@@ -429,14 +429,14 @@ function ProPresenterConnection(stateManager, host) {
 	function onNewStageDisplayFrameValue(data) {
 		// TODO: Parse directly as custom Slide Object?
 		const [cs, ns] = proPresenterParser.parseStageDisplayCurrentAndNext(data)
-
 		if (!cs) {
 			console.log('onNewStageDisplayFrameValue: Current stagedisplay slide is undefined')
 			return
 		}
 
-		const currentSlideUid = cs.uid
-		const nextSlideUid = ns ? ns.uid : undefined
+		// Clear Timeout from previous `onNewStageDisplayFrameValue` event
+		// Make new decision if current presentation should be replaced / updated
+		clearTimeout(displaySlidesFromStageDisplayTimeout)
 
 		// Current slide with uid 0000...0000 means clear :)
 		if (cs.uid === '00000000-0000-0000-0000-000000000000') {
@@ -446,6 +446,11 @@ function ProPresenterConnection(stateManager, host) {
 
 		const currentPresentationPath = stateManager.getCurrentPresentationPath()
 		const currentPresentation = stateManager.getCurrentPresentation()
+
+		if (currentPresentationPath !== '' && !currentPresentation) {
+			// Next presentation is currently loading. Do nothing.
+			return
+		}
 
 		if (currentPresentationPath !== '' && currentPresentation) {
 			const currentSlideIndex = stateManager.getCurrentSlideIndex()
@@ -457,11 +462,7 @@ function ProPresenterConnection(stateManager, host) {
 					(!nextSlide && !ns.text || (nextSlide && nextSlide.rawText === ns.text)) ) {
 					// The cs.text is already displayed at the moment. 
 					// Dirty hack as just the texts are compared. 
-
-					// Avoid that a presentation from Stage Display WebSocket API is displayed.
-					clearTimeout(displaySlidesFromStageDisplayTimeout)
-
-					// And simply do nothing with this event.
+					// Do nothing with this event.
 					return
 				}
 			}
@@ -565,7 +566,6 @@ function ProPresenterConnection(stateManager, host) {
 			// Update that presentation right away and display new slides
 			displaySlides()
 		} else {
-			clearTimeout(displaySlidesFromStageDisplayTimeout)
 			// The timeout will be cancelled if these texts are part of a real presentation
 			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, 500)
 		}

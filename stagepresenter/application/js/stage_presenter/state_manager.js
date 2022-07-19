@@ -141,6 +141,7 @@ function StateManager(stateBroadcastChannel) {
 				stateBroadcastChannel.postMessage({action: 'slideIndex', value: index})
 			}
 		} else {
+			currentPresentation = undefined
 			// Wait till presentation is loaded...
 			console.log("Do not change current slide, first load presentation")
 		}
