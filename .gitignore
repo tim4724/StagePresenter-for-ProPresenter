@@ -3,3 +3,4 @@ build/
 *.provisionprofile
 entitlements.distribution.plist
 .vs/
+.DS_Store

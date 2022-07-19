@@ -1,6 +1,6 @@
 {
     "name": "StagePresenter",
-    "version": "0.4.5",
+    "version": "0.4.7",
     "description": "Stage Display for ProPresenter",
     "main": "main.js",
     "scripts": {
@@ -21,7 +21,7 @@
     "author": "Tim Vogel",
     "license": "",
     "devDependencies": {
-        "electron": "^18.2.1",
+        "electron": "^19.0.0",
         "electron-reload": "^2.0.0-alpha.1"
     }
 }
