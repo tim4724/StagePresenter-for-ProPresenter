@@ -267,7 +267,6 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
-				const startDate = Date.now()
 				if (currentPresentationDataCache && isEqual(currentPresentationDataCache, data)) {
 					// Nothing changed in the presentation...
 					break
@@ -336,29 +335,26 @@ function ProPresenterConnection(stateManager, host) {
 							presentationPath: presentationPath,
 							presentation: presentation
 						})
-						return
 						// Not current presentation - ignore
+						return
 					}
 
-					const animate = shouldAnimate(presentation)
-					if (!width || width <= lowResolutionImageWidth) {
-						currentPresentationDataCache = data
-						stateManager.onNewPresentation(presentation, presentationPath, animate)
+					currentPresentationDataCache = data
 
-						if (width) {
-							const slides = presentation.groups.map(g => g.slides).flat()
-							let resolution = undefined
-							if (slides.length > 16 || slides.some(s => s.rawText.length > 0)) {
-								resolution = middleResolutionImageWidth
-							} else {
-								// Load presentation with an even higher image resolution
-								resolution = highResolutionImageWidth
-							}
-							remoteWebSocket.send(Actions.presentationRequest(presentationPath, resolution))
+					const animate = shouldAnimate(presentation)
+					stateManager.onNewPresentation(presentation, presentationPath, animate)
+					// Sometimes (Video-Presentations) the width is twice than the requested `lowResolutionImageWidth`
+					// No idea why :D 
+					if (width && width <= lowResolutionImageWidth * 2) {	
+						const slides = presentation.groups.map(g => g.slides).flat()
+						let resolution = undefined
+						if (slides.length > 16 || slides.some(s => s.rawText.length > 0)) {
+							resolution = middleResolutionImageWidth
+						} else {
+							// Load presentation with an even higher image resolution
+							resolution = highResolutionImageWidth
 						}
-					} else {
-						// The loaded presentation is just the current presentation with higher image resolution...
-						stateManager.onNewPresentation(presentation, presentationPath, animate)
+						remoteWebSocket.send(Actions.presentationRequest(presentationPath, resolution))
 					}
 				})
 				break
