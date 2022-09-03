@@ -75,9 +75,9 @@ function ProPresenterConnection(stateManager, host) {
 			// Even waiting 500ms is not enough sometimes
 			// Therefore we wait 2 seconds between the connection attempts
 			const connectToStageNecessary =
-				!stageWebSocket || [WebSocket.CLOSING, WebSocket.CLOSED].includes(stageWebSocket.readyState)
+				!stageWebSocket || [WebSocket.CLOSING, WebSocket.CLOSED].includes(stageWebSocket.readyState)
 			const connectToRemoteNecessary =
-				!remoteWebSocket  || [WebSocket.CLOSING, WebSocket.CLOSED].includes(remoteWebSocket.readyState)
+				!remoteWebSocket  || [WebSocket.CLOSING, WebSocket.CLOSED].includes(remoteWebSocket.readyState)
 
 			if (connectToStageNecessary) {
 				connectToStageWebSocket()
@@ -138,6 +138,10 @@ function ProPresenterConnection(stateManager, host) {
 			}
 			remoteWebSocket.onclose = function (ev) {
 				console.log('RemoteWebSocket close ' + JSON.stringify(ev))
+				
+				connectionStatusElement.innerText = "Not Connected"
+				connectionStatusElement.classList.remove('success')
+
 				remoteWebsocketConnectionState = WebSocketConnectionState()
 				if (ev) {
 					remoteWebsocketConnectionState.error = ev.reason
@@ -254,8 +258,8 @@ function ProPresenterConnection(stateManager, host) {
 				remoteWebSocket.send(Actions.stageDisplaySets)
 				break
 			case 'playlistRequestAll':
-				if (data_string !== currentPlaylistDataCache) {
-					currentPlaylistDataCache = data_string
+				if (!currentPlaylistDataCache || !isEqual(currentPlaylistDataCache, data)) {
+					currentPlaylistDataCache = data
 					stateManager.onNewPlaylists(proPresenterParser.parsePlaylists(data))
 				}
 				clearTimeout(playlistRequestAllTimeout)
