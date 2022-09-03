@@ -405,7 +405,11 @@ function ProPresenterConnection(stateManager, host) {
 			case 'audioTriggered':
 				const name = data.audioName
 				clearTimeout(displayPresentationFromAudioTriggeredTimeout)
-				// The timeout will be cancelled if these texts are part of a real presentation
+				if (!stateManager.isCurrentSlideCleared()) {
+					break
+				}
+
+				// The timeout will be cancelled if this part of a real presentation
 				displayPresentationFromAudioTriggeredTimeout = setTimeout(function() {
 					const slide = Slide('', 'img/play_banner.png', [], undefined, undefined, "", false, [])
 					const group = Group('', '', [slide])

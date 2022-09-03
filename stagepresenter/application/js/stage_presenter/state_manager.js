@@ -13,7 +13,7 @@ function StateManager(stateBroadcastChannel) {
 	let currentPresentationPath = ''
 
 	let currentSlideIndex = -1
-	let currentSlideCleared = false
+	let currentSlideCleared = true
 
 	function getState() {
 		return {
@@ -213,6 +213,7 @@ function StateManager(stateBroadcastChannel) {
 		getCurrentPresentationPath: () => currentPresentationPath,
 		getCurrentPresentation: () => currentPresentation,
 		getCurrentSlideIndex: () => currentSlideIndex,
+		isCurrentSlideCleared: () => currentSlideCleared,
 		getState: getState,
 	}
 }
