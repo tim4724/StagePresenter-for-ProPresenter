@@ -13,11 +13,12 @@ function Playlist(name, items, location) {
 	}
 }
 
-function PlaylistItem(text, type, location) {
+function PlaylistItem(text, type, location, thumbnail) {
 	return {
 		text: text,
 		type: type,
-		location: location
+		location: location,
+		thumbnail: thumbnail
 	}
 }
 
@@ -88,7 +89,7 @@ function ProPresenterParser() {
 			} else {
 				const newItems = playlist.playlist.map(function (item) {
 					const name = parsePresentationName(item.playlistItemName, true)
-					return PlaylistItem(name, item.playlistItemType, item.playlistItemLocation)
+					return PlaylistItem(name, item.playlistItemType, item.playlistItemLocation, item.playlistItemThumbnail)
 				})
 				const newPlaylist = Playlist(playlist.playlistName, newItems, playlist.playlistLocation)
 				newPlaylists.push(newPlaylist)

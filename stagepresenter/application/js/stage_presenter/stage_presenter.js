@@ -68,20 +68,23 @@ function StagePresenter() {
 
 					if (item.type != 'playlistItemTypePresentation') {
 						const name = item.text
-						let previewImage = ''
-						switch (item.type) {
-							// "playlistItemTypeImage" does not exist, tough it should??
-							// Images are "playlistItemTypeVideo"
-							case 'playlistItemTypeVideo':
-							case 'playlistItemTypeAudio':
-							case 'playlistItemTypeImage':
-								previewImage = 'img/play_banner.png'
-								break
-							case 'playlistItemTypePlaceHolder':
-							default:
-								previewImage = 'img/circle_banner.png'
-								break
+						let previewImage = item.thumbnail
+						if (!previewImage || (previewImage.length && previewImage.length <= 0)) {
+							switch (item.type) {
+								// "playlistItemTypeImage" does not exist, tough it should??
+								// Images are "playlistItemTypeVideo"
+								case 'playlistItemTypeVideo':
+								case 'playlistItemTypeAudio':
+								case 'playlistItemTypeImage':
+									previewImage = 'img/play_banner.png'
+									break
+								case 'playlistItemTypePlaceHolder':
+								default:
+									previewImage = 'img/circle_banner.png'
+									break
+							}
 						}
+						
 						const slide = Slide('', previewImage, [], undefined, undefined, "", false, [])
 						const group = Group('', '', [slide])
 						const p = Presentation(name, [group])
