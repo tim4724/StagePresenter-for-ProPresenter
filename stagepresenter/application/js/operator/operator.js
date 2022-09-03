@@ -204,9 +204,13 @@ function Operator() {
 			slideSelect.disabled = false
 			let i = 0;
 			for (const group of presentation.groups) {
-				if (group.name.length > 0 && presentation.groups.length > 1) {
+				if (presentation.groups.length > 1 && (i > 0 || (group.name && group.name.length > 0))) {
 					const optGroupElement = document.createElement('optgroup')
-					optGroupElement.label = group.name
+					if (group.name && group.name.length > 0) {
+						optGroupElement.label = group.name
+					} else {
+						optGroupElement.label = 'Group'
+					}
 					for (const slide of group.slides) {
 						const optionElement = toOptionElement(i)
 						optionElement.setAttribute('color', group.color);
