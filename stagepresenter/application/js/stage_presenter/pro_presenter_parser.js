@@ -387,15 +387,11 @@ function ProPresenterParser() {
 
 		let newGroups = []
 		for (const group of presentation.presentationSlideGroups) {
-			let groupName = parseGroupName(group.groupName || '')
+			let groupName = parseGroupName(group.groupName || '')
 
 			// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 			let bibleRegex_colon = /^.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 			const isBibleGroup = bibleRegex_colon.test(groupName)
-
-			const splitSlidesInGroups = presentation.presentationSlideGroups.length === 1
-				&& group.groupSlides.length > 1
-				&& groupName.length === 0
 
 			let newSlides = []
 			for (const slide of group.groupSlides) {
@@ -414,40 +410,31 @@ function ProPresenterParser() {
 					playlistItemType
 				)
 
-				if (splitSlidesInGroups) {
-					const name = newSlide.label
-					const groupColor = newSlide.color
-					newGroups.push(Group(
-						parseGroupName(name), groupColor, [newSlide]))
-				} else {
-					newSlides.push(newSlide)
-				}
+				newSlides.push(newSlide)
 			}
 
-			if (!splitSlidesInGroups) {
-				const groupColor = asCSSColor(group.groupColor)
-				if(isBibleGroup
-					&& newSlides.length > 0
-					&& newSlides[0].lineNumbers) {
-					const firstSlide = newSlides[0]
+			const groupColor = asCSSColor(group.groupColor)
+			if(isBibleGroup
+				&& newSlides.length > 0
+				&& newSlides[0].lineNumbers) {
+				const firstSlide = newSlides[0]
 
-					let firstVerseNumber = firstSlide.lineNumbers[0]
-					if (!firstVerseNumber && firstSlide.lineNumbers[1]) {
-						firstVerseNumber = parseInt(firstSlide.lineNumbers[1]) - 1
-					}
-
-					if (firstVerseNumber && !isNaN(firstVerseNumber)) {
-						const lastSlide = newSlides[newSlides.length - 1]
-						let lastVerseNumber = undefined
-						if (lastSlide && lastSlide.lineNumbers) {
-							const lastIndex = lastSlide.lineNumbers.length - 1
-							lastVerseNumber = lastSlide.lineNumbers[lastIndex]
-						}
-						groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
-					}
+				let firstVerseNumber = firstSlide.lineNumbers[0]
+				if (!firstVerseNumber && firstSlide.lineNumbers[1]) {
+					firstVerseNumber = parseInt(firstSlide.lineNumbers[1]) - 1
 				}
-				newGroups.push(Group(groupName, groupColor, newSlides))
+
+				if (firstVerseNumber && !isNaN(firstVerseNumber)) {
+					const lastSlide = newSlides[newSlides.length - 1]
+					let lastVerseNumber = undefined
+					if (lastSlide && lastSlide.lineNumbers) {
+						const lastIndex = lastSlide.lineNumbers.length - 1
+						lastVerseNumber = lastSlide.lineNumbers[lastIndex]
+					}
+					groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
+				}
 			}
+			newGroups.push(Group(groupName, groupColor, newSlides))
 		}
 
 		return Presentation(presentationName, newGroups)
@@ -488,7 +475,7 @@ function ProPresenterParser() {
 		if(!groupName) {
 			return ''
 		}
-		groupName = (groupName || '').trim().normalize()
+		groupName = (groupName || '').trim().normalize()
 		const bibleGroupNameRegex = /^((\d+).?\s?)?(.+)\s(\d+):(\d+(-\d+)?(\s\(.+\))?)$/u
 		const match = groupName.match(bibleGroupNameRegex)
 		if (match) {
