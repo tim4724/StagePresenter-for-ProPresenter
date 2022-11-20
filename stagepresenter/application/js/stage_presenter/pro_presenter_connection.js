@@ -371,9 +371,15 @@ function ProPresenterConnection(stateManager, host) {
 				// This action only will be received, when queried first, which does not happen at the moment.
 			case 'presentationTriggerIndex':
 				if (!data.presentationPath) {
-					// No "real" presentation was clicked. Therefore ignore event.
+					// No "real" presentation was clicked. Therefore ignore action.
 					// E.g. A quick bible text was clicked.
 					// Fix necessary for ProPresenter 7.9.2. As far as I am aware, this wasn't necessary in earlier versions.
+					break
+				}
+				if (data.slideIndex === -1) {
+					// No "real" presentation was clicked. Therefore ignore action.
+					// E.g. A quick bible text was clicked.
+					// Fix necessary for ProPresenter on Windows (7.8.2, 7.10). WTF.
 					break
 				}
 				// Slide of a presentation was clicked in pro presenter...
@@ -427,7 +433,14 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'clearAll':
 			case 'clearText':
+				const currentPresentation = stateManager.getCurrentPresentation()
+				if (stateManager.getCurrentPresentationPath() === '' && currentPresentation && currentPresentation.name === '') {
+					// Fix for ProPresenter on Windows. This "clearText" is wrong. 
+					// At the moment "Current" and "Next" from StageDisplay Interface are displayed. (function onNewStageDisplayFrameValue(data))
+					break
+				}
 				stateManager.clearSlideIndex()
+				break
 			default:
 				console.log('Unknown action', data.action)
 				break
@@ -495,8 +508,14 @@ function ProPresenterConnection(stateManager, host) {
 			// Change current presentation
 			if (currentPresentationPath === '' && currentPresentation) {
 				const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
-				if (ns && allPresentationSlides.length > 0
-					&& allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid) {
+				let prependCurrentSlide = ns && allPresentationSlides.length > 0 && allPresentationSlides[0].stageDisplayApiPresentationUid === ns.uid
+				let appendNextSlide = cs && allPresentationSlides.length > 0 && allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid
+				if (prependCurrentSlide === false && appendNextSlide === false) {
+					// Compare `text` instead of `uid`. UID not reliable for ProPresenter on Windows.
+					prependCurrentSlide = ns && allPresentationSlides.length > 0 && allPresentationSlides[0].rawText === ns.text
+					appendNextSlide = cs && allPresentationSlides.length > 0 && allPresentationSlides[allPresentationSlides.length - 1].rawText === cs.text
+				}
+				if (prependCurrentSlide) {
 					const presentation = currentPresentation
 					if (nextStageDisplaySlide) {
 						// Update the one slide that is already in the presentation
@@ -511,8 +530,7 @@ function ProPresenterConnection(stateManager, host) {
 					stateManager.onNewPresentation(presentation, '', false)
 					stateManager.onNewSlideIndex('', 0, true)
 					return
-				} else if (allPresentationSlides.length > 0
-					&& allPresentationSlides[allPresentationSlides.length - 1].stageDisplayApiPresentationUid === cs.uid) {
+				} else if (appendNextSlide) {
 					const presentation = currentPresentation
 					// Update the one slide that is already in the presentation
 					const lastGroup = presentation.groups[presentation.groups.length - 1]
@@ -532,7 +550,12 @@ function ProPresenterConnection(stateManager, host) {
 					return
 				} else {
 					// Just scroll
-					const slideIndex = allPresentationSlides.findIndex(s => s.stageDisplayApiPresentationUid === cs.uid)
+					let slideIndex = allPresentationSlides.findIndex(s => s.stageDisplayApiPresentationUid === cs.uid)
+					if (slideIndex < 0) {
+						// Fix for ProPresenter (7.10) on Windows.
+						// ProPresenter on Windows does not have reliable UIDs. WTF.
+						slideIndex = allPresentationSlides.findIndex(s => s.rawText === cs.text)
+					}
 					if (slideIndex >= 0) {
 						const presentation = currentPresentation
 						// Update the two slides of the presentation
@@ -571,8 +594,9 @@ function ProPresenterConnection(stateManager, host) {
 
 		if (currentPresentationPath === '' && currentPresentation && currentPresentation.name === '') {
 			// Assumably, a stage display presentation is already displayed
-			// Update that presentation right away and display new slides
-			displaySlides()
+			// Update that presentation after XXms and display new slides
+			// If a new "presentationTriggerIndex" action is received within these XXms, the timout will be cancelled.
+			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, 40)
 		} else {
 			// The timeout will be cancelled if these texts are part of a real presentation
 			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, 500)
