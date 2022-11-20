@@ -71,6 +71,7 @@ a.button {
 	display: flex;
     align-items: center;
 	text-decoration: inherit;
+	border-radius: 8px;
 }
 
 #paypalLogo {
@@ -79,15 +80,18 @@ a.button {
 
 .actions {
 	display: flex;
+	flex-wrap: wrap;
     justify-content: space-evenly;
 	padding-left: 64px;
 	padding-right: 64px;
-	gap: 32px;
+	grid-column-gap: 32px;
+	margin-top: 32px;
 }
 
 .buttonWrapper {
 	display: inline-block;
 	margin: 12px 0;
+	flex-shrink: 0;
 }
 
 #downloadAppStore img {
@@ -132,10 +136,6 @@ footer a {
   	header {
 		font-size: 0.7em;
 		padding: 64px 16px 92px;
-	}
-
-	#startDemoWrapper {
-		display: none;
 	}
 }
 
