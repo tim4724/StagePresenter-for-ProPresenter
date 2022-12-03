@@ -37,9 +37,9 @@ Just edit the Label and enter both seperated with a space.
 
 
 ## Chords in the Slide Notes
-
+<p align="center">
 <img src="/readme_res/StagePresenter_Chords.png?raw=true" width="700" />
-
+</p>
 Chords in the notes of a slide are automatically recognized and displayed in yellow. 
 1) Enter the text with the chords into the slide notes. It's best to use the fonts "Helvetica" or "Arial" to align the chords and text. <img src="/readme_res/ProPresenter_slide_notes_chords.png?raw=true" width="700" />
 2) Go to StagePresenter Settings and change the setting "Show Slide Notes" selection to "Instead of Slide Content".
