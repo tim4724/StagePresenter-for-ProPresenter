@@ -205,13 +205,17 @@ function PresentationDomUpdater() {
 				slideElement.classList.add('showImageLarger')
 			}
 
+			const slideTextContainer = document.createElement('div')
+			slideTextContainer.classList.add('slideTextContainer')
+			slideElement.appendChild(slideTextContainer)
+
 			for (let i = 0; i < slide.lines.length; i++) {
 				const line = slide.lines[i]
 
 				const lineSpan = document.createElement('span')
 				lineSpan.classList.add('line')
 
-				const lineNumber = (slide.lineNumbers || [])[i]
+				const lineNumber = (slide.lineNumbers || [])[i]
 				if (lineNumber && lineNumber.length > 0){
 					const bibleVerseSpan = document.createElement('span')
 					bibleVerseSpan.innerText = lineNumber
@@ -220,9 +224,10 @@ function PresentationDomUpdater() {
 					groupElement.classList.add('groupWithText')
 				}
 
-				const isMusicInfo = (slide.lineHasMusicInfo || [])[i]
+				const isMusicInfo = (slide.lineHasMusicInfo || [])[i]
 				if (isMusicInfo) {
 					lineSpan.classList.add('musicInfo')
+					groupElement.classList.add('groupWithMusicInfo')
 				}
 
 				const textSpan = document.createElement('span')
@@ -230,11 +235,11 @@ function PresentationDomUpdater() {
 				textSpan.innerText = line
 
 				lineSpan.appendChild(textSpan)
-				slideElement.appendChild(lineSpan)
+				slideTextContainer.appendChild(lineSpan)
 
 				if (line.length <= 0) {
 					// Empty line in slide. Ensure that there is a line break.
-					slideElement.appendChild(document.createElement('br'))
+					slideTextContainer.appendChild(document.createElement('br'))
 				}
 			}
 

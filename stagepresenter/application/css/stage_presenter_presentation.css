@@ -84,6 +84,11 @@
 	text-align: start;
 }
 
+.groupWithMusicInfo .slideTextContainer {
+	display: inline-block;
+	text-align: start;
+}
+
 .slide {
 	border-left: 8px solid;
 	border-right: 8px solid;
@@ -173,7 +178,14 @@
 	color: #ffffff;
 	padding: 8px;
 	display: none;
-	margin-right: 0;
+}
+
+#slideNotesContent {
+	white-space: break-spaces;
+	text-align: start;
+	margin-end: auto;
+	margin-start: auto;
+	display: inline-block;
 }
 
 .line.musicInfo {
