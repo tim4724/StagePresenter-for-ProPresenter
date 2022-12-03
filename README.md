@@ -18,25 +18,26 @@ Download on the [Mac App Store](https://apps.apple.com/us/app/stagepresenter/id1
 
 ## Try it in the Browser
 
-Visit [https://stagepresenter.com](https://stagepresenter.com/) to try directly in the browser (Chrome is recommended).
+Visit [https://stagepresenter.com](https://stagepresenter.com/) to try directly in the browser.
 
 ## Screenshots
 
 All of the display will be used to show song lyrics.<br>
 StagePresenter shows more than the current and next slide.<br>
 If possible the complete verse, chorus or bridge is on the screen, since they get repeated quite often.
+
 ![StagePresenter Screenshot Normal](/readme_res/StagePresenter_Song.png?raw=true)
 
 | | |
 :-------------------------:|:-------------------------:
-Bible passages ![](/readme_res/StagePresenter_Bible.png?raw=true) | Countdowns, Timers and Stage-Messages ![](/readme_res/StagePresenter_Timer-and-Stagemessage.png?raw=true)
-Optional sidebar with playlist and preview ![](/readme_res/StagePresenter_Song_Playlist.png?raw=true) | Video with Countdown ![](/readme_res/StagePresenter_Video.png?raw=true)
-Any screen orientation ![](/readme_res/StagePresenter_Portrait.png?raw=true) | Slides with images ![](/readme_res/Stagepresenter_Slide_Image.png?raw=true)
-Extensive settings ![](/readme_res/StagePresenter_Settings.png?raw=true) | Small Controller window ![](/readme_res/StagePresenter_Controller.png?raw=true) Display the next song or slide ahead of time for the people on the stage. |
+Bible passages ![](/readme_res/StagePresenter_Bible.png?raw=true) | Chords ![](/readme_res/StagePresenter_Chords.png?raw=true)
+Optional sidebar with playlist and preview ![](/readme_res/StagePresenter_Song_Playlist.png?raw=true) | Slides with images ![](/readme_res/Stagepresenter_Slide_Image.png?raw=true)
+
+## Usage Tips and tricks
+See document [Tips and Tricks](/tips_and_tricks.md).
 
 ## Planned features / improvements
 - Operator Preview window
-- Add Descriptions, help and tips in the settings
 - Windows and Linux support?
 
 ## I noticed a bug / I have an idea for an awesome feature

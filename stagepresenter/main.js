@@ -456,6 +456,10 @@ app.whenReady().then(async () => {
 			{
 				label: 'Open Controller',
 				click () { createOperatorWindow() }
+			},
+			{
+				label: 'View Tips and Tricks Document',
+				click () { shell.openExternal('https://github.com/tim4724/StagePresenter-for-ProPresenter/blob/main/tips_and_tricks.md#tips-and-tricks-for-stagepresenter')	}
 			}
 		])
 		app.dock.setMenu(dockMenu)
