@@ -1,9 +1,8 @@
 "use strict"
 
 // Matches e.g. 'Römer 8_18' or 'Römer 8_18-23 (LU17)'
-// Also matches 'John 3_16-17 (KJV)-1' or John 3_16-1
-const biblePresentationNameRegex =
-	/^((\d+).?\s?)?(.+)\s(\d+)_(\d+(-(\d+))?)((\s\(.+\))(-\d+)?)?$/
+// Also matches 'John 3_16-17 (KJV)-1' or 'John 3_16-1'
+const biblePresentationNameRegex = /^((\d+).?\s?)?(.+)\s(\d+)_(\d+(-(\d+))?)((\s\(.+\))(-\d+)?)?$/
 
 function Playlist(name, items, location) {
 	return {
@@ -109,9 +108,10 @@ function ProPresenterParser() {
 		if (!rawText) {
 			rawText = ""
 		}
-		let keepLinebreaks = false
 		const features = localStorage.features.split(' ')
 		const slideNotesReplaceSlideContent = features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0
+		let onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
+		let keepLinebreaks = false
 		if (slideNotesReplaceSlideContent) {
 			rawText = slideNotes
 			slideNotes = ""
@@ -128,23 +128,31 @@ function ProPresenterParser() {
 			label = label.replace(/\$stagepresenter:keepLinebreaks/i, "")
 			keepLinebreaks = true
 		}
+		if (label && (/\$stagepresenter:showOnlyFirstTextBox/i).test(label)) {
+			label = label.replace(/\$stagepresenter:showOnlyFirstTextBox/i, "")
+			onlyFirstTextInSlide = true
+		}
+		if (label && (/\$stagepresenter:showAllTextBoxes/i).test(label)) {
+			label = label.replace(/\$stagepresenter:showAllTextBoxes/i, "")
+			onlyFirstTextInSlide = false
+		}
 		if (label && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showImageFullscreen/i, "")
+			label = label.replace(/\$stagepresenter:showImage(Fullscreen|Larger)?/ig, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, true, false)
 		}
 		if (label && (/\$stagepresenter:showImageLarger/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showImageLarger/i, "")
+			label = label.replace(/\$stagepresenter:showImage(Fullscreen|Larger)?/ig, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, true)
 		}
 		if (label && (/\$stagepresenter:showImage/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showImage/i, "")
+			label = label.replace(/\$stagepresenter:showImage(Fullscreen|Larger)?/ig, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, false)
 		}
 
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
 		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
 
-		const isBiblePassage = assumeIsBiblePassage || (label && bibleRegex.test(label))
+		const isBiblePassage = assumeIsBiblePassage || (label && bibleRegex.test(label))
 
 		let bibleReferenceRegex
 		if (isBiblePassage) {
@@ -209,7 +217,6 @@ function ProPresenterParser() {
 		if (rawText.length > 0) {
 			textBoxes = rawText.split('\r')
 		}
-		const onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
 		const improveBiblePassages = features.includes('improveBiblePassages')
 
 		// Remove a textbox that only contains the label of the slide
@@ -433,6 +440,9 @@ function ProPresenterParser() {
 					}
 					groupName = fixVerseNumberOfLabel(firstVerseNumber, lastVerseNumber, groupName)
 				}
+			}
+			if (groupName == '' && newSlides.length > 0) {
+				groupName = newSlides[0].label || ''
 			}
 			newGroups.push(Group(groupName, groupColor, newSlides))
 		}

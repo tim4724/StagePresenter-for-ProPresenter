@@ -69,7 +69,7 @@ function StageMonitorSettings() {
 			}
 		}
 
-		for (const option of clockMode.options) {
+		for (const option of clockModeInput.options) {
 			if (features.includes(option.value)) {
 				option.selected = true;
 				break;
