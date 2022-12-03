@@ -5,7 +5,7 @@
 
 Add one of the following labels to a slide to override how a presentation is displayed in StagePresenter.
 
-<img src="/readme_res/ProPresenter_add_label.png?raw=true" width="400" />
+<img src="/readme_res/ProPresenter_add_label.png?raw=true" width="600" />
 
 ### Show the Preview Image of a Slide in StagePresenter
 
@@ -24,8 +24,7 @@ Add one of the following labels to a slide to override how a presentation is dis
 | `$stagepresenter:keepLineBreaks`       | Keep the linebreaks in the text of the slide. Ignoring "Auto-Remove Linebreaks" in settings.                        |
 
 ### Additional Hints
-- Add the Labels as Presets in ProPresenter. Add them in the "Labels" section under "Settings" -> "Groups" in ProPresenter. 
-<img src="/readme_res/ProPresenter_label_presets.png?raw=true" width="200" />
+- Add the Labels as Presets in ProPresenter. Add them in the "Labels" section under "Settings" -> "Groups" in ProPresenter. <img src="/readme_res/ProPresenter_label_presets.png?raw=true" width="500" />
 - It is possible to change the label of multiple slides at once. To do that, select the slides while holding the "SHIFT" key.
 Then click right with the mouse and choose "Label" in the context menu. 
 - After changing the label of a slide, you need to click any slide for the changes to apply. 
@@ -38,11 +37,13 @@ Just edit the Label and enter both seperated with a space.
 
 
 ## Chords in the Slide Notes
+
+<img src="/readme_res/StagePresenter_Chords.png?raw=true" width="700" />
+
 Chords in the notes of a slide are automatically recognized and displayed in yellow. 
-1) Enter the text with the chords into the slide notes. It's best to use the fonts "Helvetica" or "Arial" to align the chords and text.
-<img src="/readme_res/ProPresenter_slide_notes_chords.png?raw=true" width="400" />
+1) Enter the text with the chords into the slide notes. It's best to use the fonts "Helvetica" or "Arial" to align the chords and text. <img src="/readme_res/ProPresenter_slide_notes_chords.png?raw=true" width="700" />
 2) Go to StagePresenter Settings and change the setting "Show Slide Notes" selection to "Instead of Slide Content".
-<img src="/readme_res/StagePresenter_Chords.png?raw=true" width="500" />
+
 
 
 ## Hide Slides
