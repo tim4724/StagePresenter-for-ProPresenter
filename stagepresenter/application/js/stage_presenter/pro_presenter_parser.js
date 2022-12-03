@@ -112,8 +112,9 @@ function ProPresenterParser() {
 		const slideNotesReplaceSlideContent = features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0
 		let onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
 		let keepLinebreaks = false
+		let slideText = rawText
 		if (slideNotesReplaceSlideContent) {
-			rawText = slideNotes
+			slideText = slideNotes
 			slideNotes = ""
 			keepLinebreaks = true
 		} else if (!features.includes("showSlideNotes")) {
@@ -214,8 +215,8 @@ function ProPresenterParser() {
 		}
 
 		let textBoxes = []
-		if (rawText.length > 0) {
-			textBoxes = rawText.split('\r')
+		if (slideText.length > 0) {
+			textBoxes = slideText.split('\r')
 		}
 		const improveBiblePassages = features.includes('improveBiblePassages')
 

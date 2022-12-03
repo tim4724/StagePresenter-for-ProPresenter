@@ -17,6 +17,8 @@ function ProPresenterConnection(stateManager, host) {
 	const connectionStatusElement = document.getElementById("connectionStatus")
 	const proPresenterParser = ProPresenterParser()
 
+	const displayPresentationFromStageDisplayDelay = 500
+	const updatePresentationFromStageDisplayDelay = 40
 	const lowResolutionImageWidth = 32 // Image height 18px
 	const middleResolutionImageWidth = 640 // Image height 360px
 	const highResolutionImageWidth = 1280 // Image Height 720px
@@ -218,7 +220,7 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'fv': // FrameValue
 				if (remoteWebSocket && remoteWebSocket.readyState == WebSocket.OPEN) {
-					onNewStageDisplayFrameValue(data)
+					setTimeout(function() {	onNewStageDisplayFrameValue(data) }, 200)
 				}
 				break
 			case 'sys':
@@ -386,6 +388,10 @@ function ProPresenterConnection(stateManager, host) {
 				
 				// Avoid that a presentation from stagedisplay-Api is displayed
 				clearTimeout(displaySlidesFromStageDisplayTimeout)
+				// Avoid that a future presentation from stagedisplay-Api is displayed
+				setTimeout(() => {clearTimeout(displaySlidesFromStageDisplayTimeout)}, updatePresentationFromStageDisplayDelay)
+				setTimeout(() => {clearTimeout(displaySlidesFromStageDisplayTimeout)}, displayPresentationFromStageDisplayDelay)
+
 				// Avoid that a presentation from "audioTriggered" action is displayed
 				clearTimeout(displayPresentationFromAudioTriggeredTimeout)
 				// Avoid that a presentation from earlier "presentationTriggerIndex" is requested
@@ -471,22 +477,6 @@ function ProPresenterConnection(stateManager, host) {
 		if (currentPresentationPath !== '' && !currentPresentation) {
 			// Next presentation is currently loading. Do nothing.
 			return
-		}
-
-		if (currentPresentationPath !== '' && currentPresentation) {
-			const currentSlideIndex = stateManager.getCurrentSlideIndex()
-			if (currentSlideIndex >= 0) {
-				const allPresentationSlides = currentPresentation.groups.map(g => g.slides).flat()
-				const currentSlide = allPresentationSlides[currentSlideIndex]
-				const nextSlide = allPresentationSlides[currentSlideIndex + 1]
-				if (currentSlide && currentSlide.rawText === cs.text &&
-					(!nextSlide && !ns.text || (nextSlide && nextSlide.rawText === ns.text)) ) {
-					// The cs.text is already displayed at the moment. 
-					// Dirty hack as just the texts are compared. 
-					// Do nothing with this event.
-					return
-				}
-			}
 		}
 
 		function displaySlides() {
@@ -596,10 +586,10 @@ function ProPresenterConnection(stateManager, host) {
 			// Assumably, a stage display presentation is already displayed
 			// Update that presentation after XXms and display new slides
 			// If a new "presentationTriggerIndex" action is received within these XXms, the timout will be cancelled.
-			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, 40)
+			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, updatePresentationFromStageDisplayDelay)
 		} else {
 			// The timeout will be cancelled if these texts are part of a real presentation
-			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, 500)
+			displaySlidesFromStageDisplayTimeout = setTimeout(displaySlides, displayPresentationFromStageDisplayDelay)
 		}
 	}
 
