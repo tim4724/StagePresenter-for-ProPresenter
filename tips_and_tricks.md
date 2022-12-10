@@ -54,4 +54,4 @@ A disabled slide can still be clicked and displayed for the audience. This e.g. 
 
 
 ## Set the Preview Image Background
-By default the background of preview images is the gray checkboard template. This can be changed to black e.g. in ProPresenter.
+By default the background of preview images is the gray checkboard template. This can be changed to black in ProPresenter.
