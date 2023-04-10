@@ -52,7 +52,7 @@ function ProPresenterConnection(stateManager, host) {
 	let displaySlidesFromStageDisplayTimeout = undefined
 	let displayPresentationFromAudioTriggeredTimeout = undefined
 	let playlistRequestAllTimeout = undefined
-	let presentationRequestAfterSlideClickTimeout = undefined
+	let presentationRequestAfterTimeout = undefined
 	let lastUsedResolutionImageWidth = lowResolutionImageWidth
 
 	function disconnect() {
@@ -277,10 +277,25 @@ function ProPresenterConnection(stateManager, host) {
 				break
 			case 'presentationCurrent':
 			case 'presentationRequest':
+				if (!data.presentation) {
+					// Sometimes the data has no "presentation". Only occurs since ProPresenter 7.13.
+					// We should probably switch soon to the public API, to avoid these bugs.
+					
+					const presentationPath = data.presentationPath || stateManager.getCurrentPresentationPath()
+					console.log("Received invalid presentation data. Request again after timeout")
+					clearTimeout(presentationRequestAfterTimeout)
+					presentationRequestAfterTimeout = setTimeout(function() {
+						const action = Actions.presentationRequest(presentationPath, lastUsedResolutionImageWidth)
+						console.log("Request Presentation", presentationPath, lastUsedResolutionImageWidth)
+						remoteWebSocket.send(action)
+					}, 1000)
+					break
+				}
+				// TODO: Shouldn't the cache always use the lowResolutionImageWidth when comparing presentations?
 				if (currentPresentationDataCache && isEqual(currentPresentationDataCache, data)) {
 					// Nothing changed in the presentation...
 					// Condition does not really work well, 
-					// because the JPEG images sometimes different even if nothing change...
+					// because the JPEG images sometimes differ even if nothing changed...
 					break
 				}
 				currentPresentationDataCache = data
@@ -364,6 +379,7 @@ function ProPresenterConnection(stateManager, host) {
 							// Load presentation with an even higher image resolution
 							resolution = highResolutionImageWidth
 						}
+						console.log("Request Presentation", presentationPath, resolution)
 						remoteWebSocket.send(Actions.presentationRequest(presentationPath, resolution))
 					}
 				})
@@ -395,11 +411,12 @@ function ProPresenterConnection(stateManager, host) {
 				// Avoid that a presentation from "audioTriggered" action is displayed
 				clearTimeout(displayPresentationFromAudioTriggeredTimeout)
 				// Avoid that a presentation from earlier "presentationTriggerIndex" is requested
-				clearTimeout(presentationRequestAfterSlideClickTimeout)
+				clearTimeout(presentationRequestAfterTimeout)
 
 				const presentationPath = data.presentationPath
 				if (presentationPath != stateManager.getCurrentPresentationPath()) {
 					// Request the presentation right now, as it probably changed...
+					console.log("Request Presentation", presentationPath, "default")
 					remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 					// Ensure that new presentation will be displayed
 					currentPresentationDataCache = undefined
@@ -410,8 +427,9 @@ function ProPresenterConnection(stateManager, host) {
 					// Because we can set presentationSlideQuality
 					// However reload after timeout to reduce the number of actions sent,
 					// if someone clicks many slides in a short timeframe.
-					presentationRequestAfterSlideClickTimeout = setTimeout(function() {
+					presentationRequestAfterTimeout = setTimeout(function() {
 						const action = Actions.presentationRequest(presentationPath, lastUsedResolutionImageWidth)
+						console.log("Request Presentation", presentationPath, lastUsedResolutionImageWidth)
 						remoteWebSocket.send(action)
 					}, 1000)
 				}
@@ -620,6 +638,7 @@ function ProPresenterConnection(stateManager, host) {
 			&& remoteWebsocketConnectionState.isAuthenticated
 			&& presentationPath && presentationPath.length > 0) {
 			// If the presentationPath is an empty string, ProPresenter will crash always
+			console.log("Request Presentation", presentationPath, "default")
 			remoteWebSocket.send(Actions.presentationRequest(presentationPath))
 		}
 	}
