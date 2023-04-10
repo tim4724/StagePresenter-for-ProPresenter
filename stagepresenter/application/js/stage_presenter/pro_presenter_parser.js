@@ -110,6 +110,8 @@ function ProPresenterParser() {
 		}
 		const features = localStorage.features.split(' ')
 		const slideNotesReplaceSlideContent = features.includes("slideNotesReplaceSlideContent") && slideNotes.length > 0
+		let improveBiblePassages = features.includes('improveBiblePassages')
+
 		let onlyFirstTextInSlide = features.includes('onlyFirstTextInSlide')
 		let keepLinebreaks = false
 		let slideText = rawText
@@ -125,38 +127,45 @@ function ProPresenterParser() {
 			previewImage = "img/play_banner.png"
 		}
 
-		if (label && (/\$stagepresenter:keepLinebreaks/i).test(label)) {
-			label = label.replace(/\$stagepresenter:keepLinebreaks/i, "")
+		if (label && (/(\$stagepresenter)?:keepLinebreaks/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:keepLinebreaks/i, "")
 			keepLinebreaks = true
 		}
-		if (label && (/\$stagepresenter:showOnlyFirstTextBox/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showOnlyFirstTextBox/i, "")
+		if (label && (/(\$stagepresenter)?:showOnlyFirstTextBox/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:showOnlyFirstTextBox/i, "")
 			onlyFirstTextInSlide = true
 		}
-		if (label && (/\$stagepresenter:showAllTextBoxes/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showAllTextBoxes/i, "")
+		if (label && (/(\$stagepresenter)?:showAllTextBoxes/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:showAllTextBoxes/i, "")
 			onlyFirstTextInSlide = false
 		}
-		if (label && (/\$stagepresenter:showImageFullscreen/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showImage(Fullscreen|Larger)?/ig, "")
+		if (label && (/(\$stagepresenter)?:showImageFullscreen/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:showImage(Fullscreen|Larger)?/ig, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, true, false)
 		}
-		if (label && (/\$stagepresenter:showImageLarger/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showImage(Fullscreen|Larger)?/ig, "")
+		if (label && (/(\$stagepresenter)?:showImageLarger/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:showImage(Fullscreen|Larger)?/ig, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, true)
 		}
-		if (label && (/\$stagepresenter:showImage/i).test(label)) {
-			label = label.replace(/\$stagepresenter:showImage(Fullscreen|Larger)?/ig, "")
+		if (label && (/(\$stagepresenter)?:showImage/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:showImage(Fullscreen|Larger)?/ig, "")
 			return Slide("", previewImage, [], label, color, slideNotes, false, undefined, enabled, false, false, false)
+		}
+		if (label && (/(\$stagepresenter)?:bible/i).test(label)) {
+			label = label.replace(/(\$stagepresenter)?:bible/i, "")
+			assumeIsBiblePassage = true
+			improveBiblePassages = true
 		}
 
 		// Matches e.g. 'Römer 8:18' or 'Römer 8:18-23 (LU17)'
-		const bibleRegex = /.+\s\d+:\d+(-\d+)?(\s\(.+\))?$/
+		// Also Matches e.g. 'John 1:2b-4a (KJV)'
+		const bibleRegex = /.+\s\d+:\d+(\w)?(-\d+(\w)?)?(\s\(.+\))?$/
 
-		const isBiblePassage = assumeIsBiblePassage || (label && bibleRegex.test(label))
-
+		if (label && bibleRegex.test(label) == true) {
+			assumeIsBiblePassage = true
+		}
 		let bibleReferenceRegex
-		if (isBiblePassage) {
+		if (assumeIsBiblePassage) {
 			if (!label) {
 				bibleReferenceRegex = bibleRegex
 			} else {
@@ -166,7 +175,7 @@ function ProPresenterParser() {
 				if (colonIndex > 0) {
 					bookAndChapter = bookAndChapter.substr(0, colonIndex)
 				}
-				bibleReferenceRegex = new RegExp('^' + escapeRegExp(bookAndChapter) + ':\\d+(-\\d+)?(\\s\\(.+\\))?$')
+				bibleReferenceRegex = new RegExp('^' + escapeRegExp(bookAndChapter) + ':\\d+(\\w)?(-\\d+(\\w)?)?(\\s\\(.+\\))?$')
 			}
 		} else {
 			// Always false...
@@ -175,10 +184,6 @@ function ProPresenterParser() {
 
 		function removeEmptyLines(lines) {
 			return lines.filter(line => line.trim().length > 0)
-		}
-
-		function trimEndOfLine(line) {
-			return line.replace(/\s*$/, '')
 		}
 
 		function removeBibleReference(strings) {
@@ -218,7 +223,6 @@ function ProPresenterParser() {
 		if (slideText.length > 0) {
 			textBoxes = slideText.split('\r')
 		}
-		const improveBiblePassages = features.includes('improveBiblePassages')
 
 		// Remove a textbox that only contains the label of the slide
 		if (label && label.length > 5 && textBoxes.length > 1) {
@@ -237,7 +241,7 @@ function ProPresenterParser() {
 		if (improveBiblePassages && textBoxes.length > 0) {
 			let lines
 			if (onlyFirstTextInSlide) {
-				if (isBiblePassage) {
+				if (assumeIsBiblePassage) {
 					textBoxes = removeBibleReference(textBoxes)
 				}
 				lines = textBoxes[0].split('\n')
@@ -245,14 +249,14 @@ function ProPresenterParser() {
 				lines = textBoxes.join('\n').split('\n')
 			}
 			lines = removeEmptyLines(lines)
-			if (isBiblePassage) {
+			if (assumeIsBiblePassage) {
 				lines = removeBibleReference(lines)
 			}
 
 			function fixNewLineOfBiblePassage(lines, minMatches=2) {
 				// Foreach line, split line on a verse number
 				// Ugly but best we can do...
-				const verseRegex = /(^|\s)(\d+)(\w|\s)[^\d\n\r].{6}/g
+				const verseRegex = /(^|\s)(\d+)[^\d\n\r].{6}/g
 				let newLines = []
 
 				for (let i = 0; i < lines.length; i++) {
@@ -285,31 +289,29 @@ function ProPresenterParser() {
 								const verseNumber = verseNumbersAndIndices[i][0]
 								const index = verseNumbersAndIndices[i][1]
 								if (index > 0) {
-									newLines.push(
-										trimEndOfLine(line.substring(previousIndex, index))
-									)
+									newLines.push(line.substring(previousIndex, index).trim())
 								}
 								previousIndex = index
 							}
 						}
 					}
 
-					newLines.push(
-						trimEndOfLine(line.substring(previousIndex, line.length))
-					)
+					newLines.push(line.substring(previousIndex, line.length).trim())
 				}
 
 				return newLines
 			}
-			lines = fixNewLineOfBiblePassage(lines)
+			if (assumeIsBiblePassage) {
+				lines = fixNewLineOfBiblePassage(lines)
+			}
 			lines = removeEmptyLines(lines)
 
 			let lineNumbers = undefined
 			let firstVerseNumber = undefined
 			let lastVerseNumber = undefined
 
-			const verseNumberRegex = /^(\d+)([^\d\n\r].*$)/
-			if (lines.some(l => verseNumberRegex.test(l))) {
+			const verseNumberRegex = /^(\d+)(.*)$/
+			if (assumeIsBiblePassage && lines.some(l => verseNumberRegex.test(l))) {
 				lineNumbers = []
 				for (let i = 0; i < lines.length; i++) {
 					if (bibleReferenceRegex.test(lines[i])) {
@@ -337,14 +339,14 @@ function ProPresenterParser() {
 			if (slideNotesReplaceSlideContent) {
 				lineHasMusicInfo = getLineHasMusicInfo(lines)
 			}
-			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, lineNumbers, enabled, keepLinebreaks, false, false, lineHasMusicInfo)
+			return Slide(rawText, previewImage, lines, label, color, slideNotes, assumeIsBiblePassage, lineNumbers, enabled, keepLinebreaks, false, false, lineHasMusicInfo)
 		} else {
 			let lines = []
 			if (textBoxes.length > 0) {
 				const text = onlyFirstTextInSlide ? textBoxes[0] : textBoxes.join('\n')
 				lines = text.split('\n')
 				for (let i = 0; i < lines.length; i++) {
-					lines[i] = trimEndOfLine(lines[i])
+					lines[i] = lines[i].trim()
 				}
 			}
 			lines = removeEmptyLines(lines)
@@ -352,7 +354,7 @@ function ProPresenterParser() {
 			if (slideNotesReplaceSlideContent) {
 				lineHasMusicInfo = getLineHasMusicInfo(lines)
 			}
-			return Slide(rawText, previewImage, lines, label, color, slideNotes, isBiblePassage, undefined, enabled, keepLinebreaks, false, false, lineHasMusicInfo)
+			return Slide(rawText, previewImage, lines, label, color, slideNotes, assumeIsBiblePassage, undefined, enabled, keepLinebreaks, false, false, lineHasMusicInfo)
 		}
 	}
 

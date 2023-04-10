@@ -9,19 +9,20 @@ Add one of the following labels to a slide to override how a presentation is dis
 
 ### Show the Preview Image of a Slide in StagePresenter
 
-| ProPresenter Slide Label              | Effect on StagePresenter                                           |
-|---------------------------------------|--------------------------------------------------------------------|
-| `$stagepresenter:showImage`           | Show the preview image of the slide instead of the slide text.     |
-| `$stagepresenter:showImageLarger`     | Show a large preview image of the slide instead of the slide text. |
-| `$stagepresenter:showImageFullscreen` | Show a fullscreen preview image of the slide instead of the text.  |
+| ProPresenter Slide Label              | Effect on StagePresenter                            |
+|---------------------------------------|-----------------------------------------------------|
+| `:showImage`           | Show the preview image of the slide instead of the slide text.     |
+| `:showImageLarger`     | Show a large preview image of the slide instead of the slide text. |
+| `:showImageFullscreen` | Show a fullscreen preview image of the slide instead of the text.  |
 
 ### Change which Text of a Slide is shown in StagePresenter
 
-| ProPresenter Slide Label               | Effect on StagePresenter                                                                                            |
-|----------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| `$stagepresenter:showAllTextBoxes`     | Show the text from all textboxes of a slide. Ignoring "Only include the first Textbox of a Slide" in settings.      |
-| `$stagepresenter:showOnlyFirstTextBox` | Show only text from the first textbox of a slide. Ignoring "Only include the first Textbox of a Slide" in settings. |
-| `$stagepresenter:keepLineBreaks`       | Keep the linebreaks in the text of the slide. Ignoring "Auto-Remove Linebreaks" in settings.                        |
+| ProPresenter Slide Label               | Effect on StagePresenter                                                                                                                             |
+|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `:showAllTextBoxes`     | Show the text from all textboxes of a slide. Ignoring "Only include the first Textbox of a Slide" in settings.                                                      |
+| `:showOnlyFirstTextBox` | Show only text from the first textbox of a slide. Ignoring "Only include the first Textbox of a Slide" in settings.                                                 |
+| `:keepLineBreaks`       | Keep the linebreaks in the text of the slide. Ignoring "Auto-Remove Linebreaks" in settings.                                                                        |
+| `:bible`                | Highlight the verse numbers of a bible passage even if bible passage is not automatically recognized. Ignoring "Improve layout of Bible Presentations" in settings. |
 
 ### Additional Hints
 - Add the Labels as Presets in ProPresenter. Add them in the "Labels" section under "Settings" -> "Groups" in ProPresenter. <img src="/readme_res/ProPresenter_label_presets.png?raw=true" width="500" />
@@ -30,10 +31,9 @@ Then click right with the mouse and choose "Label" in the context menu.
 - After changing the label of a slide, you need to click any slide for the changes to apply. 
 The Presentation shown in StagePresenter then refreshes after a few seconds.
 - It is possible to combine a "normal" label like `Repeat` with a StagePresenter Label. 
-Just edit the label and enter e.g. `Repeat $stagepresenter:showOnlyFirstTextBox`.
-- It is possible to combine the `$stagepresenter:keepLineBreaks` label with `$stagepresenter:showAllTextBoxes` 
-or `$stagepresenter:showOnlyFirstTextBox`. 
-Just edit the Label and enter both seperated with a space.
+Just edit the label and enter e.g. `Repeat $:showOnlyFirstTextBox`.
+- It is possible to combine the `:keepLineBreaks` label with `:showAllTextBoxes` or `:showOnlyFirstTextBox`. 
+Just edit the Label and enter both.
 
 
 ## Chords in the Slide Notes
