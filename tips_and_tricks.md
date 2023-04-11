@@ -31,7 +31,7 @@ Then click right with the mouse and choose "Label" in the context menu.
 - After changing the label of a slide, you need to click any slide for the changes to apply. 
 The Presentation shown in StagePresenter then refreshes after a few seconds.
 - It is possible to combine a "normal" label like `Repeat` with a StagePresenter Label. 
-Just edit the label and enter e.g. `Repeat $:showOnlyFirstTextBox`.
+Just edit the label and enter e.g. `Repeat :showOnlyFirstTextBox`.
 - It is possible to combine the `:keepLineBreaks` label with `:showAllTextBoxes` or `:showOnlyFirstTextBox`. 
 Just edit the Label and enter both.
 
